@@ -151,58 +151,58 @@
 
             <div class="premium-list premium-list--jobs premium-list--feed premium-list--compact premium-list--mgmt">
                 <div class="premium-list-head">
-                    <span class="pli-head-cell pli-head-rank">#</span>
-                    <span class="pli-head-cell pli-head-icon"></span>
-                    <span class="pli-head-cell pli-head-name">Job Card</span>
-                    <span class="pli-head-cell pli-head-customer">Customer</span>
-                    <span class="pli-head-cell pli-head-service">Service</span>
-                    <span class="pli-head-cell pli-head-subcategory">Sub Category</span>
-                    <span class="pli-head-cell pli-head-status">Status</span>
-                    <span class="pli-head-cell pli-head-joined">Created</span>
-                    <span class="pli-head-cell pli-head-actions">Actions</span>
+                    <span class="pli-head-cell col-center">#</span>
+                    <span class="pli-head-cell col-center pli-head-icon"></span>
+                    <span class="pli-head-cell col-left">Job Card</span>
+                    <span class="pli-head-cell col-center">Customer</span>
+                    <span class="pli-head-cell col-center">Service</span>
+                    <span class="pli-head-cell col-center">Sub Category</span>
+                    <span class="pli-head-cell col-center">Status</span>
+                    <span class="pli-head-cell col-center">Created</span>
+                    <span class="pli-head-cell col-center">Actions</span>
                 </div>
 
                 @foreach($jobCards as $jobCard)
                     <article class="premium-list-item" id="job-card-row-{{ $jobCard->id }}">
-                        <div class="pli-rank">{{ $listStart + $loop->iteration }}</div>
+                        <div class="pli-rank col-center">{{ $listStart + $loop->iteration }}</div>
 
-                        <div class="pli-col pli-col-icon">
+                        <div class="pli-col pli-col-icon col-center">
                             <div class="pli-icon pli-icon--cyan">
                                 <i class="bi bi-clipboard2-check-fill"></i>
                             </div>
                         </div>
 
-                        <div class="pli-col pli-col-name">
+                        <div class="pli-col pli-col-name col-left">
                             <div class="pli-name-stack">
                                 <span class="pli-title job-card-name">{{ $jobCard->job_card_name }}</span>
-                                <span class="pli-subtext">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                <span class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span>
                             </div>
                         </div>
 
-                        <div class="pli-col pli-col-customer">
+                        <div class="pli-col pli-col-customer col-center">
                             <span class="pli-col-text">{{ $jobCard->customer->name ?? '—' }}</span>
                         </div>
 
-                        <div class="pli-col pli-col-service">
+                        <div class="pli-col pli-col-service col-center">
                             <span class="pli-col-text">{{ $jobCard->service->service_name ?? '—' }}</span>
                         </div>
 
-                        <div class="pli-col pli-col-subcategory">
+                        <div class="pli-col pli-col-subcategory col-center">
                             <span class="pli-col-text">{{ $jobCard->subcategory ?: '—' }}</span>
                         </div>
 
-                        <div class="pli-col pli-col-status-col">
+                        <div class="pli-col pli-col-status-col col-center">
                             <span class="job-status status-{{ $jobCard->status }}">
                                 <span class="status-dot"></span>
                                 {{ $statusLabels[$jobCard->status] ?? ucfirst($jobCard->status) }}
                             </span>
                         </div>
 
-                        <div class="pli-col pli-col-joined">
+                        <div class="pli-col pli-col-joined col-center">
                             <span class="pli-col-text">{{ $jobCard->created_at ? $jobCard->created_at->format('d M Y') : '—' }}</span>
                         </div>
 
-                        <div class="pli-col pli-col-actions col-actions actions-cell">
+                        <div class="pli-col pli-col-actions col-actions actions-cell col-center">
                             <button
                                 type="button"
                                 class="pli-btn-icon pli-btn-icon--edit"
