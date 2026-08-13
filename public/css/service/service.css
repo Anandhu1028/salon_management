@@ -1,0 +1,75 @@
+/* ============================================================
+   SERVICE MODULE CSS
+   ============================================================ */
+
+.service-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.service-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.service-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: var(--clr-violet-light);
+    color: var(--clr-violet);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.service-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.service-price {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--clr-primary-dark);
+}
+
+.service-search {
+    margin: 0;
+}
+
+/* Wider form modal (service icon picker needs room) */
+.premium-modal.premium-modal--wide .modal-dialog {
+    max-width: 680px;
+    width: calc(100% - 2rem);
+}
+
+@media (min-width: 768px) {
+    .premium-modal.premium-modal--wide .modal-body {
+        padding: 24px 32px;
+    }
+
+    .premium-modal.premium-modal--wide .modal-header,
+    .premium-modal.premium-modal--wide .modal-footer {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+.service-form-grid {
+    margin-top: 0;
+}
+
+.service-form-grid .input-group .form-control,
+.service-form-grid .input-group .input-group-text {
+    height: 44px;
+}
+
+.service-table td {
+    vertical-align: middle;
+}

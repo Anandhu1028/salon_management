@@ -1,0 +1,78 @@
+/* ============================================================
+   STAFF MODULE CSS
+   ============================================================ */
+
+.staff-page,
+.product-page,
+.customer-page,
+.service-page,
+.job-card-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.staff-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.staff-profile > div:last-child {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.staff-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(99,102,241,.2);
+}
+
+.staff-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--clr-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.staff-table td:nth-child(2),
+.staff-table td:nth-child(3) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.staff-table .staff-actions {
+    flex-wrap: nowrap;
+}
+
+.staff-table .status-action {
+    padding: 0 8px;
+    font-size: .65rem;
+}
+
+.staff-role-badge {
+    font-size: .7rem;
+    color: var(--clr-text-muted);
+}
+
+.staff-search {
+    margin: 0;
+}
+
+.staff-table td {
+    vertical-align: middle;
+}

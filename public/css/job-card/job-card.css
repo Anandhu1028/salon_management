@@ -1,0 +1,69 @@
+/* ============================================================
+   JOB CARD MODULE CSS
+   ============================================================ */
+
+.job-card-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.job-card-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.job-card-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: var(--clr-warning-light);
+    color: var(--clr-warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.job-card-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.job-card-number {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--clr-primary);
+    letter-spacing: .03em;
+}
+
+.customer-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.customer-mini-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--gradient-accent);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.job-card-search {
+    margin: 0;
+}
+
+.job-card-table td {
+    vertical-align: middle;
+}

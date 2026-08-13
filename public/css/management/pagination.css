@@ -1,0 +1,123 @@
+/* ================================================================
+   PREMIUM PAGINATION — Square icon-style controls
+   ================================================================ */
+
+.management-page .pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px 20px 18px;
+    border-top: 1px solid #F1F5F9;
+    background: #FFFFFF;
+}
+
+.pagination-summary {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #64748B;
+    line-height: 1.4;
+}
+
+.pagination-summary strong {
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.management-page .premium-pagination__list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+.management-page .premium-pagination__list .page-item {
+    margin: 0;
+}
+
+.management-page .premium-pagination__list .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748B;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.premium-pagination__btn--nav {
+    font-size: 0.9375rem;
+}
+
+.premium-pagination__btn--nav .bi {
+    line-height: 1;
+    font-weight: 700;
+}
+
+.premium-pagination__btn--ellipsis {
+    border-color: transparent !important;
+    background: transparent !important;
+    color: #94A3B8 !important;
+    cursor: default;
+    pointer-events: none;
+}
+
+.management-page .premium-pagination__list .page-link:hover:not(.premium-pagination__btn--ellipsis) {
+    background: #F8FAFC;
+    color: #6366F1;
+    border-color: #E0E7FF;
+}
+
+.management-page .premium-pagination__list .page-item.active .page-link {
+    background: #6366F1;
+    color: #FFFFFF;
+    border-color: #6366F1;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.32);
+}
+
+.management-page .premium-pagination__list .page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
+    background: #FFFFFF;
+    color: #CBD5E1;
+    border-color: #E5E7EB;
+    box-shadow: none;
+}
+
+@media (max-width: 768px) {
+    .management-page .pagination-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px 16px 16px;
+    }
+
+    .pagination-summary {
+        text-align: center;
+    }
+
+    .premium-pagination {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .management-page .premium-pagination__list {
+        justify-content: center;
+        min-width: max-content;
+        padding-bottom: 2px;
+    }
+}

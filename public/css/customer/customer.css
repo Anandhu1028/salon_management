@@ -1,0 +1,44 @@
+/* ============================================================
+   CUSTOMER MODULE CSS
+   ============================================================ */
+
+.customer-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.customer-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.customer-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-full);
+    background: var(--gradient-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, .25);
+}
+
+.customer-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.customer-search {
+    margin: 0;
+}
+
+.customer-table td {
+    vertical-align: middle;
+}

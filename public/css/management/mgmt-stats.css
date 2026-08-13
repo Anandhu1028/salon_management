@@ -1,0 +1,365 @@
+/* ================================================================
+   MANAGEMENT KPI STAT CARDS — Premium colorful dashboard cards
+   ================================================================ */
+
+.kpi-3d-icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+.kpi-3d-icon--sm {
+    width: 22px;
+    height: 22px;
+}
+
+.mgmt-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.mgmt-stats-grid.mgmt-stats-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ── Card shell ── */
+.mgmt-stat-card {
+    position: relative;
+    border-radius: 20px;
+    padding: 22px 24px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    background: #FFFFFF;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 32px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+    isolation: isolate;
+    min-height: 148px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition:
+        border-color 0.28s ease,
+        box-shadow 0.28s ease,
+        transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.mgmt-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 2px 4px rgba(15, 23, 42, 0.04),
+        0 16px 40px rgba(15, 23, 42, 0.1);
+}
+
+/* Decorative layers */
+.mgmt-stat-accent {
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 4px;
+    border-radius: 0 6px 6px 0;
+    z-index: 1;
+}
+
+.mgmt-stat-glow {
+    position: absolute;
+    top: -40px;
+    right: -30px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.7;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.mgmt-stat-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.55) 0%,
+        rgba(255, 255, 255, 0) 42%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+.mgmt-stat-card:hover .mgmt-stat-glow {
+    opacity: 0.95;
+    transform: scale(1.08);
+}
+
+/* ── Theme palettes ── */
+.mgmt-stat-card.indigo {
+    background: linear-gradient(148deg, #FFFFFF 0%, #F8F7FF 42%, #EEF2FF 100%);
+}
+.mgmt-stat-card.indigo .mgmt-stat-accent { background: linear-gradient(180deg, #A5B4FC, #6366F1); box-shadow: 0 0 12px rgba(99, 102, 241, 0.45); }
+.mgmt-stat-card.indigo .mgmt-stat-glow { background: radial-gradient(circle, rgba(129, 140, 248, 0.35) 0%, transparent 68%); }
+.mgmt-stat-card.indigo .mgmt-stat-dot { background: #6366F1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18); }
+.mgmt-stat-card.indigo .mgmt-stat-value { color: #4338CA; }
+.mgmt-stat-card.indigo .mgmt-stat-icon-circle { background: linear-gradient(145deg, #A5B4FC 0%, #6366F1 55%, #4F46E5 100%); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.45); }
+.mgmt-stat-card.indigo .mgmt-stat-icon-ring { border-color: rgba(99, 102, 241, 0.25); background: rgba(99, 102, 241, 0.08); }
+.mgmt-stat-card.indigo:hover { border-color: rgba(99, 102, 241, 0.22); }
+
+.mgmt-stat-card.green {
+    background: linear-gradient(148deg, #FFFFFF 0%, #F6FEF9 42%, #ECFDF5 100%);
+}
+.mgmt-stat-card.green .mgmt-stat-accent { background: linear-gradient(180deg, #6EE7B7, #22C55E); box-shadow: 0 0 12px rgba(34, 197, 94, 0.4); }
+.mgmt-stat-card.green .mgmt-stat-glow { background: radial-gradient(circle, rgba(74, 222, 128, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.green .mgmt-stat-dot { background: #22C55E; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18); }
+.mgmt-stat-card.green .mgmt-stat-value { color: #15803D; }
+.mgmt-stat-card.green .mgmt-stat-icon-circle { background: linear-gradient(145deg, #6EE7B7 0%, #22C55E 55%, #16A34A 100%); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4); }
+.mgmt-stat-card.green .mgmt-stat-icon-ring { border-color: rgba(34, 197, 94, 0.25); background: rgba(34, 197, 94, 0.08); }
+.mgmt-stat-card.green:hover { border-color: rgba(34, 197, 94, 0.22); }
+
+.mgmt-stat-card.red {
+    background: linear-gradient(148deg, #FFFFFF 0%, #FFF8F8 42%, #FEF2F2 100%);
+}
+.mgmt-stat-card.red .mgmt-stat-accent { background: linear-gradient(180deg, #FCA5A5, #EF4444); box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+.mgmt-stat-card.red .mgmt-stat-glow { background: radial-gradient(circle, rgba(248, 113, 113, 0.3) 0%, transparent 68%); }
+.mgmt-stat-card.red .mgmt-stat-dot { background: #EF4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18); }
+.mgmt-stat-card.red .mgmt-stat-value { color: #B91C1C; }
+.mgmt-stat-card.red .mgmt-stat-icon-circle { background: linear-gradient(145deg, #FCA5A5 0%, #EF4444 55%, #DC2626 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
+.mgmt-stat-card.red .mgmt-stat-icon-ring { border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.08); }
+.mgmt-stat-card.red:hover { border-color: rgba(239, 68, 68, 0.22); }
+
+.mgmt-stat-card.blue {
+    background: linear-gradient(148deg, #FFFFFF 0%, #F7FAFF 42%, #EFF6FF 100%);
+}
+.mgmt-stat-card.blue .mgmt-stat-accent { background: linear-gradient(180deg, #93C5FD, #3B82F6); box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+.mgmt-stat-card.blue .mgmt-stat-glow { background: radial-gradient(circle, rgba(96, 165, 250, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.blue .mgmt-stat-dot { background: #3B82F6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18); }
+.mgmt-stat-card.blue .mgmt-stat-value { color: #1D4ED8; }
+.mgmt-stat-card.blue .mgmt-stat-icon-circle { background: linear-gradient(145deg, #93C5FD 0%, #3B82F6 55%, #2563EB 100%); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); }
+.mgmt-stat-card.blue .mgmt-stat-icon-ring { border-color: rgba(59, 130, 246, 0.25); background: rgba(59, 130, 246, 0.08); }
+.mgmt-stat-card.blue:hover { border-color: rgba(59, 130, 246, 0.22); }
+
+.mgmt-stat-card.violet {
+    background: linear-gradient(148deg, #FFFFFF 0%, #FAF8FF 42%, #F5F3FF 100%);
+}
+.mgmt-stat-card.violet .mgmt-stat-accent { background: linear-gradient(180deg, #C4B5FD, #8B5CF6); box-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
+.mgmt-stat-card.violet .mgmt-stat-glow { background: radial-gradient(circle, rgba(167, 139, 250, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.violet .mgmt-stat-dot { background: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18); }
+.mgmt-stat-card.violet .mgmt-stat-value { color: #6D28D9; }
+.mgmt-stat-card.violet .mgmt-stat-icon-circle { background: linear-gradient(145deg, #C4B5FD 0%, #8B5CF6 55%, #7C3AED 100%); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
+.mgmt-stat-card.violet .mgmt-stat-icon-ring { border-color: rgba(139, 92, 246, 0.25); background: rgba(139, 92, 246, 0.08); }
+.mgmt-stat-card.violet:hover { border-color: rgba(139, 92, 246, 0.22); }
+
+.mgmt-stat-card.orange {
+    background: linear-gradient(148deg, #FFFFFF 0%, #FFFCF5 42%, #FFFBEB 100%);
+}
+.mgmt-stat-card.orange .mgmt-stat-accent { background: linear-gradient(180deg, #FCD34D, #F59E0B); box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+.mgmt-stat-card.orange .mgmt-stat-glow { background: radial-gradient(circle, rgba(251, 191, 36, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.orange .mgmt-stat-dot { background: #F59E0B; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18); }
+.mgmt-stat-card.orange .mgmt-stat-value { color: #B45309; }
+.mgmt-stat-card.orange .mgmt-stat-icon-circle { background: linear-gradient(145deg, #FCD34D 0%, #F59E0B 55%, #D97706 100%); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); }
+.mgmt-stat-card.orange .mgmt-stat-icon-ring { border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.08); }
+.mgmt-stat-card.orange:hover { border-color: rgba(245, 158, 11, 0.22); }
+
+.mgmt-stat-card.pink {
+    background: linear-gradient(148deg, #FFFFFF 0%, #FFF8FC 42%, #FDF2F8 100%);
+}
+.mgmt-stat-card.pink .mgmt-stat-accent { background: linear-gradient(180deg, #F9A8D4, #EC4899); box-shadow: 0 0 12px rgba(236, 72, 153, 0.4); }
+.mgmt-stat-card.pink .mgmt-stat-glow { background: radial-gradient(circle, rgba(244, 114, 182, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.pink .mgmt-stat-dot { background: #EC4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.18); }
+.mgmt-stat-card.pink .mgmt-stat-value { color: #BE185D; }
+.mgmt-stat-card.pink .mgmt-stat-icon-circle { background: linear-gradient(145deg, #F9A8D4 0%, #EC4899 55%, #DB2777 100%); box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4); }
+.mgmt-stat-card.pink .mgmt-stat-icon-ring { border-color: rgba(236, 72, 153, 0.25); background: rgba(236, 72, 153, 0.08); }
+.mgmt-stat-card.pink:hover { border-color: rgba(236, 72, 153, 0.22); }
+
+.mgmt-stat-card.cyan {
+    background: linear-gradient(148deg, #FFFFFF 0%, #F5FCFF 42%, #ECFEFF 100%);
+}
+.mgmt-stat-card.cyan .mgmt-stat-accent { background: linear-gradient(180deg, #67E8F9, #0EA5E9); box-shadow: 0 0 12px rgba(14, 165, 233, 0.4); }
+.mgmt-stat-card.cyan .mgmt-stat-glow { background: radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, transparent 68%); }
+.mgmt-stat-card.cyan .mgmt-stat-dot { background: #0EA5E9; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18); }
+.mgmt-stat-card.cyan .mgmt-stat-value { color: #0369A1; }
+.mgmt-stat-card.cyan .mgmt-stat-icon-circle { background: linear-gradient(145deg, #67E8F9 0%, #0EA5E9 55%, #0284C7 100%); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4); }
+.mgmt-stat-card.cyan .mgmt-stat-icon-ring { border-color: rgba(14, 165, 233, 0.25); background: rgba(14, 165, 233, 0.08); }
+.mgmt-stat-card.cyan:hover { border-color: rgba(14, 165, 233, 0.22); }
+
+/* ── Status dot & trend ── */
+.mgmt-stat-dot {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    z-index: 3;
+}
+
+.mgmt-stat-trend {
+    position: absolute;
+    top: 32px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 3;
+    backdrop-filter: blur(4px);
+}
+
+.mgmt-stat-trend.is-up {
+    background: linear-gradient(135deg, #DCFCE7, #BBF7D0);
+    color: #15803D;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.mgmt-stat-trend.is-down {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    color: #DC2626;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
+}
+
+.mgmt-stat-trend-arrow {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+/* ── Header: icon + label ── */
+.mgmt-stat-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-right: 78px;
+    position: relative;
+    z-index: 2;
+}
+
+.mgmt-stat-icon-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.mgmt-stat-icon-ring {
+    position: absolute;
+    inset: -5px;
+    border-radius: 17px;
+    border: 1.5px solid;
+    z-index: 0;
+}
+
+.mgmt-stat-icon-circle {
+    position: relative;
+    z-index: 1;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.mgmt-stat-card:hover .mgmt-stat-icon-circle {
+    transform: scale(1.06) rotate(-2deg);
+}
+
+.mgmt-stat-icon-circle .kpi-3d-icon--sm {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+    opacity: 0.96;
+}
+
+.mgmt-stat-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: #475569;
+    margin: 0;
+    line-height: 1.35;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+/* ── Body ── */
+.mgmt-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+    z-index: 2;
+    padding-right: 78px;
+    min-width: 0;
+}
+
+.mgmt-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.mgmt-stat-sub {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94A3B8;
+    line-height: 1.35;
+}
+
+/* ── Sparkline ── */
+.mgmt-stat-sparkline {
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.06));
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+    .mgmt-stats-grid.mgmt-stats-grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .mgmt-stats-grid,
+    .mgmt-stats-grid.mgmt-stats-grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .mgmt-stats-grid,
+    .mgmt-stats-grid.mgmt-stats-grid--4 {
+        grid-template-columns: 1fr;
+    }
+
+    .mgmt-stat-card {
+        padding: 18px 20px 16px;
+        min-height: 0;
+    }
+
+    .mgmt-stat-value {
+        font-size: 1.625rem;
+    }
+
+    .mgmt-stat-icon-circle {
+        width: 44px;
+        height: 44px;
+    }
+
+    .mgmt-stat-header,
+    .mgmt-stat-body {
+        padding-right: 64px;
+    }
+}
