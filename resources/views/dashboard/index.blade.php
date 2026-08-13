@@ -377,14 +377,14 @@
     </section>
 
     {{-- Appointments row --}}
-    <section class="dashboard-section" id="sectionAppt">
+    <section class="dashboard-section dashboard-section--insights" id="sectionAppt">
     <div class="dashboard-grid-appt">
 
         {{-- Appointments Overview — weekly day-column heatmap --}}
-        <div class="content-card content-card--appt-heatmap" id="appointmentOverviewCard">
+        <div class="content-card content-card--minimal content-card--appt-heatmap" id="appointmentOverviewCard">
             @php
                 $apptDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                $apptHeatmapRows = 6;
+                $apptHeatmapRows = 10;
                 mt_srand(20260813);
                 $apptHeatmapByDay = [];
                 $apptHeatmapTotal = 0;
@@ -464,7 +464,7 @@
         </div>
 
         {{-- Today's Appointment Status --}}
-        <div class="content-card content-card--appt-status" id="appointmentStatusCard">
+        <div class="content-card content-card--minimal content-card--appt-status" id="appointmentStatusCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--amber"><i class="bi bi-calendar-check"></i></span>
@@ -521,11 +521,11 @@
     </section>
 
     {{-- Performance & actions --}}
-    <section class="dashboard-section" id="sectionBottom">
+    <section class="dashboard-section dashboard-section--insights" id="sectionBottom">
     <div class="dashboard-grid-bottom">
 
         {{-- Top Staff Performance --}}
-        <div class="content-card content-card--staff" id="staffPerfCard">
+        <div class="content-card content-card--minimal content-card--staff" id="staffPerfCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--blue"><i class="bi bi-award"></i></span>
@@ -536,7 +536,7 @@
                 </div>
                 <button type="button" class="dash-period-select">This month <i class="bi bi-chevron-down"></i></button>
             </div>
-            <div class="staff-perf-list staff-perf-list--grid">
+            <div class="staff-perf-list">
                 <div class="staff-perf-row">
                     <div class="staff-perf-avatar staff-perf-avatar--1">AA</div>
                     <div class="staff-perf-info">
@@ -585,7 +585,7 @@
         </div>
 
         {{-- Quick Actions --}}
-        <div class="content-card content-card--actions" id="quickActionsCard">
+        <div class="content-card content-card--minimal content-card--actions" id="quickActionsCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--indigo"><i class="bi bi-lightning-charge"></i></span>

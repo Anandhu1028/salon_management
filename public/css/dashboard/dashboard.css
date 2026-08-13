@@ -478,12 +478,18 @@
     min-height: 400px;
 }
 
-.dashboard-grid-appt > .content-card {
-    min-height: 420px;
+.dashboard-grid-appt {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: var(--dash-gutter);
+    align-items: stretch;
 }
 
-.dashboard-grid-bottom > .content-card {
-    min-height: 360px;
+.dashboard-grid-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--dash-gutter);
+    align-items: stretch;
 }
 
 .dashboard-grid-four {
@@ -494,23 +500,378 @@
     align-items: stretch;
 }
 
-.dashboard-grid-appt {
-    display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+/* ── INSIGHTS SECTION — minimal premium polish ─────────────────── */
+.dashboard-section--insights {
     gap: var(--dash-gutter);
+}
+
+.dashboard-section--insights .content-card--minimal {
+    background: #FFFFFF;
+    border: 1px solid #EEF2F6;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 20px rgba(15, 23, 42, 0.04);
+    border-radius: 16px;
+}
+
+.dashboard-section--insights .content-card--minimal:hover {
+    transform: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 6px 24px rgba(15, 23, 42, 0.06);
+}
+
+.dashboard-section--insights .content-card--minimal::before {
+    display: none;
+}
+
+.dashboard-section--insights .content-card-header {
+    padding: 16px 20px 14px;
+    min-height: 0;
+    border-bottom: 1px solid #F4F6F9;
+}
+
+.dashboard-section--insights .content-card-icon-badge {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .content-card-icon-badge--purple { background: #F5F0FF; color: #8650f3; }
+.dashboard-section--insights .content-card-icon-badge--amber  { background: #FFFBEB; color: #D97706; }
+.dashboard-section--insights .content-card-icon-badge--blue    { background: #EFF6FF; color: #3B82F6; }
+.dashboard-section--insights .content-card-icon-badge--indigo   { background: #EEF2FF; color: #6366F1; }
+
+.dashboard-section--insights .content-card-header h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.dashboard-section--insights .content-card-header .sub-text {
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+
+/* Heatmap — full-width fill */
+.dashboard-section--insights .content-card--appt-heatmap {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-section--insights .appt-heatmap-body {
+    padding: 14px 20px 18px;
+    gap: 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.dashboard-section--insights .appt-heatmap-metric {
+    padding: 0 0 2px;
+    background: none;
+    border: none;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.dashboard-section--insights .appt-heatmap-chart-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+}
+
+.dashboard-section--insights .appt-heatmap-grid {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+    width: 100%;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.dashboard-section--insights .appt-heatmap-col {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
     align-items: stretch;
 }
 
-.dashboard-grid-bottom {
+.dashboard-section--insights .appt-heatmap-cell {
+    width: 100%;
+    flex: 1;
+    min-height: 8px;
+    height: auto;
+    aspect-ratio: unset;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .appt-heatmap-total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.dashboard-section--insights .appt-heatmap-caption {
+    font-size: 0.82rem;
+    color: var(--dash-slate);
+}
+
+.dashboard-section--insights .appt-heatmap-vs {
+    font-size: 0.7rem;
+    margin-left: 2px;
+}
+
+.dashboard-section--insights .appt-heatmap-cell.level-0 { background: #F8F7FC; }
+.dashboard-section--insights .appt-heatmap-cell.level-1 { background: #EDE8FC; box-shadow: none; }
+.dashboard-section--insights .appt-heatmap-cell.level-2 { background: #D9CCFA; box-shadow: none; }
+.dashboard-section--insights .appt-heatmap-cell.level-3 { background: #B89AF5; box-shadow: none; }
+.dashboard-section--insights .appt-heatmap-cell.level-4 {
+    background: #8650f3;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .appt-heatmap-grid .appt-heatmap-cell:hover,
+.dashboard-section--insights .appt-heatmap-grid .appt-heatmap-cell:focus {
+    transform: scale(1.06);
+    outline: 2px solid rgba(134, 80, 243, 0.25);
+}
+
+.dashboard-section--insights .appt-heatmap-day-labels {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: var(--dash-gutter);
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 8px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.dashboard-section--insights .appt-heatmap-day-labels span {
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #B0BAC9;
+}
+
+.dashboard-section--insights .appt-heatmap-legend-inline .appt-heatmap-cell {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+/* Today's status — minimal rows */
+.dashboard-section--insights .appt-status-body {
+    padding: 12px 20px 20px;
+    gap: 12px;
+}
+
+.dashboard-section--insights .appt-status-total {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #FAFAFA;
+    border: 1px solid #F1F5F9;
+}
+
+.dashboard-section--insights .appt-status-total-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.dashboard-section--insights .appt-status-total-label {
+    font-size: 0.75rem;
+    color: var(--dash-mist);
+}
+
+.dashboard-section--insights .appt-status-list {
+    gap: 6px;
+}
+
+.dashboard-section--insights .appt-status-row {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+}
+
+.dashboard-section--insights .appt-status-row.upcoming   { border-left: 3px solid #3B82F6; }
+.dashboard-section--insights .appt-status-row.inprogress { border-left: 3px solid #F59E0B; }
+.dashboard-section--insights .appt-status-row.completed  { border-left: 3px solid #10B981; }
+.dashboard-section--insights .appt-status-row.cancelled  { border-left: 3px solid #EF4444; }
+
+.dashboard-section--insights .appt-status-list .appt-status-row:hover {
+    transform: none;
+    box-shadow: none;
+    background: #FAFBFC;
+}
+
+.dashboard-section--insights .appt-status-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .appt-status-count {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.dashboard-section--insights .appt-status-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.dashboard-section--insights .appt-status-desc {
+    font-size: 0.66rem;
+}
+
+.dashboard-section--insights .appt-live-badge {
+    padding: 4px 9px;
+    font-size: 0.65rem;
+    background: #F0FDF4;
+    border-color: #DCFCE7;
+}
+
+/* Staff performance — clean list */
+.dashboard-section--insights .staff-perf-list {
+    padding: 4px 20px 18px;
+    gap: 0;
+}
+
+.dashboard-section--insights .staff-perf-row {
+    padding: 12px 0;
+    border-radius: 0;
+    border-bottom: 1px solid #F4F6F9;
+    gap: 12px;
+}
+
+.dashboard-section--insights .staff-perf-row:last-child {
+    border-bottom: none;
+}
+
+.dashboard-section--insights .staff-perf-row:hover {
+    background: transparent;
+}
+
+.dashboard-section--insights .staff-perf-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.65rem;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .staff-perf-avatar--1 { background: #6366F1; }
+.dashboard-section--insights .staff-perf-avatar--2 { background: #3B82F6; }
+.dashboard-section--insights .staff-perf-avatar--3 { background: #EC4899; }
+.dashboard-section--insights .staff-perf-avatar--4 { background: #F59E0B; }
+
+.dashboard-section--insights .staff-perf-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.dashboard-section--insights .staff-perf-meta {
+    font-size: 0.68rem;
+}
+
+.dashboard-section--insights .staff-perf-pct {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.dashboard-section--insights .staff-perf-bar {
+    width: 48px;
+    height: 3px;
+    background: #EEF2F6;
+    box-shadow: none;
+}
+
+.dashboard-section--insights .dash-period-select {
+    padding: 5px 11px;
+    font-size: 0.68rem;
+    border-color: #EEF2F6;
+    box-shadow: none;
+}
+
+/* Quick actions — flat minimal */
+.dashboard-section--insights .quick-actions-grid {
+    padding: 6px 20px 20px;
+    gap: 10px;
+}
+
+.dashboard-section--insights .quick-action-btn {
+    padding: 14px 8px;
+    min-height: 76px;
+    border-radius: 12px;
+    background: #FAFBFC;
+    border: 1px solid #EEF2F6;
+    box-shadow: none;
+    gap: 8px;
+}
+
+.dashboard-section--insights .quick-action-btn:hover {
+    transform: translateY(-1px);
+    background: #FFFFFF;
+    border-color: #E2E8F0;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.dashboard-section--insights .qa-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 1rem;
+    box-shadow: none !important;
+}
+
+.dashboard-section--insights .qa-icon::after {
+    display: none;
+}
+
+.dashboard-section--insights .quick-action-btn:hover .qa-icon {
+    transform: none;
+}
+
+.dashboard-section--insights .qa-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--dash-slate);
+}
+
+.dashboard-section--insights .qa-purple .qa-icon   { background: #F3EEFF; color: #7C3AED; }
+.dashboard-section--insights .qa-pink .qa-icon     { background: #FDF2F8; color: #DB2777; }
+.dashboard-section--insights .qa-lavender .qa-icon { background: #F5F0FF; color: #9333EA; }
+.dashboard-section--insights .qa-orange .qa-icon   { background: #FFF7ED; color: #EA580C; }
+.dashboard-section--insights .qa-blue .qa-icon     { background: #EFF6FF; color: #2563EB; }
+.dashboard-section--insights .qa-green .qa-icon     { background: #ECFDF5; color: #059669; }
+
+.dashboard-section--insights .dashboard-grid-appt {
     align-items: stretch;
 }
 
-.dashboard-grid-four,
-.dashboard-grid-three {
-    gap: var(--dash-gutter);
+.dashboard-section--insights .dashboard-grid-appt > .content-card {
+    min-height: 320px;
+}
+
+.dashboard-section--insights .content-card--appt-status {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-section--insights .content-card--appt-status .appt-status-body {
+    flex: 1;
+    justify-content: space-between;
+}
+
+.dashboard-section--insights .dashboard-grid-bottom > .content-card {
+    min-height: 0;
 }
 
 /* ── REVENUE CHART ─────────────────────────────────────────────── */
@@ -1038,6 +1399,9 @@
 .content-card--appt-heatmap .appt-heatmap-body {
     padding: 16px 24px 24px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .appt-heatmap-body {
@@ -1120,26 +1484,39 @@
 .appt-heatmap-chart-wrap {
     position: relative;
     padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
 }
 
 .appt-heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    display: flex;
+    gap: 5px;
+    flex: 1;
+    width: 100%;
     align-items: stretch;
+    min-height: 0;
 }
 
 .appt-heatmap-col {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
+    align-items: stretch;
 }
 
 .appt-heatmap-cell {
     width: 100%;
-    aspect-ratio: 1;
-    max-height: 52px;
-    border-radius: 10px;
+    flex: 1;
+    min-height: 8px;
+    height: auto;
+    aspect-ratio: unset;
+    border-radius: 4px;
     background: #F4F0FE;
     cursor: pointer;
     transition:
@@ -1147,7 +1524,7 @@
         box-shadow 0.18s var(--dash-ease),
         outline 0.12s ease;
     outline: 2px solid transparent;
-    box-shadow: 0 1px 2px rgba(134, 80, 243, 0.04);
+    box-shadow: none;
 }
 
 /* #8650f3 purple scale */
@@ -1185,8 +1562,10 @@
 .appt-heatmap-day-labels {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    margin-top: 12px;
+    gap: 5px;
+    margin-top: 8px;
+    width: 100%;
+    flex-shrink: 0;
 }
 
 /* Today's appointment status */
@@ -1283,7 +1662,7 @@
 
 .appt-heatmap-day-labels span {
     text-align: center;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     font-weight: 600;
     color: var(--dash-mist);
     line-height: 1.2;
