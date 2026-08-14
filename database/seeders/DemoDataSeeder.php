@@ -39,8 +39,9 @@ class DemoDataSeeder extends Seeder
             ['name' => 'Pooja Reddy', 'email' => 'pooja.r@salonpro.com', 'mobile_number' => '8321098765', 'status' => 'active'],
         ];
 
+        $staffModels = [];
         foreach ($staff as $row) {
-            Staff::create($row);
+            $staffModels[] = Staff::create($row);
         }
 
         $customers = [
@@ -59,8 +60,10 @@ class DemoDataSeeder extends Seeder
         ];
 
         $customerModels = [];
-        foreach ($customers as $row) {
-            $customerModels[] = Customer::create($row);
+        $customerDaysThisMonth = [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14];
+        foreach ($customers as $index => $row) {
+            $createdAt = now()->copy()->startOfMonth()->addDays($customerDaysThisMonth[$index] - 1)->setTime(10 + ($index % 7), 0);
+            $customerModels[] = Customer::create([...$row, 'created_at' => $createdAt, 'updated_at' => $createdAt]);
         }
 
         $services = [
@@ -110,6 +113,8 @@ class DemoDataSeeder extends Seeder
             Product::create($row);
         }
 
+        $activeStaff = collect($staffModels)->where('status', 'active')->values();
+
         $jobCards = [
             ['job_card_name' => 'Haircut — Aisha', 'customer_index' => 0, 'service_index' => 0, 'subcategory' => 'Cut', 'status' => 'completed'],
             ['job_card_name' => 'Bridal Trial — Hema', 'customer_index' => 4, 'service_index' => 4, 'subcategory' => 'Bridal', 'status' => 'in_progress'],
@@ -125,13 +130,38 @@ class DemoDataSeeder extends Seeder
             ['job_card_name' => 'Gel Manicure — David', 'customer_index' => 1, 'service_index' => 11, 'subcategory' => 'Manicure', 'status' => 'pending'],
         ];
 
-        foreach ($jobCards as $row) {
+        foreach ($jobCards as $index => $row) {
+            $createdAt = now()->copy()->subDays($index % 7)->setTime(9 + ($index % 8), 0);
+
             JobCard::create([
                 'job_card_name' => $row['job_card_name'],
                 'customer_id' => $customerModels[$row['customer_index']]->id,
                 'service_id' => $serviceModels[$row['service_index']]->id,
+                'staff_id' => $activeStaff[$index % $activeStaff->count()]->id,
                 'subcategory' => $row['subcategory'],
                 'status' => $row['status'],
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+        }
+
+        // A balanced 30-day schedule gives the dashboard meaningful, linked staff metrics.
+        $statuses = ['completed', 'completed', 'completed', 'completed', 'in_progress', 'pending', 'cancelled'];
+        foreach (range(0, 89) as $index) {
+            $service = $serviceModels[$index % count($serviceModels)];
+            $createdAt = now()->copy()
+                ->subDays(29 - intdiv($index, 3))
+                ->setTime(9 + ($index % 9), ($index * 10) % 60);
+
+            JobCard::create([
+                'job_card_name' => sprintf('%s Appointment %03d', $service->service_name, $index + 1),
+                'customer_id' => $customerModels[$index % count($customerModels)]->id,
+                'service_id' => $service->id,
+                'staff_id' => $activeStaff[$index % $activeStaff->count()]->id,
+                'subcategory' => $service->subcategory,
+                'status' => $statuses[$index % count($statuses)],
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt->copy()->addHour(),
             ]);
         }
     }

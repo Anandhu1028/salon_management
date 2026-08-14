@@ -7,6 +7,7 @@ use App\Models\JobCard;
 use App\Models\Staff;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -28,6 +29,7 @@ class DashboardController extends Controller
         $todayRevenue = $this->revenue($completedToday);
 
         return view('dashboard.index', [
+            'staffMembers' => Staff::query()->where('status', 'active')->orderBy('name')->get(['id', 'name']),
             'dashboard' => [
                 'customerCount' => Customer::count(),
                 'activeStaff' => Staff::where('status', 'active')->count(),
@@ -45,6 +47,11 @@ class DashboardController extends Controller
                     'staff' => $staffMonths['values'],
                     'appointments' => $appointmentMonths['values'],
                     'revenue' => $revenueMonths['values'],
+                ],
+                'staffRevenueSeries' => [
+                    '7' => $this->staffRevenueSeries(7, 'day'),
+                    '30' => $this->staffRevenueSeries(30, 'day'),
+                    '12' => $this->staffRevenueSeries(12, 'month'),
                 ],
                 'revenueSeries' => [
                     '7' => $this->revenueSeries(7, 'day'),
@@ -64,9 +71,86 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function staffPerformance(Request $request)
+    {
+        $validated = $request->validate([
+            'period' => ['nullable', 'in:today,7,30,this_month,custom'],
+            'staff_id' => ['nullable', 'integer', 'exists:staff,id'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $period = $validated['period'] ?? '7';
+        [$from, $to] = $this->staffPerformanceRange(
+            $period,
+            $validated['start_date'] ?? null,
+            $validated['end_date'] ?? null,
+        );
+
+        $staff = Staff::query()
+            ->where('status', 'active')
+            ->when($validated['staff_id'] ?? null, fn ($query, $staffId) => $query->whereKey($staffId))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        $jobs = JobCard::query()
+            ->with('service:id,price')
+            ->whereIn('staff_id', $staff->pluck('id'))
+            ->whereBetween('created_at', [$from, $to])
+            ->get()
+            ->groupBy('staff_id');
+
+        $performance = $staff->map(function (Staff $member) use ($jobs) {
+            $assigned = $jobs->get($member->id, collect());
+            $total = $assigned->count();
+            $completed = $assigned->where('status', 'completed');
+            $completedCount = $completed->count();
+            $completionRate = $total ? round(($completedCount / $total) * 100, 1) : 0;
+
+            return [
+                'id' => $member->id,
+                'name' => $member->name,
+                'total_appointments' => $total,
+                'completed_appointments' => $completedCount,
+                'cancelled_appointments' => $assigned->where('status', 'cancelled')->count(),
+                'pending_appointments' => $assigned->whereIn('status', ['pending', 'in_progress'])->count(),
+                'services_completed' => $completedCount,
+                'revenue_generated' => round($completed->sum(fn (JobCard $jobCard) => (float) ($jobCard->service?->price ?? 0)), 2),
+                'completion_rate' => $completionRate,
+                'overall_performance' => $completionRate,
+            ];
+        })->values();
+
+        return response()->json([
+            'data' => $performance,
+            'range' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+            'average_performance' => round((float) $performance->avg('overall_performance'), 1),
+        ]);
+    }
+
     private function completedJobsBetween(Carbon $from, Carbon $to): Collection
     {
         return JobCard::query()->with('service')->where('status', 'completed')->whereBetween('created_at', [$from, $to])->get();
+    }
+
+    private function staffPerformanceRange(string $period, ?string $startDate, ?string $endDate): array
+    {
+        if ($period === 'today') {
+            return [now()->startOfDay(), now()->endOfDay()];
+        }
+
+        if ($period === '30') {
+            return [now()->copy()->subDays(29)->startOfDay(), now()->endOfDay()];
+        }
+
+        if ($period === 'this_month') {
+            return [now()->startOfMonth(), now()->endOfMonth()];
+        }
+
+        if ($period === 'custom' && $startDate && $endDate) {
+            return [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()];
+        }
+
+        return [now()->copy()->subDays(6)->startOfDay(), now()->endOfDay()];
     }
 
     private function revenue(Collection $jobCards): float
@@ -103,13 +187,42 @@ class DashboardController extends Controller
 
     private function revenueSeries(int $period, string $unit): array
     {
-        $labels = []; $values = [];
+        $labels = [];
+        $values = [];
+
         for ($offset = $period - 1; $offset >= 0; $offset--) {
-            $date = $unit === 'month' ? now()->copy()->subMonths($offset) : now()->copy()->subDays($offset);
+            $date = $unit === 'month'
+                ? now()->copy()->subMonths($offset)
+                : now()->copy()->subDays($offset);
+
             $labels[] = $unit === 'month' ? $date->format('M') : $date->format('D');
-            $values[] = $this->revenue($this->completedJobsBetween($unit === 'month' ? $date->copy()->startOfMonth() : $date->copy()->startOfDay(), $unit === 'month' ? $date->copy()->endOfMonth() : $date->copy()->endOfDay()));
+            $values[] = $this->revenue($this->completedJobsBetween(
+                $unit === 'month' ? $date->copy()->startOfMonth() : $date->copy()->startOfDay(),
+                $unit === 'month' ? $date->copy()->endOfMonth() : $date->copy()->endOfDay(),
+            ));
         }
+
         return compact('labels', 'values');
+    }
+
+    private function staffRevenueSeries(int $period, string $unit): array
+    {
+        $from = $unit === 'month'
+            ? now()->copy()->subMonths($period - 1)->startOfMonth()
+            : now()->copy()->subDays($period - 1)->startOfDay();
+        $staff = Staff::where('status', 'active')->orderBy('name')->get(['id', 'name']);
+        $jobsByStaff = JobCard::with('service')
+            ->where('status', 'completed')
+            ->whereNotNull('staff_id')
+            ->whereBetween('created_at', [$from, now()])
+            ->get()
+            ->groupBy('staff_id')
+            ->map(fn (Collection $jobs) => $this->revenue($jobs));
+
+        return [
+            'labels' => $staff->pluck('name')->values()->all(),
+            'values' => $staff->map(fn (Staff $member) => $jobsByStaff->get($member->id, 0))->values()->all(),
+        ];
     }
 
     private function categoryRevenue(Collection $jobs): Collection
@@ -121,9 +234,20 @@ class DashboardController extends Controller
 
     private function weeklyCustomerCounts(): array
     {
-        return collect(range(0, 3))->map(function (int $offset) {
-            $week = now()->copy()->startOfMonth()->addWeeks($offset);
-            return ['label' => 'Week '.($offset + 1), 'value' => Customer::whereBetween('created_at', [$week, $week->copy()->endOfWeek()])->count()];
+        $monthStart = now()->copy()->startOfMonth();
+        $firstWeekStart = $monthStart->copy()->startOfWeek();
+        $now = now();
+
+        return collect(range(0, 3))->map(function (int $offset) use ($monthStart, $firstWeekStart, $now) {
+            $weekStart = $firstWeekStart->copy()->addWeeks($offset);
+            $from = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart;
+            $weekEnd = $weekStart->copy()->endOfWeek();
+            $to = $weekEnd->gt($now) ? $now->copy() : $weekEnd;
+
+            return [
+                'label' => 'Week '.($offset + 1),
+                'value' => $from->gt($to) ? 0 : Customer::whereBetween('created_at', [$from, $to])->count(),
+            ];
         })->all();
     }
 

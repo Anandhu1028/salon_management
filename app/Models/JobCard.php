@@ -13,6 +13,7 @@ class JobCard extends Model
         'job_card_name',
         'customer_id',
         'service_id',
+        'staff_id',
         'subcategory',
         'status',
     ];
@@ -25,5 +26,10 @@ class JobCard extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
     }
 }

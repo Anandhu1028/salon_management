@@ -137,12 +137,6 @@
 
             @php
                 $listStart = ($jobCards->currentPage() - 1) * $jobCards->perPage();
-                $statusLabels = [
-                    'pending' => 'Pending',
-                    'in_progress' => 'In Progress',
-                    'completed' => 'Completed',
-                    'cancelled' => 'Cancelled',
-                ];
             @endphp
 
             <div class="premium-list premium-list--jobs premium-list--feed premium-list--compact premium-list--mgmt">
@@ -153,7 +147,7 @@
                     <span class="pli-head-cell col-center">Customer</span>
                     <span class="pli-head-cell col-center">Service</span>
                     <span class="pli-head-cell col-center">Sub Category</span>
-                    <span class="pli-head-cell col-center">Status</span>
+                    <span class="pli-head-cell col-center">Amount</span>
                     <span class="pli-head-cell col-center">Created</span>
                     <span class="pli-head-cell col-center">Actions</span>
                 </div>
@@ -187,11 +181,8 @@
                             <span class="pli-col-text">{{ $jobCard->subcategory ?: '—' }}</span>
                         </div>
 
-                        <div class="pli-col pli-col-status-col col-center">
-                            <span class="job-status status-{{ $jobCard->status }}">
-                                <span class="status-dot"></span>
-                                {{ $statusLabels[$jobCard->status] ?? ucfirst($jobCard->status) }}
-                            </span>
+                        <div class="pli-col pli-col-amount col-center">
+                            <span class="pli-col-text">₹{{ number_format($jobCard->service?->price ?? 0, 0) }}</span>
                         </div>
 
                         <div class="pli-col pli-col-joined col-center">
@@ -199,6 +190,14 @@
                         </div>
 
                         <div class="pli-col pli-col-actions col-actions actions-cell col-center">
+                            <button
+                                type="button"
+                                class="pli-btn-icon pli-btn-icon--view"
+                                title="View Job Card"
+                                onclick='openJobCardDetailsModal(@json($jobCard))'
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
                             <button
                                 type="button"
                                 class="pli-btn-icon pli-btn-icon--edit"
@@ -257,7 +256,7 @@
 {{-- ADD / EDIT JOB CARD MODAL --}}
 {{-- ========================================================= --}}
 
-<div class="modal fade premium-modal" id="jobCardModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade premium-modal" id="jobCardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="jobCardForm" method="POST" action="{{ route('job-cards.store') }}">
@@ -279,7 +278,7 @@
                 </div>
 
                 {{-- Body --}}
-                <div class="modal-body">
+                <div class="modal-body job-card-form-grid">
 
                     {{-- Job Card Name --}}
                     <div class="form-field">
@@ -314,6 +313,17 @@
                         </select>
                     </div>
 
+                    {{-- Staff Member --}}
+                    <div class="form-field">
+                        <label for="staff_id" class="form-label">Staff Member</label>
+                        <select name="staff_id" id="staff_id" class="form-select">
+                            <option value="">Unassigned</option>
+                            @foreach($staff as $member)
+                                <option value="{{ $member->id }}">{{ $member->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Service --}}
                     <div class="form-field">
                         <label for="service_id" class="form-label">
@@ -322,7 +332,12 @@
                         <select name="service_id" id="service_id" class="form-select" required>
                             <option value="">Select service</option>
                             @foreach($services as $service)
-                                <option value="{{ $service->id }}" data-subcategory="{{ $service->subcategory }}">
+                                <option
+                                    value="{{ $service->id }}"
+                                    data-subcategory="{{ $service->subcategory }}"
+                                    data-category="{{ $service->category }}"
+                                    data-icon="{{ $service->icon }}"
+                                >
                                     {{ $service->service_name }}
                                     @if($service->category)
                                         — {{ $service->category }}
@@ -343,18 +358,7 @@
                         <div class="field-help">Subcategory is automatically loaded from selected service.</div>
                     </div>
 
-                    {{-- Status --}}
-                    <div class="form-field">
-                        <label for="job_card_status" class="form-label">
-                            Status <span>*</span>
-                        </label>
-                        <select name="status" id="job_card_status" class="form-select" required>
-                            <option value="pending">Pending</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="status" id="job_card_status" value="pending">
 
                 </div>
 
@@ -369,6 +373,48 @@
     </div>
 </div>
 
+
+{{-- ========================================================= --}}
+{{-- JOB CARD DETAILS MODAL --}}
+{{-- ========================================================= --}}
+
+<div class="modal fade premium-modal job-card-details-modal" id="jobCardDetailsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icon-box job-card-details-title-icon"><i class="bi bi-card-checklist"></i></div>
+                    <div class="modal-header-content">
+                        <h5 class="modal-title">Job Card Details</h5>
+                        <p class="modal-subtitle" id="jobCardDetailsNumber">—</p>
+                    </div>
+                </div>
+                <div class="job-card-details-header-actions">
+                    <button type="button" class="job-card-detail-tool" title="Export PDF" aria-label="Export PDF"><i class="bi bi-file-earmark-pdf"></i></button>
+                    <button type="button" class="job-card-detail-tool" title="Export Excel" aria-label="Export Excel"><i class="bi bi-file-earmark-spreadsheet"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="job-card-details-list">
+                    <div class="job-card-details-row"><span class="job-card-details-row-icon"><i class="bi bi-person"></i></span><span class="job-card-details-row-label">Name</span><strong id="jobCardDetailsName">—</strong></div>
+                    <div class="job-card-details-row"><span class="job-card-details-row-icon"><i class="bi bi-people"></i></span><span class="job-card-details-row-label">Customer</span><strong><span id="jobCardDetailsCustomer">—</span><small id="jobCardDetailsMobile"></small></strong></div>
+                    <div class="job-card-details-row"><span class="job-card-details-row-icon"><i class="bi bi-scissors"></i></span><span class="job-card-details-row-label">Service</span><strong id="jobCardDetailsService">—</strong></div>
+                    <div class="job-card-details-row"><span class="job-card-details-row-icon"><i class="bi bi-layers"></i></span><span class="job-card-details-row-label">Sub Category</span><strong id="jobCardDetailsSubcategory">—</strong></div>
+                    <div class="job-card-details-row"><span class="job-card-details-row-icon"><i class="bi bi-calendar3"></i></span><span class="job-card-details-row-label">Created On</span><strong id="jobCardDetailsCreated">—</strong></div>
+                </div>
+                <div class="job-card-details-invoice">
+                    <div class="job-card-details-invoice-head"><span>#</span><span>Description</span><span>Qty</span><span>Rate (₹)</span><span>Amount (₹)</span></div>
+                    <div class="job-card-details-invoice-line"><span>1</span><span><strong id="jobCardDetailsInvoiceService">—</strong><small id="jobCardDetailsCategory"></small></span><span>1</span><span id="jobCardDetailsRate">₹0</span><span id="jobCardDetailsAmount">₹0</span></div>
+                    <div class="job-card-details-totals"><span>Subtotal</span><strong id="jobCardDetailsSubtotal">₹0</strong><span>Discount</span><strong>₹0.00</strong><span>Tax (0%)</span><strong>₹0.00</strong><span class="job-card-details-total-label">Total</span><strong class="job-card-details-total" id="jobCardDetailsTotal">₹0</strong></div>
+                </div>
+            </div>
+            <div class="modal-footer job-card-details-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{-- ========================================================= --}}
 {{-- DELETE CONFIRMATION MODAL --}}
@@ -423,7 +469,8 @@ function loadSubcategory(serviceId, selectedSubcategory = null) {
     }
 
     subcategorySelect.disabled = false;
-    subcategorySelect.innerHTML = `<option value="${escapeHtml(subcategory)}">${escapeHtml(subcategory)}</option>`;
+    const subcategoryOption = new Option(subcategory, subcategory, true, true);
+    subcategorySelect.replaceChildren(subcategoryOption);
 
     if (selectedSubcategory) {
         subcategorySelect.value = selectedSubcategory;
@@ -436,6 +483,120 @@ serviceSelect.addEventListener('change', function () {
     loadSubcategory(this.value);
 });
 
+function initialiseServicePicker(select) {
+    const iconMap = {
+        haircut: 'bi-scissors', scissors: 'bi-scissors', 'hair-color': 'bi-palette-fill', keratin: 'bi-stars',
+        spa: 'bi-flower1', facial: 'bi-stars', sparkle: 'bi-stars', sparkles: 'bi-stars', makeup: 'bi-brush',
+        brush: 'bi-brush', nails: 'bi-hand-index-thumb', nail: 'bi-hand-index-thumb', beard: 'bi-person',
+        user: 'bi-person', massage: 'bi-flower1', waxing: 'bi-droplet', droplet: 'bi-droplet', threading: 'bi-bezier2',
+        default: 'bi-scissors',
+    };
+    const services = [...select.options].filter(option => option.value).map(option => ({
+        id: option.value,
+        name: option.textContent.trim().split(' — ')[0],
+        category: option.dataset.category || '',
+        subcategory: option.dataset.subcategory || '',
+        icon: option.dataset.icon || 'default',
+    }));
+    const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char]));
+    const icon = (key) => `<i class="bi ${iconMap[key] || iconMap.default}" aria-hidden="true"></i>`;
+    const details = (service) => [service.category, service.subcategory].filter(Boolean).map(escapeHtml).join(' <span>·</span> ');
+
+    const picker = document.createElement('div');
+    picker.className = 'job-service-picker';
+    picker.innerHTML = `
+        <button type="button" class="job-service-picker__trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="jobServiceOptions">
+            <span class="job-service-picker__trigger-content"></span><i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="job-service-picker__panel" id="jobServicePanel">
+            <div class="job-service-picker__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Search service..." aria-label="Search service"></div>
+            <div class="job-service-picker__filter-wrap"><div class="job-service-picker__filters" aria-label="Filter services by category"></div><button type="button" class="job-service-picker__filter-next" aria-label="Show more categories"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
+            <div class="job-service-picker__options" id="jobServiceOptions" role="listbox"></div>
+        </div>`;
+    select.classList.add('job-service-picker__native');
+    select.after(picker);
+
+    const trigger = picker.querySelector('.job-service-picker__trigger');
+    const triggerContent = picker.querySelector('.job-service-picker__trigger-content');
+    const panel = picker.querySelector('.job-service-picker__panel');
+    const search = picker.querySelector('input');
+    const filters = picker.querySelector('.job-service-picker__filters');
+    const filterNext = picker.querySelector('.job-service-picker__filter-next');
+    const list = picker.querySelector('.job-service-picker__options');
+    let activeCategory = '';
+    let activeIndex = -1;
+
+    const updateFilterArrow = () => {
+        filterNext.hidden = filters.scrollWidth <= filters.clientWidth + 2;
+    };
+    filterNext.addEventListener('click', () => filters.scrollBy({ left: 140, behavior: 'smooth' }));
+    filters.addEventListener('scroll', updateFilterArrow);
+
+    const close = () => { picker.classList.remove('is-open', 'opens-up'); trigger.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
+    const visibleServices = () => {
+        const query = search.value.toLowerCase().trim();
+        return services.filter(service => !activeCategory || service.category === activeCategory).filter(service =>
+            [service.name, service.category, service.subcategory].join(' ').toLowerCase().includes(query)
+        );
+    };
+    const render = () => {
+        const selected = services.find(service => service.id === select.value);
+        triggerContent.innerHTML = selected
+            ? `<span><strong>${escapeHtml(selected.name)}</strong><small>${details(selected)}</small></span>`
+            : '<span><strong>Select service</strong></span>';
+
+        const categories = [...new Set(services.map(service => service.category).filter(Boolean))];
+        filters.innerHTML = `<button type="button" class="${!activeCategory ? 'is-active' : ''}" data-category="">All</button>` + categories.map(category =>
+            `<button type="button" class="${activeCategory === category ? 'is-active' : ''}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`
+        ).join('');
+        filters.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { activeCategory = button.dataset.category; render(); }));
+        requestAnimationFrame(updateFilterArrow);
+
+        const matches = visibleServices();
+        list.innerHTML = matches.length ? matches.map((service, index) => {
+            const selectedState = service.id === select.value;
+            const palette = escapeHtml(service.category.toLowerCase().replace(/\s+/g, '-'));
+            return `<button type="button" class="job-service-picker__option ${selectedState ? 'is-selected' : ''}" data-value="${escapeHtml(service.id)}" role="option" aria-selected="${selectedState}" tabindex="-1">
+                <span class="job-service-picker__icon category-${palette}">${icon(service.icon)}</span>
+                <span class="job-service-picker__copy"><strong>${escapeHtml(service.name)}</strong><small>${details(service)}</small></span>
+                ${selectedState ? '<i class="bi bi-check-circle-fill job-service-picker__check" aria-hidden="true"></i>' : ''}
+            </button>`;
+        }).join('') : '<div class="job-service-picker__empty"><i class="bi bi-scissors" aria-hidden="true"></i><strong>No services found</strong><span>Try another search term</span></div>';
+        list.querySelectorAll('.job-service-picker__option').forEach(option => option.addEventListener('click', () => choose(option.dataset.value)));
+    };
+    const choose = (id) => {
+        select.value = id;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        render();
+        close();
+        trigger.focus();
+    };
+    const open = () => {
+        picker.classList.add('is-open');
+        const rect = trigger.getBoundingClientRect();
+        picker.classList.toggle('opens-up', window.innerHeight - rect.bottom < 375 && rect.top > 375);
+        trigger.setAttribute('aria-expanded', 'true');
+        render();
+        search.focus();
+    };
+    trigger.addEventListener('click', () => picker.classList.contains('is-open') ? close() : open());
+    search.addEventListener('input', render);
+    picker.addEventListener('keydown', event => {
+        const options = [...list.querySelectorAll('.job-service-picker__option')];
+        if (event.key === 'Escape') { event.preventDefault(); close(); trigger.focus(); }
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault(); activeIndex = Math.max(0, Math.min(options.length - 1, activeIndex + (event.key === 'ArrowDown' ? 1 : -1))); options[activeIndex]?.focus();
+        }
+        if (event.key === 'Enter' && document.activeElement.classList.contains('job-service-picker__option')) { event.preventDefault(); choose(document.activeElement.dataset.value); }
+    });
+    document.addEventListener('click', event => { if (!picker.contains(event.target)) close(); });
+    select.addEventListener('change', render);
+    window.refreshJobServicePicker = render;
+    render();
+}
+
+initialiseServicePicker(serviceSelect);
+
 function openAddJobCardModal() {
     const form = document.getElementById('jobCardForm');
     form.reset();
@@ -446,8 +607,8 @@ function openAddJobCardModal() {
     document.getElementById('jobCardSubmitButton').textContent = 'Create Job Card';
     document.getElementById('job_card_status').value = 'pending';
     loadSubcategory(null);
-    [document.getElementById('customer_id'), serviceSelect, document.getElementById('job_card_status')]
-        .forEach(select => window.refreshNiceSelect?.(select));
+    window.refreshNiceSelect?.(document.getElementById('customer_id'));
+    window.refreshJobServicePicker?.();
 }
 
 function openEditJobCardModal(jobCard) {
@@ -461,11 +622,36 @@ function openEditJobCardModal(jobCard) {
     document.getElementById('job_card_name').value = jobCard.job_card_name ?? '';
     document.getElementById('customer_id').value = jobCard.customer_id ?? '';
     document.getElementById('service_id').value = jobCard.service_id ?? '';
+    document.getElementById('staff_id').value = jobCard.staff_id ?? '';
     document.getElementById('job_card_status').value = jobCard.status ?? 'pending';
 
     loadSubcategory(jobCard.service_id, jobCard.subcategory);
-    [document.getElementById('customer_id'), serviceSelect, document.getElementById('job_card_status')]
-        .forEach(select => window.refreshNiceSelect?.(select));
+    window.refreshNiceSelect?.(document.getElementById('customer_id'));
+    window.refreshNiceSelect?.(document.getElementById('staff_id'));
+    window.refreshJobServicePicker?.();
+}
+
+function openJobCardDetailsModal(jobCard) {
+    const service = jobCard.service || {};
+    const customer = jobCard.customer || {};
+    const amount = Number(service.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    const created = jobCard.created_at ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+
+    document.getElementById('jobCardDetailsNumber').textContent = `#JC-${String(jobCard.id).padStart(5, '0')}`;
+    document.getElementById('jobCardDetailsAmount').textContent = `₹${amount}.00`;
+    document.getElementById('jobCardDetailsName').textContent = jobCard.job_card_name || '—';
+    document.getElementById('jobCardDetailsCreated').textContent = created;
+    document.getElementById('jobCardDetailsCustomer').textContent = customer.name || '—';
+    document.getElementById('jobCardDetailsMobile').textContent = customer.mobile_number || '';
+    document.getElementById('jobCardDetailsService').textContent = service.service_name || '—';
+    document.getElementById('jobCardDetailsInvoiceService').textContent = service.service_name || '—';
+    document.getElementById('jobCardDetailsCategory').textContent = [service.category, service.subcategory].filter(Boolean).join(' · ');
+    document.getElementById('jobCardDetailsSubcategory').textContent = jobCard.subcategory || '—';
+    document.getElementById('jobCardDetailsRate').textContent = `₹${amount}.00`;
+    document.getElementById('jobCardDetailsSubtotal').textContent = `₹${amount}.00`;
+    document.getElementById('jobCardDetailsTotal').textContent = `₹${amount}.00`;
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('jobCardDetailsModal')).show();
 }
 
 function openDeleteJobCardModal(jobCardId, jobCardName) {

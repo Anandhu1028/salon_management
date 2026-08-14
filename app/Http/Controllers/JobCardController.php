@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\ExportsManagementList;
 use App\Models\Customer;
 use App\Models\JobCard;
 use App\Models\Service;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -33,10 +34,13 @@ class JobCardController extends Controller
             ->orderBy('service_name')
             ->get();
 
+        $staff = Staff::where('status', 'active')->orderBy('name')->get();
+
         return view('job-cards.index', compact(
             'jobCards',
             'customers',
             'services',
+            'staff',
             'search',
             'filter'
         ));
@@ -106,6 +110,8 @@ class JobCardController extends Controller
                 'exists:services,id',
             ],
 
+            'staff_id' => ['nullable', 'exists:staff,id'],
+
             'subcategory' => [
                 'required',
                 'string',
@@ -169,6 +175,8 @@ class JobCardController extends Controller
                 'required',
                 'exists:services,id',
             ],
+
+            'staff_id' => ['nullable', 'exists:staff,id'],
 
             'subcategory' => [
                 'required',
@@ -234,6 +242,7 @@ class JobCardController extends Controller
         return JobCard::with([
             'customer',
             'service',
+            'staff',
         ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {

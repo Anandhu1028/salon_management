@@ -30,6 +30,13 @@
         <div class="sidebar-section-label">Management</div>
         <ul class="sidebar-menu sidebar-menu-management">
 
+           <li class="{{ request()->routeIs('job-cards.*') ? 'active' : '' }}">
+                <a href="{{ route('job-cards.index') }}">
+                    <span class="sidebar-nav-icon nav-icon-jobs"><i class="bi bi-clipboard2-check"></i></span>
+                    <span class="sidebar-nav-text">Job Cards</span>
+                </a>
+            </li>
+
             <li class="{{ request()->routeIs('staff.*') ? 'active' : '' }}">
                 <a href="{{ route('staff.index') }}">
                     <span class="sidebar-nav-icon nav-icon-staff"><i class="bi bi-people"></i></span>
@@ -58,12 +65,7 @@
                 </a>
             </li>
 
-            <li class="{{ request()->routeIs('job-cards.*') ? 'active' : '' }}">
-                <a href="{{ route('job-cards.index') }}">
-                    <span class="sidebar-nav-icon nav-icon-jobs"><i class="bi bi-clipboard2-check"></i></span>
-                    <span class="sidebar-nav-text">Job Cards</span>
-                </a>
-            </li>
+            
 
         </ul>
 

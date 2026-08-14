@@ -145,84 +145,78 @@
     <section class="dashboard-section" id="sectionCharts">
     <div class="dashboard-grid-charts">
 
-        {{-- Revenue Overview --}}
+        {{-- Staff Work Performance --}}
         <div class="content-card content-card--wide content-card--revenue" id="revenueCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
-                    <span class="content-card-icon-badge content-card-icon-badge--indigo"><i class="bi bi-graph-up"></i></span>
+                    <span class="content-card-icon-badge content-card-icon-badge--indigo"><i class="bi bi-people-fill"></i></span>
                     <div>
-                        <h2>Revenue Overview</h2>
-                        <span class="sub-text">Daily earnings · last 7 days</span>
+                        <h2>Staff Work Performance</h2>
+                        <span class="sub-text" id="staffPerformanceSubtitle">Staff productivity and service completion · last 7 days</span>
                     </div>
                 </div>
-                <div class="chart-period-control">
-                    <button type="button" class="chart-period-btn active" data-period="7">7 Days</button>
-                    <button type="button" class="chart-period-btn" data-period="30">30 Days</button>
-                    <button type="button" class="chart-period-btn" data-period="12">12 Months</button>
+                <div class="staff-performance-filters">
+                    <div class="staff-performance-filter-chip staff-performance-filter-chip--staff">
+                        <span class="staff-performance-filter-icon"><i class="bi bi-person-workspace"></i></span>
+                        <span class="staff-performance-filter-label">Staff</span>
+                        <select class="staff-performance-select-native" id="staffPerformanceStaff" aria-label="Filter by staff member">
+                            <option value="">All Staff</option>
+                            @foreach($staffMembers as $staffMember)
+                                <option value="{{ $staffMember->id }}">{{ $staffMember->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="staff-performance-dropdown" data-select="staffPerformanceStaff">
+                            <button type="button" class="staff-performance-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span>All Staff</span><i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="staff-performance-dropdown-menu" role="listbox">
+                                <button type="button" role="option" aria-selected="true" data-value=""><span>All Staff</span><i class="bi bi-check2"></i></button>
+                                @foreach($staffMembers as $staffMember)
+                                    <button type="button" role="option" aria-selected="false" data-value="{{ $staffMember->id }}"><span>{{ $staffMember->name }}</span><i class="bi bi-check2"></i></button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="staff-performance-filter-chip">
+                        <span class="staff-performance-filter-icon"><i class="bi bi-calendar3"></i></span>
+                        <span class="staff-performance-filter-label">Period</span>
+                        <select class="staff-performance-select-native" id="staffPerformancePeriod" aria-label="Filter by period">
+                            <option value="today">Today</option>
+                            <option value="7" selected>7 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="this_month">This Month</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <div class="staff-performance-dropdown" data-select="staffPerformancePeriod">
+                            <button type="button" class="staff-performance-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span>7 Days</span><i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="staff-performance-dropdown-menu" role="listbox">
+                                <button type="button" role="option" aria-selected="false" data-value="today"><span>Today</span><i class="bi bi-check2"></i></button>
+                                <button type="button" role="option" aria-selected="true" data-value="7"><span>7 Days</span><i class="bi bi-check2"></i></button>
+                                <button type="button" role="option" aria-selected="false" data-value="30"><span>30 Days</span><i class="bi bi-check2"></i></button>
+                                <button type="button" role="option" aria-selected="false" data-value="this_month"><span>This Month</span><i class="bi bi-check2"></i></button>
+                                <button type="button" role="option" aria-selected="false" data-value="custom"><span>Custom Range</span><i class="bi bi-check2"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="chart-card-body">
-                <div class="chart-container chart-container--revenue">
-                    <svg viewBox="0 0 700 180" preserveAspectRatio="none" style="width:100%; height:100%; overflow:visible;" id="revenueChart">
-                        <defs>
-                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#6366F1" stop-opacity="0.32" />
-                                <stop offset="60%" stop-color="#8B5CF6" stop-opacity="0.10" />
-                                <stop offset="100%" stop-color="#C026D3" stop-opacity="0.0" />
-                            </linearGradient>
-                            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="0%" stop-color="#6366F1" />
-                                <stop offset="50%" stop-color="#8B5CF6" />
-                                <stop offset="100%" stop-color="#C026D3" />
-                            </linearGradient>
-                            <filter id="dotGlow">
-                                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
-                                <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.39  0 0 0 0 0.40  0 0 0 0 0.95  0 0 0 0.6 0" result="coloredBlur" />
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-
-                        <text x="0" y="16" class="chart-y-label">75K</text>
-                        <text x="0" y="52" class="chart-y-label">56K</text>
-                        <text x="0" y="88" class="chart-y-label">38K</text>
-                        <text x="0" y="124" class="chart-y-label">19K</text>
-                        <text x="0" y="160" class="chart-y-label">0</text>
-
-                        <line x1="36" y1="14" x2="700" y2="14" class="chart-grid-line" />
-                        <line x1="36" y1="50" x2="700" y2="50" class="chart-grid-line" />
-                        <line x1="36" y1="86" x2="700" y2="86" class="chart-grid-line" />
-                        <line x1="36" y1="122" x2="700" y2="122" class="chart-grid-line" />
-                        <line x1="36" y1="158" x2="700" y2="158" class="chart-grid-line" />
-
-                        <path id="chartArea" d="M36,128 C120,108 180,88 240,98 S360,48 450,52 S560,38 630,42 L680,24 L680,158 L36,158 Z" fill="url(#chartGradient)" />
-                        <path id="chartPath" d="M36,128 C120,108 180,88 240,98 S360,48 450,52 S560,38 630,42 L680,24" fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-
-                        <line id="chartGuideLine" x1="0" y1="14" x2="0" y2="158" class="chart-guide-line" style="display:none;" />
-
-                        <g id="chartPoints">
-                            <circle class="chart-point" data-day="Mon" data-val="₹18,500" cx="36" cy="128" r="4.5" fill="#6366F1" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Tue" data-val="₹28,200" cx="136" cy="102" r="4.5" fill="#6C63F8" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Wed" data-val="₹25,800" cx="240" cy="98" r="4.5" fill="#7C5CF6" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Thu" data-val="₹44,100" cx="350" cy="52" r="4.5" fill="#8B5CF6" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Fri" data-val="₹48,650" cx="450" cy="42" r="5" fill="#9D4FC5" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Sat" data-val="₹52,000" cx="560" cy="34" r="4.5" fill="#B040BF" stroke="#fff" stroke-width="2" />
-                            <circle class="chart-point" data-day="Sun" data-val="₹57,400" cx="680" cy="24" r="5.5" fill="#C026D3" stroke="#fff" stroke-width="2.5" filter="url(#dotGlow)" />
-                        </g>
-                    </svg>
-
-                    <div class="chart-tooltip" id="chartTooltip">
-                        <span class="tooltip-day" id="tooltipDay">Friday</span>
-                        <span class="tooltip-val" id="tooltipVal">₹48,650</span>
+            <div class="staff-performance-custom-range" id="staffPerformanceCustomRange" hidden>
+                <label>From <input type="date" id="staffPerformanceStart"></label>
+                <label>To <input type="date" id="staffPerformanceEnd"></label>
+                <button type="button" id="staffPerformanceApply">Apply</button>
+            </div>
+            <div class="chart-card-body staff-performance-body">
+                <div class="staff-performance-chart-wrap">
+                    <div class="staff-performance-chart-scroll" id="staffPerformanceChartScroll">
+                        <canvas id="staffPerformanceChart" aria-label="Staff work performance chart"></canvas>
                     </div>
                 </div>
-
-                <div class="chart-x-labels" id="chartXLabels">
-                    <span>Mon</span><span>Tue</span><span>Wed</span>
-                    <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                <div class="staff-performance-summary">
+                    <span class="staff-performance-summary-icon"><i class="bi bi-arrow-up-right"></i></span>
+                    <span><strong id="staffPerformanceAverage">0%</strong> average overall performance</span>
                 </div>
             </div>
         </div>
@@ -311,17 +305,23 @@
                     <span class="growth-pill growth-pill--muted">{{ $dashboard['customerLastMonth'] }} last month</span>
                 </div>
                 <div class="growth-chart-premium">
+                    @php
+                        $maxWeeklyCustomers = max(25, (int) (ceil(max(array_column($dashboard['weeklyCustomers'], 'value')) / 5) * 5));
+                        $growthTicks = collect(range(0, $maxWeeklyCustomers, 5))->reverse()->values();
+                        $growthGridStep = 100 / max(1, $growthTicks->count() - 1);
+                    @endphp
                     <div class="growth-chart-y-axis" aria-hidden="true">
-                        <span>200</span><span>150</span><span>100</span><span>50</span><span>0</span>
+                        @foreach($growthTicks as $tick)
+                            <span>{{ $tick }}</span>
+                        @endforeach
                     </div>
                     <div class="growth-chart-main">
-                        <div class="growth-grid-lines" aria-hidden="true"></div>
+                        <div class="growth-grid-lines" style="--growth-grid-step: {{ $growthGridStep }}%;" aria-hidden="true"></div>
                         <div class="bar-chart bar-chart--premium">
-                            @php $maxWeeklyCustomers = max(1, max(array_column($dashboard['weeklyCustomers'], 'value'))); @endphp
                             @foreach($dashboard['weeklyCustomers'] as $week)
                                 <div class="bar-col">
                                     <span class="bar-value">{{ $week['value'] }}</span>
-                                    <div class="bar-fill bar-fill--premium{{ $loop->last ? ' bar-fill--peak' : '' }}" style="--bar-h: {{ max(8, round(($week['value'] / $maxWeeklyCustomers) * 100)) }}%;"></div>
+                                    <div class="bar-fill bar-fill--premium{{ $loop->last ? ' bar-fill--peak' : '' }}" style="--bar-h: {{ $week['value'] > 0 ? max(8, round(($week['value'] / $maxWeeklyCustomers) * 100)) : 0 }}%;"></div>
                                     <span class="bar-label">{{ $week['label'] }}</span>
                                 </div>
                             @endforeach
@@ -339,7 +339,7 @@
     <div class="dashboard-grid-appt">
 
         {{-- Appointments Overview — weekly day-column heatmap --}}
-        <div class="content-card content-card--minimal content-card--appt-heatmap content-card--appt-square" id="appointmentOverviewCard">
+        <!-- <div class="content-card content-card--minimal content-card--appt-heatmap content-card--appt-square" id="appointmentOverviewCard">
             @php
                 $apptDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 $apptHeatmapByDay = collect(range(0, 6))->map(fn ($day) => collect($dashboard['heatmap'])->map(fn ($week) => $week[$day])->all())->all();
@@ -402,10 +402,10 @@
                     <span class="appt-heatmap-tooltip-date" id="apptHeatmapTooltipDate">Mon · 1w ago</span>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         {{-- Appointment insight mini cards --}}
-        <div class="dash-appt-stats-col" id="apptInsightCards">
+        <!-- <div class="dash-appt-stats-col" id="apptInsightCards">
             <div class="dash-appt-mini-card peak-hour">
                 <span class="dash-appt-mini-icon"><i class="bi bi-clock-history"></i></span>
                 <div class="dash-appt-mini-body">
@@ -433,10 +433,10 @@
                     <span class="dash-appt-mini-meta">Completion Rate <span class="dash-appt-mini-dot">·</span> Today</span>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         {{-- Today's Appointment Status --}}
-        <div class="content-card content-card--minimal content-card--appt-status" id="appointmentStatusCard">
+        <!-- <div class="content-card content-card--minimal content-card--appt-status" id="appointmentStatusCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--amber"><i class="bi bi-calendar-check"></i></span>
@@ -487,7 +487,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
     </section>
@@ -603,6 +603,7 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const greeting = document.getElementById('dashboardGreeting');
@@ -622,87 +623,120 @@
             updateGreeting();
             setInterval(updateGreeting, 60 * 1000);
 
-            const revenueSeries = @json($dashboard['revenueSeries']);
-            const renderRevenueChart = (period) => {
-                const series = revenueSeries[period];
-                const chartSvg = document.getElementById('revenueChart');
-                const chartPath = document.getElementById('chartPath');
-                const chartArea = document.getElementById('chartArea');
-                const pointsGroup = document.getElementById('chartPoints');
-                const xLabels = document.getElementById('chartXLabels');
-                if (!series || !chartSvg || !chartPath || !chartArea || !pointsGroup) return;
+            const performanceCanvas = document.getElementById('staffPerformanceChart');
+            const performanceChartScroll = document.getElementById('staffPerformanceChartScroll');
+            const periodSelect = document.getElementById('staffPerformancePeriod');
+            const staffSelect = document.getElementById('staffPerformanceStaff');
+            const customRange = document.getElementById('staffPerformanceCustomRange');
+            const startDate = document.getElementById('staffPerformanceStart');
+            const endDate = document.getElementById('staffPerformanceEnd');
+            const applyRange = document.getElementById('staffPerformanceApply');
+            const averagePerformance = document.getElementById('staffPerformanceAverage');
+            const subtitle = document.getElementById('staffPerformanceSubtitle');
+            let staffPerformanceChart;
 
-                const max = Math.max(1, ...series.values);
-                const left = 36; const right = 680; const top = 14; const bottom = 158;
-                const step = series.values.length > 1 ? (right - left) / (series.values.length - 1) : 0;
-                const coords = series.values.map((value, index) => ({
-                    x: left + (index * step), y: bottom - ((value / max) * (bottom - top)), value,
+            document.querySelectorAll('.staff-performance-dropdown').forEach(dropdown => {
+                const select = document.getElementById(dropdown.dataset.select);
+                const trigger = dropdown.querySelector('.staff-performance-dropdown-trigger');
+                const options = dropdown.querySelectorAll('[role="option"]');
+                const close = () => { dropdown.classList.remove('is-open'); trigger.setAttribute('aria-expanded', 'false'); };
+
+                trigger.addEventListener('click', () => {
+                    const willOpen = !dropdown.classList.contains('is-open');
+                    document.querySelectorAll('.staff-performance-dropdown.is-open').forEach(item => item.classList.remove('is-open'));
+                    dropdown.classList.toggle('is-open', willOpen);
+                    trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                });
+                options.forEach(option => option.addEventListener('click', () => {
+                    select.value = option.dataset.value;
+                    trigger.querySelector('span').textContent = option.querySelector('span').textContent;
+                    options.forEach(item => item.setAttribute('aria-selected', item === option ? 'true' : 'false'));
+                    close();
+                    select.dispatchEvent(new Event('change'));
                 }));
-                const line = coords.map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`).join(' ');
-                chartPath.setAttribute('d', line);
-                chartArea.setAttribute('d', `${line} L${right},${bottom} L${left},${bottom} Z`);
-                pointsGroup.innerHTML = coords.map((point, index) => `<circle class="chart-point" data-day="${series.labels[index]}" data-val="₹${Number(point.value).toLocaleString('en-IN')}" cx="${point.x}" cy="${point.y}" r="4.5" fill="#7C5CF6" stroke="#fff" stroke-width="2" />`).join('');
-                if (xLabels) xLabels.innerHTML = series.labels.map((label) => `<span>${label}</span>`).join('');
-                chartSvg.querySelectorAll('.chart-y-label').forEach((label, index) => {
-                    label.textContent = index === 4 ? '0' : `₹${Math.round(max * ((4 - index) / 4)).toLocaleString('en-IN')}`;
+                document.addEventListener('click', event => { if (!dropdown.contains(event.target)) close(); });
+            });
+
+            const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            const periodLabels = { today: 'today', 7: 'last 7 days', 30: 'last 30 days', this_month: 'this month', custom: 'custom range' };
+
+            const renderStaffPerformanceChart = (staff) => {
+                const context = performanceCanvas.getContext('2d');
+                const chartWidth = Math.max(performanceCanvas.closest('.staff-performance-chart-wrap').clientWidth, staff.length * 108);
+                performanceChartScroll.style.width = `${chartWidth}px`;
+                const gradient = context.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, '#8B5CF6');
+                gradient.addColorStop(.55, '#6366F1');
+                gradient.addColorStop(1, '#4F46E5');
+                if (staffPerformanceChart) staffPerformanceChart.destroy();
+
+                const performanceLabels = {
+                    id: 'performanceLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        const bars = chart.getDatasetMeta(0).data;
+                        ctx.save();
+                        ctx.fillStyle = '#4C4A70';
+                        ctx.font = '700 11px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        bars.forEach((bar, index) => {
+                            ctx.fillText(`${staff[index].overall_performance}%`, bar.x, bar.y - 10);
+                        });
+                        ctx.restore();
+                    },
+                    beforeDatasetDraw(chart) {
+                        chart.ctx.save();
+                        chart.ctx.shadowColor = 'rgba(99, 102, 241, .22)';
+                        chart.ctx.shadowBlur = 12;
+                        chart.ctx.shadowOffsetY = 6;
+                    },
+                    afterDatasetDraw(chart) { chart.ctx.restore(); },
+                };
+
+                staffPerformanceChart = new Chart(context, {
+                    type: 'bar',
+                    plugins: [performanceLabels],
+                    data: { labels: staff.map(member => member.name.split(' ')), datasets: [{ data: staff.map(member => member.overall_performance), backgroundColor: gradient, borderRadius: 10, borderSkipped: false, maxBarThickness: 56, hoverBackgroundColor: '#5B4DEB' }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: { duration: 560, easing: 'easeOutQuart' }, layout: { padding: { top: 28, right: 8, left: 2 } },
+                        plugins: {
+                            legend: { display: false }, displayColors: false,
+                            tooltip: { displayColors: false, backgroundColor: '#17152E', titleColor: '#FFFFFF', bodyColor: '#DCD9FF', padding: 14, cornerRadius: 12, callbacks: {
+                                title: ([item]) => staff[item.dataIndex].name,
+                                label: (item) => { const member = staff[item.dataIndex]; return [`Total appointments: ${member.total_appointments}`, `Completed: ${member.completed_appointments}`, `Pending / in progress: ${member.pending_appointments}`, `Cancelled: ${member.cancelled_appointments}`, `Revenue generated: ${formatCurrency(member.revenue_generated)}`, `Overall performance: ${member.overall_performance}%`]; },
+                            } },
+                        },
+                        scales: {
+                            x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748B', font: { family: 'Inter, sans-serif', weight: '600' }, maxRotation: 0, autoSkip: false, padding: 10 } },
+                            y: { beginAtZero: true, max: 100, border: { display: false }, grid: { color: 'rgba(148, 163, 184, .19)', drawTicks: false }, ticks: { stepSize: 25, padding: 12, color: '#94A3B8', callback: value => `${value}%` } },
+                        },
+                    },
                 });
             };
 
-            renderRevenueChart('7');
-            const periodBtns = document.querySelectorAll('.chart-period-btn');
-            periodBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    periodBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderRevenueChart(btn.dataset.period);
-                });
-            });
+            const loadStaffPerformance = async () => {
+                const params = new URLSearchParams({ period: periodSelect.value });
+                if (staffSelect.value) params.set('staff_id', staffSelect.value);
+                if (periodSelect.value === 'custom') {
+                    if (!startDate.value || !endDate.value) return;
+                    params.set('start_date', startDate.value); params.set('end_date', endDate.value);
+                }
+                const chartWrap = performanceCanvas.closest('.staff-performance-chart-wrap');
+                try {
+                    chartWrap.classList.add('is-loading');
+                    const response = await fetch(`{{ route('dashboard.staff-performance') }}?${params.toString()}`, { headers: { Accept: 'application/json' } });
+                    if (!response.ok) throw new Error('Unable to load staff performance');
+                    const result = await response.json();
+                    renderStaffPerformanceChart(result.data);
+                    averagePerformance.textContent = `${result.average_performance}%`;
+                    subtitle.textContent = `Staff productivity and service completion · ${periodLabels[periodSelect.value]}`;
+                } catch (error) { console.error(error); } finally { chartWrap.classList.remove('is-loading'); }
+            };
 
-            const chartSvg = document.getElementById('revenueChart');
-            const points = document.querySelectorAll('.chart-point');
-            const tooltip = document.getElementById('chartTooltip');
-            const tooltipDay = document.getElementById('tooltipDay');
-            const tooltipVal = document.getElementById('tooltipVal');
-            const guideLine = document.getElementById('chartGuideLine');
-
-            if (chartSvg && points.length && tooltip) {
-                points.forEach(point => {
-                    point.addEventListener('mouseenter', () => {
-                        const day = point.getAttribute('data-day');
-                        const val = point.getAttribute('data-val');
-                        const cx = parseFloat(point.getAttribute('cx'));
-                        const cy = parseFloat(point.getAttribute('cy'));
-
-                        tooltipDay.textContent = day;
-                        tooltipVal.textContent = val;
-
-                        if (guideLine) {
-                            guideLine.setAttribute('x1', cx);
-                            guideLine.setAttribute('x2', cx);
-                            guideLine.style.display = 'block';
-                        }
-
-                        const container = chartSvg.parentElement;
-                        const rect = container.getBoundingClientRect();
-                        const scaleX = rect.width / 700;
-                        const scaleY = rect.height / 180;
-
-                        tooltip.style.left = `${cx * scaleX}px`;
-                        tooltip.style.top = `${cy * scaleY - 45}px`;
-                        tooltip.style.display = 'flex';
-                        tooltip.style.opacity = '1';
-
-                        point.setAttribute('r', '7');
-                    });
-
-                    point.addEventListener('mouseleave', () => {
-                        tooltip.style.display = 'none';
-                        if (guideLine) guideLine.style.display = 'none';
-                        const isSun = point.getAttribute('data-day') === 'Sun';
-                        point.setAttribute('r', isSun ? '5.5' : '4.5');
-                    });
-                });
-            }
+            periodSelect.addEventListener('change', () => { customRange.hidden = periodSelect.value !== 'custom'; if (periodSelect.value !== 'custom') loadStaffPerformance(); });
+            staffSelect.addEventListener('change', loadStaffPerformance);
+            applyRange.addEventListener('click', loadStaffPerformance);
+            loadStaffPerformance();
 
             /* Appointments heatmap tooltip */
             const heatmapCells = document.querySelectorAll('#apptHeatmapGrid .appt-heatmap-cell');

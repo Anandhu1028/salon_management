@@ -70,7 +70,7 @@
    ============================================================ */
 
 .job-card-page .premium-list--jobs {
-    --pli-grid: 44px 52px minmax(180px, 1.35fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 0.9fr) 118px 108px 112px;
+    --pli-grid: 44px 52px minmax(180px, 1.35fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 0.9fr) 100px 108px 152px;
     gap: 8px;
     padding: 0 16px 18px;
 }

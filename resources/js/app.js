@@ -6,6 +6,29 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
+window.showToast = (message, type = 'success') => {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.append(container);
+    }
+
+    const icons = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+    const toast = document.createElement('div');
+    toast.className = 'premium-toast';
+    toast.innerHTML = `<div class="toast-icon ${type}"><i class="bi ${icons[type] || icons.success}" aria-hidden="true"></i></div><div class="toast-text"></div>`;
+    toast.querySelector('.toast-text').textContent = message;
+    container.append(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+};
+
 const niceSelectInstances = new WeakMap();
 
 function createNiceSelect(select) {
@@ -85,9 +108,16 @@ function createNiceSelect(select) {
 window.refreshNiceSelect = (select) => createNiceSelect(select).render();
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.premium-modal .form-select').forEach(createNiceSelect);
+    document.querySelectorAll('.alert.alert-success').forEach(alert => {
+        const message = alert.cloneNode(true);
+        message.querySelector('.btn-close')?.remove();
+        window.showToast(message.textContent.trim(), 'success');
+        alert.remove();
+    });
+
+    document.querySelectorAll('.premium-modal .form-select:not(#service_id)').forEach(createNiceSelect);
     document.addEventListener('shown.bs.modal', (event) => {
-        event.target.querySelectorAll('.form-select').forEach(select => window.refreshNiceSelect(select));
+        event.target.querySelectorAll('.form-select:not(#service_id)').forEach(select => window.refreshNiceSelect(select));
     });
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.nice-select')) {

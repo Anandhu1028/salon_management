@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/staff-performance', [DashboardController::class, 'staffPerformance'])
+        ->name('dashboard.staff-performance');
 
     /*
     |--------------------------------------------------------------------------

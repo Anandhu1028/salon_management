@@ -14,4 +14,9 @@ class Staff extends Model
         'mobile_number',
         'status',
     ];
+
+    public function jobCards()
+    {
+        return $this->hasMany(JobCard::class);
+    }
 }
