@@ -122,7 +122,8 @@
     z-index: 1;
 }
 
-/* ── HERO STAT ROW — KPI CARDS (reference layout) ──────────────── */
+/* ── HERO STAT ROW — KPI CARDS (matches reference: glass card,
+       icon circle, watermark icon, labeled bar chart) ───────────── */
 .dashboard-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -133,123 +134,129 @@
 
 .dash-stat-card {
     position: relative;
-    border-radius: 20px;
-    padding: 18px 20px 16px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.03);
+    border-radius: 24px;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 34px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
     overflow: hidden;
     isolation: isolate;
     display: flex;
     flex-direction: column;
-    min-height: 152px;
+    min-height: 220px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: default;
 }
 
 .dash-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.10), 0 4px 10px rgba(15, 23, 42, 0.05);
+    transform: translateY(-4px);
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+/* Soft radial glow washing the card, like the reference screenshot */
+.dash-stat-card::before {
+    content: '';
+    position: absolute;
+    inset: -20% -20% auto auto;
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(38px);
+    opacity: 0.55;
 }
 
 .dash-stat-card.customers {
-    background: linear-gradient(155deg, #FFFFFF 0%, #FFFFFF 50%, #F5F0FF 88%, #EDE9FE 100%);
+    background: linear-gradient(160deg, #FFFFFF 0%, #FDFCFF 55%, #F4EEFF 100%);
 }
+.dash-stat-card.customers::before { background: radial-gradient(circle, #C4B5FD, transparent 70%); }
+
 .dash-stat-card.staff {
-    background: linear-gradient(155deg, #FFFFFF 0%, #FFFFFF 50%, #EFF6FF 88%, #DBEAFE 100%);
+    background: linear-gradient(160deg, #FFFFFF 0%, #FCFDFF 55%, #EAF2FF 100%);
 }
+.dash-stat-card.staff::before { background: radial-gradient(circle, #93C5FD, transparent 70%); }
+
 .dash-stat-card.appointments {
-    background: linear-gradient(155deg, #FFFFFF 0%, #FFFFFF 50%, #FFFBEB 88%, #FEF3C7 100%);
+    background: linear-gradient(160deg, #FFFFFF 0%, #FFFDFA 55%, #FFF1DE 100%);
 }
+.dash-stat-card.appointments::before { background: radial-gradient(circle, #FDBA74, transparent 70%); }
+
 .dash-stat-card.revenue {
-    background: linear-gradient(155deg, #FFFFFF 0%, #FFFFFF 50%, #ECFDF5 88%, #D1FAE5 100%);
+    background: linear-gradient(160deg, #FFFFFF 0%, #FCFFFD 55%, #E4FBEF 100%);
 }
+.dash-stat-card.revenue::before { background: radial-gradient(circle, #6EE7B7, transparent 70%); }
 
 .dash-stat-top {
     display: flex;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: center;
+    gap: 12px;
     position: relative;
     z-index: 2;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .dash-stat-content {
     flex: 1;
     min-width: 0;
-    padding-top: 2px;
 }
 
 .dash-stat-icon-circle {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: #FFFFFF;
+    font-size: 1.1rem;
     transition: transform 0.2s ease;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
 }
 
 .dash-stat-card:hover .dash-stat-icon-circle {
-    transform: scale(1.05);
-}
-
-.dash-stat-icon-circle .kpi-3d-icon--sm {
-    width: 26px;
-    height: 26px;
-    transform: scale(1.15);
-    filter: brightness(0) invert(1);
-    opacity: 0.95;
-}
-
-.dash-stat-icon-circle .kpi-3d-icon--sm.kpi-3d-icon--rupee {
-    filter: none;
-    opacity: 1;
-    width: 22px;
-    height: 22px;
-    transform: none;
+    transform: scale(1.06);
 }
 
 .dash-stat-card.customers .dash-stat-icon-circle {
     background: linear-gradient(135deg, #9333EA 0%, #6366F1 100%);
-    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.38);
 }
 
 .dash-stat-card.staff .dash-stat-icon-circle {
     background: linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
 }
 
 .dash-stat-card.appointments .dash-stat-icon-circle {
     background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
-    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.38);
 }
 
 .dash-stat-card.revenue .dash-stat-icon-circle {
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.38);
 }
 
 .dash-stat-label {
     display: block;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 6px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #1E293B;
     line-height: 1.2;
 }
 
 .dash-stat-value-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
+    margin-top: 14px;
 }
 
 .dash-stat-value {
-    font-size: 1.65rem;
+    font-size: 2.15rem;
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.03em;
@@ -274,86 +281,127 @@
     letter-spacing: -0.01em;
 }
 
-.kpi-3d-icon {
-    display: block;
-    flex-shrink: 0;
-}
-
-.kpi-3d-icon--sm {
-    width: 22px;
-    height: 22px;
-}
-
-.kpi-3d-icon--lg {
-    width: 50px;
-    height: 50px;
-    filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.10));
-}
-
-.card-deco-icon {
-    position: absolute;
-    right: 12px;
-    bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    z-index: 1;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-}
-
-.dash-stat-card:hover .card-deco-icon {
-    transform: scale(1.08) translateY(-2px);
-}
-
-.dash-stat-card:hover .kpi-3d-icon--lg {
-    filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.14));
-}
-
+/* ── KPI footer: subtext + watermark icon + labeled bar chart ──── */
 .dash-stat-footer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: auto;
-    min-height: 46px;
     position: relative;
+    margin-top: auto;
     z-index: 2;
 }
 
 .dash-stat-subtext {
-    font-size: 0.72rem;
+    display: block;
+    font-size: 0.76rem;
     font-weight: 500;
     color: #64748B;
-    flex-shrink: 0;
-    min-width: 0;
-    white-space: nowrap;
     line-height: 1.2;
+    margin-bottom: 12px;
 }
 
-.dash-stat-spark-wrap {
-    flex: 1;
-    height: 38px;
-    min-width: 40px;
+/* Large faint watermark icon sitting behind/beside the bar chart,
+   matching the translucent people/box/coin glyph in the reference */
+.card-deco-icon {
+    position: absolute;
+    top: -34px;
+    right: 4px;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.14;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dash-stat-card:hover .card-deco-icon {
+    transform: translateY(-2px) scale(1.05);
+    opacity: 0.2;
+}
+
+.dash-stat-card.customers .card-deco-icon { color: #7C3AED; }
+.dash-stat-card.staff .card-deco-icon      { color: #2563EB; }
+.dash-stat-card.appointments .card-deco-icon { color: #F97316; }
+.dash-stat-card.revenue .card-deco-icon    { color: #059669; }
+
+.dash-kpi-chart {
     position: relative;
-    overflow: visible;
-    z-index: 2;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 64px;
 }
 
-.stat-sparkline {
-    display: block;
-    width: 100%;
+.dash-kpi-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
     height: 100%;
-    overflow: visible;
+    gap: 8px;
 }
 
-.stat-sparkline .spark-line {
-    vector-effect: non-scaling-stroke;
+.dash-kpi-bar {
+    width: 100%;
+    max-width: 15px;
+    height: var(--bar-h, 40%);
+    border-radius: 7px;
+    min-height: 6px;
+    transform-origin: bottom center;
+    animation: dashKpiBarGrow 0.6s var(--dash-ease) backwards;
 }
 
-.stat-sparkline .spark-area {
-    opacity: 1;
+.dash-kpi-bar-col:nth-child(1) .dash-kpi-bar { animation-delay: 0.02s; }
+.dash-kpi-bar-col:nth-child(2) .dash-kpi-bar { animation-delay: 0.08s; }
+.dash-kpi-bar-col:nth-child(3) .dash-kpi-bar { animation-delay: 0.14s; }
+.dash-kpi-bar-col:nth-child(4) .dash-kpi-bar { animation-delay: 0.20s; }
+.dash-kpi-bar-col:nth-child(5) .dash-kpi-bar { animation-delay: 0.26s; }
+
+@keyframes dashKpiBarGrow {
+    from { transform: scaleY(0); opacity: 0.4; }
+    to   { transform: scaleY(1); opacity: 1; }
+}
+
+.dash-kpi-bar-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94A3B8;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.dash-kpi-bar-col.is-current .dash-kpi-bar-label {
+    color: #1E293B;
+    font-weight: 800;
+}
+
+/* Bar colour ramps — light-to-bold per KPI, last bar = full brand tone */
+.dash-kpi-chart--customers .dash-kpi-bar { background: #D8CCFB; }
+.dash-kpi-chart--customers .dash-kpi-bar-col.is-current .dash-kpi-bar {
+    background: linear-gradient(180deg, #9F67F0, #7C3AED);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.38);
+}
+
+.dash-kpi-chart--staff .dash-kpi-bar { background: #C6DFFC; }
+.dash-kpi-chart--staff .dash-kpi-bar-col.is-current .dash-kpi-bar {
+    background: linear-gradient(180deg, #4F97F5, #2563EB);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.38);
+}
+
+.dash-kpi-chart--appointments .dash-kpi-bar { background: #FBDDAE; }
+.dash-kpi-chart--appointments .dash-kpi-bar-col.is-current .dash-kpi-bar {
+    background: linear-gradient(180deg, #FB923C, #F97316);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.38);
+}
+
+.dash-kpi-chart--revenue .dash-kpi-bar { background: #A9E8C9; }
+.dash-kpi-chart--revenue .dash-kpi-bar-col.is-current .dash-kpi-bar {
+    background: linear-gradient(180deg, #34D399, #059669);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.38);
 }
 
 /* ── CONTENT CARDS — PREMIUM DEPTH ─────────────────────────────── */
@@ -480,9 +528,211 @@
 
 .dashboard-grid-appt {
     display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    grid-template-columns: minmax(260px, 320px) minmax(220px, 260px) minmax(0, 1fr);
     gap: var(--dash-gutter);
     align-items: stretch;
+}
+
+/* Square appointments heatmap */
+.content-card--appt-square {
+    max-width: 320px;
+    width: 100%;
+    aspect-ratio: 1;
+    max-height: 320px;
+}
+
+.content-card--appt-square .content-card-header {
+    padding: 14px 16px 12px;
+    min-height: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.content-card--appt-square .content-card-header h2 {
+    font-size: 0.85rem;
+}
+
+.content-card--appt-square .content-card-header .sub-text {
+    font-size: 0.68rem;
+}
+
+.content-card--appt-square .content-card-icon-badge {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    font-size: 0.82rem;
+}
+
+.content-card--appt-square .appt-heatmap-body {
+    padding: 10px 16px 14px;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+}
+
+.content-card--appt-square .appt-heatmap-metric {
+    padding: 8px 12px;
+    gap: 6px;
+}
+
+.content-card--appt-square .appt-heatmap-total {
+    font-size: 1.35rem;
+}
+
+.content-card--appt-square .appt-heatmap-caption {
+    font-size: 0.78rem;
+}
+
+.content-card--appt-square .appt-heatmap-chart-wrap {
+    flex: 1;
+    min-height: 0;
+}
+
+.content-card--appt-square .appt-heatmap-grid {
+    gap: 4px;
+}
+
+.content-card--appt-square .appt-heatmap-col {
+    gap: 4px;
+}
+
+.content-card--appt-square .appt-heatmap-cell {
+    min-height: 6px;
+    border-radius: 3px;
+}
+
+.content-card--appt-square .appt-heatmap-day-labels {
+    margin-top: 6px;
+    gap: 4px;
+}
+
+.content-card--appt-square .appt-heatmap-day-labels span {
+    font-size: 0.58rem;
+}
+
+.content-card--appt-square .appt-heatmap-legend-inline .appt-heatmap-cell {
+    width: 8px;
+    height: 8px;
+}
+
+/* Appointment insight mini cards column — compact horizontal layout
+   so icon + value + badge + label fit cleanly at any column height. */
+.dash-appt-stats-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+.dash-appt-mini-card {
+    --mini-accent: #8650f3;
+    --mini-glow: rgba(134, 80, 243, 0.25);
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #F1EDFB;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    isolation: isolate;
+    min-height: 0;
+    transition: transform 0.2s var(--dash-ease), box-shadow 0.2s var(--dash-ease);
+}
+
+.dash-appt-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 10px 26px rgba(15, 23, 42, 0.07);
+}
+
+.dash-appt-mini-card.peak-hour {
+    --mini-accent: #F59E0B;
+    --mini-glow: rgba(245, 158, 11, 0.28);
+}
+.dash-appt-mini-card.walkins {
+    --mini-accent: #3B82F6;
+    --mini-glow: rgba(59, 130, 246, 0.28);
+}
+.dash-appt-mini-card.repeat-rate {
+    --mini-accent: #10B981;
+    --mini-glow: rgba(16, 185, 129, 0.28);
+}
+
+.dash-appt-mini-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    color: #FFFFFF;
+    background: var(--mini-accent);
+    box-shadow: 0 4px 12px var(--mini-glow);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.dash-appt-mini-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+}
+
+.dash-appt-mini-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.dash-appt-mini-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--dash-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-appt-mini-value-row .stat-badge-inline {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.dash-appt-mini-meta {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--dash-slate);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.dash-appt-mini-dot {
+    color: var(--dash-mist);
+    font-weight: 400;
+    margin: 0 1px;
 }
 
 .dashboard-grid-bottom {
@@ -858,6 +1108,21 @@
 
 .dashboard-section--insights .dashboard-grid-appt > .content-card {
     min-height: 320px;
+}
+
+/* All three columns in this row (heatmap / mini-cards / status) share the
+   same height — driven by whichever card's content is naturally tallest —
+   with no artificial cap so nothing is clipped and no column falls short. */
+.dashboard-section--insights .dashboard-grid-appt > .content-card--appt-square {
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
+    height: 100%;
+}
+
+.dashboard-section--insights .dash-appt-stats-col {
+    max-height: none;
+    height: 100%;
 }
 
 .dashboard-section--insights .content-card--appt-status {
@@ -2319,17 +2584,73 @@
     .dashboard-section--hero .dashboard-stats-grid { margin-top: -28px; }
     .dashboard-grid-charts { grid-template-columns: 1fr; }
     .dashboard-grid-charts > .content-card,
-    .dashboard-grid-appt > .content-card,
     .dashboard-grid-bottom > .content-card { min-height: 0; }
     .dashboard-grid-four { grid-template-columns: 1fr; }
-    .dashboard-grid-appt { grid-template-columns: 1fr; }
     .dashboard-grid-bottom { grid-template-columns: 1fr; }
     .staff-perf-list--grid { grid-template-columns: 1fr; }
     .donut-card-body--premium { flex-direction: column; }
+
+    .dashboard-grid-appt {
+        grid-template-columns: minmax(240px, 280px) 1fr;
+        grid-template-areas:
+            "heatmap status"
+            "minicards minicards";
+    }
+
+    .content-card--appt-square {
+        grid-area: heatmap;
+        max-width: 280px;
+        max-height: 280px;
+        aspect-ratio: 1;
+    }
+
+    .content-card--appt-status {
+        grid-area: status;
+        min-height: 280px;
+    }
+
+    .dash-appt-stats-col {
+        grid-area: minicards;
+        flex-direction: row;
+        max-height: none;
+        height: auto;
+    }
+
+    .dash-appt-mini-card {
+        min-height: 88px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 992px) {
     .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .dashboard-grid-appt {
+        grid-template-columns: 1fr;
+        grid-template-areas: none;
+    }
+
+    .content-card--appt-square,
+    .content-card--appt-status,
+    .dash-appt-stats-col {
+        grid-area: auto;
+        max-width: none;
+        max-height: none;
+        aspect-ratio: auto;
+        min-height: 0;
+    }
+
+    .dash-appt-stats-col {
+        flex-direction: row;
+        max-height: none;
+        height: auto;
+    }
+
+    .dash-appt-mini-card {
+        min-height: 88px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -2368,6 +2689,22 @@
     .dashboard-grid-bottom {
         grid-template-columns: 1fr;
     }
+    .dash-stat-value {
+        font-size: 1.75rem;
+    }
+    .dash-stat-card {
+        min-height: 200px;
+        padding: 18px 18px 16px;
+    }
+
+    .dash-appt-stats-col {
+        flex-direction: column;
+    }
+
+    .dash-appt-mini-card {
+        flex-direction: row;
+        align-items: center;
+    }
 }
 
 /* ── REDUCED MOTION ────────────────────────────────────────────── */
@@ -2376,7 +2713,7 @@
     .content-card,
     .quick-action-btn,
     .dash-stat-icon-circle,
-    .card-deco-icon,
+    .dash-appt-mini-card,
     .svc-icon-badge,
     .qa-icon,
     .chart-period-btn,
@@ -2396,7 +2733,8 @@
     }
     .bar-fill,
     .ps-bar-fill,
-    .staff-perf-bar-fill {
+    .staff-perf-bar-fill,
+    .dash-kpi-bar {
         animation: none;
         transform: none;
     }

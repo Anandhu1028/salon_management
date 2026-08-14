@@ -20,10 +20,14 @@
 
         <div class="dashboard-stats-grid" id="statsGrid">
 
+        @php
+            $kpiMonths = ['Apr', 'May', 'Jun', 'Jul', 'Aug'];
+        @endphp
+
         <div class="dash-stat-card customers" id="cardCustomers">
             <div class="dash-stat-top">
                 <div class="dash-stat-icon-circle">
-                    @include('partials.kpi-3d-icons', ['type' => 'people-purple', 'size' => 'kpi-3d-icon--sm'])
+                    <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Total Customers</span>
@@ -34,29 +38,23 @@
                 </div>
             </div>
             <div class="dash-stat-footer">
+                <span class="card-deco-icon"><i class="bi bi-people-fill"></i></span>
                 <span class="dash-stat-subtext">vs last month</span>
-                <div class="dash-stat-spark-wrap">
-                    <svg viewBox="0 0 120 36" class="stat-sparkline" preserveAspectRatio="none" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="sparkGrad1" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.35" />
-                                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path class="spark-area" d="M0 26 C18 26 32 24 52 22 S72 18 88 16 C100 14 110 12 120 10 L120 36 L0 36 Z" fill="url(#sparkGrad1)" />
-                        <path class="spark-line" d="M0 26 C18 26 32 24 52 22 S72 18 88 16 C100 14 110 12 120 10" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linecap="round" />
-                    </svg>
+                <div class="dash-kpi-chart dash-kpi-chart--customers">
+                    @foreach ($kpiMonths as $i => $m)
+                        <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
+                            <div class="dash-kpi-bar" style="--bar-h: {{ [55, 68, 46, 74, 100][$i] }}%;"></div>
+                            <span class="dash-kpi-bar-label">{{ $m }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <span class="card-deco-icon">
-                    @include('partials.kpi-3d-icons', ['type' => 'people-purple', 'size' => 'kpi-3d-icon--lg'])
-                </span>
             </div>
         </div>
 
         <div class="dash-stat-card staff" id="cardStaff">
             <div class="dash-stat-top">
                 <div class="dash-stat-icon-circle">
-                    @include('partials.kpi-3d-icons', ['type' => 'people-blue', 'size' => 'kpi-3d-icon--sm'])
+                    <i class="bi bi-person-badge-fill"></i>
                 </div>
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Active Staff</span>
@@ -67,29 +65,23 @@
                 </div>
             </div>
             <div class="dash-stat-footer">
+                <span class="card-deco-icon"><i class="bi bi-person-badge-fill"></i></span>
                 <span class="dash-stat-subtext">on duty today</span>
-                <div class="dash-stat-spark-wrap">
-                    <svg viewBox="0 0 120 36" class="stat-sparkline" preserveAspectRatio="none" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="sparkGrad2" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.35" />
-                                <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path class="spark-area" d="M0 28 L68 27 L80 27 L88 16 L92 22 L96 12 L104 18 L112 14 L120 10 L120 36 L0 36 Z" fill="url(#sparkGrad2)" />
-                        <path class="spark-line" d="M0 28 L68 27 L80 27 L88 16 L92 22 L96 12 L104 18 L112 14 L120 10" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
+                <div class="dash-kpi-chart dash-kpi-chart--staff">
+                    @foreach ($kpiMonths as $i => $m)
+                        <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
+                            <div class="dash-kpi-bar" style="--bar-h: {{ [58, 70, 50, 66, 100][$i] }}%;"></div>
+                            <span class="dash-kpi-bar-label">{{ $m }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <span class="card-deco-icon">
-                    @include('partials.kpi-3d-icons', ['type' => 'people-blue', 'size' => 'kpi-3d-icon--lg'])
-                </span>
             </div>
         </div>
 
         <div class="dash-stat-card appointments" id="cardAppointments">
             <div class="dash-stat-top">
                 <div class="dash-stat-icon-circle">
-                    @include('partials.kpi-3d-icons', ['type' => 'calendar-orange', 'size' => 'kpi-3d-icon--sm'])
+                    <i class="bi bi-bag-check-fill"></i>
                 </div>
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Today's Appointments</span>
@@ -100,29 +92,23 @@
                 </div>
             </div>
             <div class="dash-stat-footer">
+                <span class="card-deco-icon"><i class="bi bi-bag-check-fill"></i></span>
                 <span class="dash-stat-subtext">6 in progress</span>
-                <div class="dash-stat-spark-wrap">
-                    <svg viewBox="0 0 120 36" class="stat-sparkline" preserveAspectRatio="none" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="sparkGrad3" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.35" />
-                                <stop offset="100%" stop-color="#F59E0B" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path class="spark-area" d="M0 30 C24 28 48 24 72 20 S96 16 108 14 S114 12 120 10 L120 36 L0 36 Z" fill="url(#sparkGrad3)" />
-                        <path class="spark-line" d="M0 30 C24 28 48 24 72 20 S96 16 108 14 S114 12 120 10" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" />
-                    </svg>
+                <div class="dash-kpi-chart dash-kpi-chart--appointments">
+                    @foreach ($kpiMonths as $i => $m)
+                        <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
+                            <div class="dash-kpi-bar" style="--bar-h: {{ [50, 62, 48, 72, 100][$i] }}%;"></div>
+                            <span class="dash-kpi-bar-label">{{ $m }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <span class="card-deco-icon">
-                    @include('partials.kpi-3d-icons', ['type' => 'calendar-orange', 'size' => 'kpi-3d-icon--lg'])
-                </span>
             </div>
         </div>
 
         <div class="dash-stat-card revenue" id="cardRevenue">
             <div class="dash-stat-top">
                 <div class="dash-stat-icon-circle">
-                    @include('partials.kpi-3d-icons', ['type' => 'rupee-green', 'size' => 'kpi-3d-icon--sm'])
+                    <i class="bi bi-currency-rupee"></i>
                 </div>
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Today's Revenue</span>
@@ -133,22 +119,16 @@
                 </div>
             </div>
             <div class="dash-stat-footer">
+                <span class="card-deco-icon"><i class="bi bi-currency-rupee"></i></span>
                 <span class="dash-stat-subtext">vs yesterday</span>
-                <div class="dash-stat-spark-wrap">
-                    <svg viewBox="0 0 120 36" class="stat-sparkline" preserveAspectRatio="none" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="sparkGrad4" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#10B981" stop-opacity="0.35" />
-                                <stop offset="100%" stop-color="#10B981" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path class="spark-area" d="M0 32 C35 28 70 22 95 16 L120 10 L120 36 L0 36 Z" fill="url(#sparkGrad4)" />
-                        <path class="spark-line" d="M0 32 C35 28 70 22 95 16 L120 10" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" />
-                    </svg>
+                <div class="dash-kpi-chart dash-kpi-chart--revenue">
+                    @foreach ($kpiMonths as $i => $m)
+                        <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
+                            <div class="dash-kpi-bar" style="--bar-h: {{ [46, 56, 50, 76, 100][$i] }}%;"></div>
+                            <span class="dash-kpi-bar-label">{{ $m }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <span class="card-deco-icon">
-                    @include('partials.kpi-3d-icons', ['type' => 'coins-green', 'size' => 'kpi-3d-icon--lg'])
-                </span>
             </div>
         </div>
 
@@ -381,10 +361,10 @@
     <div class="dashboard-grid-appt">
 
         {{-- Appointments Overview — weekly day-column heatmap --}}
-        <div class="content-card content-card--minimal content-card--appt-heatmap" id="appointmentOverviewCard">
+        <div class="content-card content-card--minimal content-card--appt-heatmap content-card--appt-square" id="appointmentOverviewCard">
             @php
                 $apptDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                $apptHeatmapRows = 10;
+                $apptHeatmapRows = 7;
                 mt_srand(20260813);
                 $apptHeatmapByDay = [];
                 $apptHeatmapTotal = 0;
@@ -463,6 +443,40 @@
             </div>
         </div>
 
+        {{-- Appointment insight mini cards --}}
+        <div class="dash-appt-stats-col" id="apptInsightCards">
+            <div class="dash-appt-mini-card peak-hour">
+                <span class="dash-appt-mini-icon"><i class="bi bi-clock-history"></i></span>
+                <div class="dash-appt-mini-body">
+                    <div class="dash-appt-mini-value-row">
+                        <span class="dash-appt-mini-value">4–6 PM</span>
+                        <span class="stat-badge-inline up">↑ 12%</span>
+                    </div>
+                    <span class="dash-appt-mini-meta">Peak Hour <span class="dash-appt-mini-dot">·</span> Busiest booking window</span>
+                </div>
+            </div>
+            <div class="dash-appt-mini-card walkins">
+                <span class="dash-appt-mini-icon"><i class="bi bi-door-open"></i></span>
+                <div class="dash-appt-mini-body">
+                    <div class="dash-appt-mini-value-row">
+                        <span class="dash-appt-mini-value">6</span>
+                        <span class="stat-badge-inline up">↑ 3</span>
+                    </div>
+                    <span class="dash-appt-mini-meta">Walk-ins Today <span class="dash-appt-mini-dot">·</span> No prior booking</span>
+                </div>
+            </div>
+            <div class="dash-appt-mini-card repeat-rate">
+                <span class="dash-appt-mini-icon"><i class="bi bi-arrow-repeat"></i></span>
+                <div class="dash-appt-mini-body">
+                    <div class="dash-appt-mini-value-row">
+                        <span class="dash-appt-mini-value">68%</span>
+                        <span class="stat-badge-inline up">↑ 5.1%</span>
+                    </div>
+                    <span class="dash-appt-mini-meta">Repeat Clients <span class="dash-appt-mini-dot">·</span> vs last month</span>
+                </div>
+            </div>
+        </div>
+
         {{-- Today's Appointment Status --}}
         <div class="content-card content-card--minimal content-card--appt-status" id="appointmentStatusCard">
             <div class="content-card-header">
@@ -525,7 +539,7 @@
     <div class="dashboard-grid-bottom">
 
         {{-- Top Staff Performance --}}
-        <div class="content-card content-card--minimal content-card--staff" id="staffPerfCard">
+        <!-- <div class="content-card content-card--minimal content-card--staff" id="staffPerfCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--blue"><i class="bi bi-award"></i></span>
@@ -582,10 +596,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         {{-- Quick Actions --}}
-        <div class="content-card content-card--minimal content-card--actions" id="quickActionsCard">
+        <!-- <div class="content-card content-card--minimal content-card--actions" id="quickActionsCard">
             <div class="content-card-header">
                 <div class="content-card-title-group">
                     <span class="content-card-icon-badge content-card-icon-badge--indigo"><i class="bi bi-lightning-charge"></i></span>
@@ -621,7 +635,7 @@
                     <span class="qa-label">View Reports</span>
                 </a>
             </div>
-        </div>
+        </div> -->
 
     </div>
     </section>

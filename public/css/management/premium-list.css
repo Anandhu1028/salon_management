@@ -1541,7 +1541,7 @@
 }
 
 .premium-modal .confirm-actions .btn {
-    flex: 1;
+    /* flex: 1; */
     border-radius: 12px;
     padding: 11px 16px;
     font-weight: 600;

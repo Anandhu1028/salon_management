@@ -31,7 +31,7 @@ class StaffController extends Controller
         $headers = ['Name', 'Email', 'Mobile', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (Staff $staff) => [
+            fn(Staff $staff) => [
                 $staff->name,
                 $staff->email ?: '—',
                 $staff->mobile_number ?: '—',
@@ -47,7 +47,7 @@ class StaffController extends Controller
         $headers = ['Name', 'Email', 'Mobile', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (Staff $staff) => [
+            fn(Staff $staff) => [
                 $staff->name,
                 $staff->email ?: '—',
                 $staff->mobile_number ?: '—',

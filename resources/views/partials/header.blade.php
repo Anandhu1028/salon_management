@@ -53,7 +53,16 @@
                 <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> My Profile</a></li>
                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item dropdown-item--danger" href="#"><i class="bi bi-box-arrow-right"></i> Log Out</a></li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+
+                        <button type="submit" class="dropdown-item dropdown-item--danger">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Log Out
+                        </button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>

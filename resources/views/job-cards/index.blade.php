@@ -3,10 +3,6 @@
 @section('title', 'Job Cards')
 @section('page-title', 'Job Cards')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/job-card/job-card.css') }}">
-@endpush
-
 @section('content')
 
 <div class="job-card-page management-page">

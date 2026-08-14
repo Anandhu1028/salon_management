@@ -3,11 +3,6 @@
 @section('title', 'Services')
 @section('page-title', 'Services')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/service/service.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/service/service-icons.css') }}">
-@endpush
-
 @section('content')
 
 <div class="service-page management-page">

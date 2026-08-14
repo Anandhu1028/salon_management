@@ -78,6 +78,7 @@
                 </div>
                 <div class="sidebar-profile-info">
                     <div class="sidebar-profile-name">Administrator</div>
+                    <div class="sidebar-profile-role">Salon Manager</div>
                 </div>
             </div>
         </div>

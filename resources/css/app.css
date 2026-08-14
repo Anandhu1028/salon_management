@@ -1,9 +1,27 @@
-@import 'tailwindcss';
+/* The premium application styles were previously served as unversioned files
+ * from public/css.  Keep one Vite-owned entry point so every authenticated
+ * management page receives the same shared design system. */
+@import "../../public/css/app.css";
+@import "../../public/css/management/management.css";
+@import "../../public/css/management/mgmt-stats.css";
+@import "../../public/css/management/premium-list.css";
+@import "../../public/css/management/pagination.css";
+@import "../../public/css/staff/staff.css";
+@import "../../public/css/customer/customer.css";
+@import "../../public/css/service/service.css";
+@import "../../public/css/service/service-icons.css";
+@import "../../public/css/product/product.css";
+@import "../../public/css/job-card/job-card.css";
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+.management-page .empty-state img,
+.management-page .empty-state svg {
+    width: min(220px, 100%);
+    height: 220px;
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
 }

@@ -3,10 +3,6 @@
 @section('title', 'Staff')
 @section('page-title', 'Staff')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/staff/staff.css') }}">
-@endpush
-
 @section('content')
 
 <div class="staff-page management-page">

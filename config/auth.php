@@ -42,6 +42,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Added: fixes "Auth guard [manager] is not defined."
+        // This guard is referenced somewhere in your app (e.g. middleware
+        // like auth:manager on the /staff route, or a Gate/Policy check).
+        // It currently points at the same 'users' provider as the web guard,
+        // since we don't know if you have a dedicated Manager/Staff model.
+        // If managers are actually a separate model/table, change 'provider'
+        // below to match (see the 'providers' section further down).
+        'manager' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -70,6 +82,13 @@ return [
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
+        // ],
+
+        // If managers live in their own table/model, uncomment and adjust
+        // this, then point the 'manager' guard above at 'provider' => 'managers'.
+        // 'managers' => [
+        //     'driver' => 'eloquent',
+        //     'model' => App\Models\Manager::class,
         // ],
     ],
 

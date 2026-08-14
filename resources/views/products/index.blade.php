@@ -3,10 +3,6 @@
 @section('title', 'Products')
 @section('page-title', 'Products')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/product/product.css') }}">
-@endpush
-
 @section('content')
 
 <div class="product-page management-page">
