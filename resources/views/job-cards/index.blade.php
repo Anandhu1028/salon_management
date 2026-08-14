@@ -428,6 +428,8 @@ function loadSubcategory(serviceId, selectedSubcategory = null) {
     if (selectedSubcategory) {
         subcategorySelect.value = selectedSubcategory;
     }
+
+    window.refreshNiceSelect?.(subcategorySelect);
 }
 
 serviceSelect.addEventListener('change', function () {
@@ -444,6 +446,8 @@ function openAddJobCardModal() {
     document.getElementById('jobCardSubmitButton').textContent = 'Create Job Card';
     document.getElementById('job_card_status').value = 'pending';
     loadSubcategory(null);
+    [document.getElementById('customer_id'), serviceSelect, document.getElementById('job_card_status')]
+        .forEach(select => window.refreshNiceSelect?.(select));
 }
 
 function openEditJobCardModal(jobCard) {
@@ -460,6 +464,8 @@ function openEditJobCardModal(jobCard) {
     document.getElementById('job_card_status').value = jobCard.status ?? 'pending';
 
     loadSubcategory(jobCard.service_id, jobCard.subcategory);
+    [document.getElementById('customer_id'), serviceSelect, document.getElementById('job_card_status')]
+        .forEach(select => window.refreshNiceSelect?.(select));
 }
 
 function openDeleteJobCardModal(jobCardId, jobCardName) {

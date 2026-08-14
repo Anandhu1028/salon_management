@@ -14,14 +14,21 @@
     {{-- Hero + KPI stat cards --}}
     <section class="dashboard-section dashboard-section--hero" id="welcomeBanner">
         <div class="dash-compact-welcome">
-            <h2 class="dash-welcome-title">Good morning, Admin! 👋</h2>
+            <h2 class="dash-welcome-title" id="dashboardGreeting">Good morning, Admin! 👋</h2>
             <p class="dash-welcome-sub">Here's what's happening with your salon today.</p>
         </div>
 
         <div class="dashboard-stats-grid" id="statsGrid">
 
         @php
-            $kpiMonths = ['Apr', 'May', 'Jun', 'Jul', 'Aug'];
+            $kpiMonths = $dashboard['kpiMonths']['labels'];
+            $normalizeBars = fn (array $values) => collect($values)->map(fn ($value) => max(8, round(($value / max(1, max($values))) * 100)))->all();
+            $customerBars = $normalizeBars($dashboard['kpiMonths']['customers']);
+            $staffBars = $normalizeBars($dashboard['kpiMonths']['staff']);
+            $appointmentBars = $normalizeBars($dashboard['kpiMonths']['appointments']);
+            $revenueBars = $normalizeBars($dashboard['kpiMonths']['revenue']);
+            $growthClass = fn ($value) => $value >= 0 ? 'up' : 'down';
+            $growthText = fn ($value) => ($value >= 0 ? '↑ ' : '↓ ').number_format(abs($value), 1).'%';
         @endphp
 
         <div class="dash-stat-card customers" id="cardCustomers">
@@ -32,8 +39,8 @@
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Total Customers</span>
                     <div class="dash-stat-value-row">
-                        <span class="dash-stat-value">1,248</span>
-                        <span class="stat-badge-inline up">↑ 12.5%</span>
+                        <span class="dash-stat-value">{{ number_format($dashboard['customerCount']) }}</span>
+                        <span class="stat-badge-inline {{ $growthClass($dashboard['customerGrowth']) }}">{{ $growthText($dashboard['customerGrowth']) }}</span>
                     </div>
                 </div>
             </div>
@@ -43,7 +50,7 @@
                 <div class="dash-kpi-chart dash-kpi-chart--customers">
                     @foreach ($kpiMonths as $i => $m)
                         <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
-                            <div class="dash-kpi-bar" style="--bar-h: {{ [55, 68, 46, 74, 100][$i] }}%;"></div>
+                            <div class="dash-kpi-bar" style="--bar-h: {{ $customerBars[$i] }}%;"></div>
                             <span class="dash-kpi-bar-label">{{ $m }}</span>
                         </div>
                     @endforeach
@@ -59,8 +66,7 @@
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Active Staff</span>
                     <div class="dash-stat-value-row">
-                        <span class="dash-stat-value">24</span>
-                        <span class="stat-badge-inline up">↑ 4.2%</span>
+                        <span class="dash-stat-value">{{ number_format($dashboard['activeStaff']) }}</span>
                     </div>
                 </div>
             </div>
@@ -70,7 +76,7 @@
                 <div class="dash-kpi-chart dash-kpi-chart--staff">
                     @foreach ($kpiMonths as $i => $m)
                         <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
-                            <div class="dash-kpi-bar" style="--bar-h: {{ [58, 70, 50, 66, 100][$i] }}%;"></div>
+                            <div class="dash-kpi-bar" style="--bar-h: {{ $staffBars[$i] }}%;"></div>
                             <span class="dash-kpi-bar-label">{{ $m }}</span>
                         </div>
                     @endforeach
@@ -86,18 +92,18 @@
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Today's Appointments</span>
                     <div class="dash-stat-value-row">
-                        <span class="dash-stat-value">38</span>
-                        <span class="stat-badge-inline up">↑ 8.4%</span>
+                        <span class="dash-stat-value">{{ number_format($dashboard['todayAppointments']) }}</span>
+                        <span class="stat-badge-inline {{ $growthClass($dashboard['appointmentGrowth']) }}">{{ $growthText($dashboard['appointmentGrowth']) }}</span>
                     </div>
                 </div>
             </div>
             <div class="dash-stat-footer">
                 <span class="card-deco-icon"><i class="bi bi-bag-check-fill"></i></span>
-                <span class="dash-stat-subtext">6 in progress</span>
+                <span class="dash-stat-subtext">{{ $dashboard['inProgressToday'] }} in progress</span>
                 <div class="dash-kpi-chart dash-kpi-chart--appointments">
                     @foreach ($kpiMonths as $i => $m)
                         <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
-                            <div class="dash-kpi-bar" style="--bar-h: {{ [50, 62, 48, 72, 100][$i] }}%;"></div>
+                            <div class="dash-kpi-bar" style="--bar-h: {{ $appointmentBars[$i] }}%;"></div>
                             <span class="dash-kpi-bar-label">{{ $m }}</span>
                         </div>
                     @endforeach
@@ -113,8 +119,8 @@
                 <div class="dash-stat-content">
                     <span class="dash-stat-label">Today's Revenue</span>
                     <div class="dash-stat-value-row">
-                        <span class="dash-stat-value">₹48,650</span>
-                        <span class="stat-badge-inline up">↑ 15.8%</span>
+                        <span class="dash-stat-value">₹{{ number_format($dashboard['todayRevenue'], 0) }}</span>
+                        <span class="stat-badge-inline {{ $growthClass($dashboard['revenueGrowth']) }}">{{ $growthText($dashboard['revenueGrowth']) }}</span>
                     </div>
                 </div>
             </div>
@@ -124,7 +130,7 @@
                 <div class="dash-kpi-chart dash-kpi-chart--revenue">
                     @foreach ($kpiMonths as $i => $m)
                         <div class="dash-kpi-bar-col{{ $loop->last ? ' is-current' : '' }}">
-                            <div class="dash-kpi-bar" style="--bar-h: {{ [46, 56, 50, 76, 100][$i] }}%;"></div>
+                            <div class="dash-kpi-bar" style="--bar-h: {{ $revenueBars[$i] }}%;"></div>
                             <span class="dash-kpi-bar-label">{{ $m }}</span>
                         </div>
                     @endforeach
@@ -214,7 +220,7 @@
                     </div>
                 </div>
 
-                <div class="chart-x-labels">
+                <div class="chart-x-labels" id="chartXLabels">
                     <span>Mon</span><span>Tue</span><span>Wed</span>
                     <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
                 </div>
@@ -244,54 +250,38 @@
                         </defs>
                         <circle cx="60" cy="60" r="48" fill="none" stroke="#F1F5F9" stroke-width="10"/>
                         <g transform="rotate(-90 60 60)" filter="url(#donutShadowRev)">
-                            <circle cx="60" cy="60" r="44" fill="none" stroke="#8650f3" stroke-width="11" stroke-linecap="round" stroke-dasharray="162.4 113.9" stroke-dashoffset="0"/>
-                            <circle cx="60" cy="60" r="44" fill="none" stroke="#6366F1" stroke-width="11" stroke-linecap="round" stroke-dasharray="74.3 201.9" stroke-dashoffset="-165.4"/>
-                            <circle cx="60" cy="60" r="44" fill="none" stroke="#F59E0B" stroke-width="11" stroke-linecap="round" stroke-dasharray="27.5 248.7" stroke-dashoffset="-242.7"/>
-                            <circle cx="60" cy="60" r="44" fill="none" stroke="#10B981" stroke-width="11" stroke-linecap="round" stroke-dasharray="11.0 265.2" stroke-dashoffset="-273.2"/>
+                            @php $donutColors = ['#8650f3', '#6366F1', '#F59E0B', '#10B981']; $donutCircumference = 276.46; $donutOffset = 0; @endphp
+                            @foreach($dashboard['categoryRevenue'] as $category)
+                                @php $dash = ($category['amount'] / max(1, $dashboard['categoryRevenue']->sum('amount'))) * $donutCircumference; @endphp
+                                <circle cx="60" cy="60" r="44" fill="none" stroke="{{ $donutColors[$loop->index] }}" stroke-width="11" stroke-linecap="round" stroke-dasharray="{{ $dash }} {{ $donutCircumference - $dash }}" stroke-dashoffset="-{{ $donutOffset }}"/>
+                                @php $donutOffset += $dash; @endphp
+                            @endforeach
                         </g>
                     </svg>
                     <div class="donut-center">
-                        <span class="donut-center-value">₹2.45L</span>
+                        <span class="donut-center-value">₹{{ number_format($dashboard['categoryRevenue']->sum('amount'), 0) }}</span>
                         <span class="donut-center-label">Total Revenue</span>
                     </div>
                 </div>
                 <ul class="donut-legend donut-legend--premium">
-                    <li>
-                        <span class="legend-dot legend-dot--purple"></span>
-                        <div class="legend-detail">
-                            <span class="legend-name">Services</span>
-                            <div class="legend-track"><div class="legend-track-fill legend-track-fill--purple" style="width: 59%;"></div></div>
-                        </div>
-                        <span class="legend-amt">₹1,44,951</span>
-                        <span class="legend-pct">59%</span>
-                    </li>
-                    <li>
-                        <span class="legend-dot legend-dot--blue"></span>
-                        <div class="legend-detail">
-                            <span class="legend-name">Products</span>
-                            <div class="legend-track"><div class="legend-track-fill legend-track-fill--blue" style="width: 27%;"></div></div>
-                        </div>
-                        <span class="legend-amt">₹66,334</span>
-                        <span class="legend-pct">27%</span>
-                    </li>
-                    <li>
-                        <span class="legend-dot legend-dot--orange"></span>
-                        <div class="legend-detail">
-                            <span class="legend-name">Packages</span>
-                            <div class="legend-track"><div class="legend-track-fill legend-track-fill--orange" style="width: 10%;"></div></div>
-                        </div>
-                        <span class="legend-amt">₹24,568</span>
-                        <span class="legend-pct">10%</span>
-                    </li>
-                    <li>
-                        <span class="legend-dot legend-dot--green"></span>
-                        <div class="legend-detail">
-                            <span class="legend-name">Others</span>
-                            <div class="legend-track"><div class="legend-track-fill legend-track-fill--green" style="width: 4%;"></div></div>
-                        </div>
-                        <span class="legend-amt">₹9,827</span>
-                        <span class="legend-pct">4%</span>
-                    </li>
+                    @php
+                        $categoryTotal = max(1, $dashboard['categoryRevenue']->sum('amount'));
+                        $categoryThemes = ['purple', 'blue', 'orange', 'green'];
+                    @endphp
+                    @forelse($dashboard['categoryRevenue'] as $category)
+                        @php $percentage = round(($category['amount'] / $categoryTotal) * 100); $theme = $categoryThemes[$loop->index]; @endphp
+                        <li>
+                            <span class="legend-dot legend-dot--{{ $theme }}"></span>
+                            <div class="legend-detail">
+                                <span class="legend-name">{{ $category['name'] }}</span>
+                                <div class="legend-track"><div class="legend-track-fill legend-track-fill--{{ $theme }}" style="width: {{ $percentage }}%;"></div></div>
+                            </div>
+                            <span class="legend-amt">₹{{ number_format($category['amount'], 0) }}</span>
+                            <span class="legend-pct">{{ $percentage }}%</span>
+                        </li>
+                    @empty
+                        <li><span class="legend-name">No completed service revenue this month</span></li>
+                    @endforelse
                 </ul>
             </div>
         </div>
@@ -311,14 +301,14 @@
             <div class="growth-card-body growth-card-body--premium">
                 <div class="growth-metric-row">
                     <div class="growth-metric-main">
-                        <span class="growth-value">1,248</span>
+                        <span class="growth-value">{{ number_format($dashboard['customerCount']) }}</span>
                         <span class="growth-label">Total Customers</span>
                     </div>
-                    <span class="stat-badge-inline up">↑ 12.5%</span>
+                    <span class="stat-badge-inline {{ $growthClass($dashboard['customerGrowth']) }}">{{ $growthText($dashboard['customerGrowth']) }}</span>
                 </div>
                 <div class="growth-stats-pills">
-                    <span class="growth-pill"><strong>+186</strong> new</span>
-                    <span class="growth-pill growth-pill--muted">164 last month</span>
+                    <span class="growth-pill"><strong>+{{ $dashboard['customerThisMonth'] }}</strong> new</span>
+                    <span class="growth-pill growth-pill--muted">{{ $dashboard['customerLastMonth'] }} last month</span>
                 </div>
                 <div class="growth-chart-premium">
                     <div class="growth-chart-y-axis" aria-hidden="true">
@@ -327,26 +317,14 @@
                     <div class="growth-chart-main">
                         <div class="growth-grid-lines" aria-hidden="true"></div>
                         <div class="bar-chart bar-chart--premium">
-                            <div class="bar-col">
-                                <span class="bar-value">110</span>
-                                <div class="bar-fill bar-fill--premium" style="--bar-h: 55%;"></div>
-                                <span class="bar-label">Week 1</span>
-                            </div>
-                            <div class="bar-col">
-                                <span class="bar-value">136</span>
-                                <div class="bar-fill bar-fill--premium" style="--bar-h: 68%;"></div>
-                                <span class="bar-label">Week 2</span>
-                            </div>
-                            <div class="bar-col">
-                                <span class="bar-value">156</span>
-                                <div class="bar-fill bar-fill--premium" style="--bar-h: 78%;"></div>
-                                <span class="bar-label">Week 3</span>
-                            </div>
-                            <div class="bar-col">
-                                <span class="bar-value">186</span>
-                                <div class="bar-fill bar-fill--premium bar-fill--peak" style="--bar-h: 92%;"></div>
-                                <span class="bar-label">Week 4</span>
-                            </div>
+                            @php $maxWeeklyCustomers = max(1, max(array_column($dashboard['weeklyCustomers'], 'value'))); @endphp
+                            @foreach($dashboard['weeklyCustomers'] as $week)
+                                <div class="bar-col">
+                                    <span class="bar-value">{{ $week['value'] }}</span>
+                                    <div class="bar-fill bar-fill--premium{{ $loop->last ? ' bar-fill--peak' : '' }}" style="--bar-h: {{ max(8, round(($week['value'] / $maxWeeklyCustomers) * 100)) }}%;"></div>
+                                    <span class="bar-label">{{ $week['label'] }}</span>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -364,25 +342,8 @@
         <div class="content-card content-card--minimal content-card--appt-heatmap content-card--appt-square" id="appointmentOverviewCard">
             @php
                 $apptDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                $apptHeatmapRows = 7;
-                mt_srand(20260813);
-                $apptHeatmapByDay = [];
-                $apptHeatmapTotal = 0;
-                for ($d = 0; $d < 7; $d++) {
-                    $apptHeatmapByDay[$d] = [];
-                    for ($r = 0; $r < $apptHeatmapRows; $r++) {
-                        $isWeekend = $d >= 5;
-                        $level = $isWeekend ? mt_rand(0, 3) : mt_rand(1, 4);
-                        $count = [2, 5, 9, 14, 20][$level];
-                        $weeksAgo = $apptHeatmapRows - $r;
-                        $apptHeatmapByDay[$d][] = [
-                            'level' => $level,
-                            'count' => $count,
-                            'label' => $apptDayLabels[$d] . ' · ' . $weeksAgo . 'w ago',
-                        ];
-                        $apptHeatmapTotal += $count;
-                    }
-                }
+                $apptHeatmapByDay = collect(range(0, 6))->map(fn ($day) => collect($dashboard['heatmap'])->map(fn ($week) => $week[$day])->all())->all();
+                $apptHeatmapTotal = collect($dashboard['heatmap'])->flatten(1)->sum('count');
             @endphp
 
             <div class="content-card-header">
@@ -408,7 +369,7 @@
                 <div class="appt-heatmap-metric">
                     <span class="appt-heatmap-total">{{ number_format($apptHeatmapTotal) }}</span>
                     <span class="appt-heatmap-caption">Appointments</span>
-                    <span class="stat-badge-inline up">↑ 8.4%</span>
+                    <span class="stat-badge-inline {{ $growthClass($dashboard['appointmentGrowth']) }}">{{ $growthText($dashboard['appointmentGrowth']) }}</span>
                     <span class="appt-heatmap-vs">vs. last month</span>
                 </div>
 
@@ -449,30 +410,27 @@
                 <span class="dash-appt-mini-icon"><i class="bi bi-clock-history"></i></span>
                 <div class="dash-appt-mini-body">
                     <div class="dash-appt-mini-value-row">
-                        <span class="dash-appt-mini-value">4–6 PM</span>
-                        <span class="stat-badge-inline up">↑ 12%</span>
+                        <span class="dash-appt-mini-value">{{ $dashboard['todayStatuses']['pending'] }}</span>
                     </div>
-                    <span class="dash-appt-mini-meta">Peak Hour <span class="dash-appt-mini-dot">·</span> Busiest booking window</span>
+                    <span class="dash-appt-mini-meta">Pending Today <span class="dash-appt-mini-dot">·</span> Awaiting service</span>
                 </div>
             </div>
             <div class="dash-appt-mini-card walkins">
                 <span class="dash-appt-mini-icon"><i class="bi bi-door-open"></i></span>
                 <div class="dash-appt-mini-body">
                     <div class="dash-appt-mini-value-row">
-                        <span class="dash-appt-mini-value">6</span>
-                        <span class="stat-badge-inline up">↑ 3</span>
+                        <span class="dash-appt-mini-value">{{ $dashboard['inProgressToday'] }}</span>
                     </div>
-                    <span class="dash-appt-mini-meta">Walk-ins Today <span class="dash-appt-mini-dot">·</span> No prior booking</span>
+                    <span class="dash-appt-mini-meta">In Progress <span class="dash-appt-mini-dot">·</span> Currently in service</span>
                 </div>
             </div>
             <div class="dash-appt-mini-card repeat-rate">
                 <span class="dash-appt-mini-icon"><i class="bi bi-arrow-repeat"></i></span>
                 <div class="dash-appt-mini-body">
                     <div class="dash-appt-mini-value-row">
-                        <span class="dash-appt-mini-value">68%</span>
-                        <span class="stat-badge-inline up">↑ 5.1%</span>
+                        <span class="dash-appt-mini-value">{{ $dashboard['todayAppointments'] ? round(($dashboard['todayStatuses']['completed'] / $dashboard['todayAppointments']) * 100) : 0 }}%</span>
                     </div>
-                    <span class="dash-appt-mini-meta">Repeat Clients <span class="dash-appt-mini-dot">·</span> vs last month</span>
+                    <span class="dash-appt-mini-meta">Completion Rate <span class="dash-appt-mini-dot">·</span> Today</span>
                 </div>
             </div>
         </div>
@@ -491,7 +449,7 @@
             </div>
             <div class="appt-status-body">
                 <div class="appt-status-total">
-                    <span class="appt-status-total-val">38</span>
+                    <span class="appt-status-total-val">{{ $dashboard['todayAppointments'] }}</span>
                     <span class="appt-status-total-label">appointments today</span>
                 </div>
                 <div class="appt-status-list">
@@ -501,7 +459,7 @@
                             <div class="appt-status-title">Upcoming</div>
                             <div class="appt-status-desc">Scheduled & waiting</div>
                         </div>
-                        <span class="appt-status-count">12</span>
+                        <span class="appt-status-count">{{ $dashboard['todayStatuses']['pending'] }}</span>
                     </div>
                     <div class="appt-status-row inprogress">
                         <span class="appt-status-icon amber"><i class="bi bi-hourglass-split"></i></span>
@@ -509,7 +467,7 @@
                             <div class="appt-status-title">In Progress</div>
                             <div class="appt-status-desc">Currently in chair</div>
                         </div>
-                        <span class="appt-status-count">8</span>
+                        <span class="appt-status-count">{{ $dashboard['todayStatuses']['in_progress'] }}</span>
                     </div>
                     <div class="appt-status-row completed">
                         <span class="appt-status-icon green"><i class="bi bi-check-circle"></i></span>
@@ -517,7 +475,7 @@
                             <div class="appt-status-title">Completed</div>
                             <div class="appt-status-desc">Finished today</div>
                         </div>
-                        <span class="appt-status-count">16</span>
+                        <span class="appt-status-count">{{ $dashboard['todayStatuses']['completed'] }}</span>
                     </div>
                     <div class="appt-status-row cancelled">
                         <span class="appt-status-icon red"><i class="bi bi-x-circle"></i></span>
@@ -525,7 +483,7 @@
                             <div class="appt-status-title">Cancelled</div>
                             <div class="appt-status-desc">No-shows & cancelled</div>
                         </div>
-                        <span class="appt-status-count">2</span>
+                        <span class="appt-status-count">{{ $dashboard['todayStatuses']['cancelled'] }}</span>
                     </div>
                 </div>
             </div>
@@ -647,11 +605,56 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const greeting = document.getElementById('dashboardGreeting');
+            const updateGreeting = () => {
+                if (!greeting) return;
+
+                const hour = new Date().getHours();
+                const salutation = hour < 12
+                    ? 'Good morning'
+                    : hour < 17
+                        ? 'Good afternoon'
+                        : 'Good evening';
+
+                greeting.textContent = `${salutation}, Admin! 👋`;
+            };
+
+            updateGreeting();
+            setInterval(updateGreeting, 60 * 1000);
+
+            const revenueSeries = @json($dashboard['revenueSeries']);
+            const renderRevenueChart = (period) => {
+                const series = revenueSeries[period];
+                const chartSvg = document.getElementById('revenueChart');
+                const chartPath = document.getElementById('chartPath');
+                const chartArea = document.getElementById('chartArea');
+                const pointsGroup = document.getElementById('chartPoints');
+                const xLabels = document.getElementById('chartXLabels');
+                if (!series || !chartSvg || !chartPath || !chartArea || !pointsGroup) return;
+
+                const max = Math.max(1, ...series.values);
+                const left = 36; const right = 680; const top = 14; const bottom = 158;
+                const step = series.values.length > 1 ? (right - left) / (series.values.length - 1) : 0;
+                const coords = series.values.map((value, index) => ({
+                    x: left + (index * step), y: bottom - ((value / max) * (bottom - top)), value,
+                }));
+                const line = coords.map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`).join(' ');
+                chartPath.setAttribute('d', line);
+                chartArea.setAttribute('d', `${line} L${right},${bottom} L${left},${bottom} Z`);
+                pointsGroup.innerHTML = coords.map((point, index) => `<circle class="chart-point" data-day="${series.labels[index]}" data-val="₹${Number(point.value).toLocaleString('en-IN')}" cx="${point.x}" cy="${point.y}" r="4.5" fill="#7C5CF6" stroke="#fff" stroke-width="2" />`).join('');
+                if (xLabels) xLabels.innerHTML = series.labels.map((label) => `<span>${label}</span>`).join('');
+                chartSvg.querySelectorAll('.chart-y-label').forEach((label, index) => {
+                    label.textContent = index === 4 ? '0' : `₹${Math.round(max * ((4 - index) / 4)).toLocaleString('en-IN')}`;
+                });
+            };
+
+            renderRevenueChart('7');
             const periodBtns = document.querySelectorAll('.chart-period-btn');
             periodBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     periodBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    renderRevenueChart(btn.dataset.period);
                 });
             });
 
