@@ -35,7 +35,7 @@
             <a href="#" class="header-profile" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="header-avatar-wrap">
                     <div class="header-avatar">
-                        <img src="{{ auth()->user()->avatar_url ?? asset('images/default-avatar.jpg') }}" alt="{{ auth()->user()->name ?? 'Administrator' }}">
+                        <img src="{{ auth()->user()->avatar_url ?? asset('images/icons8-user-default-64.png') }}" alt="{{ auth()->user()->name ?? 'Administrator' }}">
                     </div>
                     <span class="header-avatar-status" aria-hidden="true"></span>
                 </div>
