@@ -2838,13 +2838,15 @@
 @media (max-width: 576px) {
     .dash-compact-welcome {
         margin: -16px -12px 0;
-        padding: 22px 14px 44px;
+        padding: 20px 14px 38px;
     }
-    .dashboard-section--hero .dashboard-stats-grid {
-        grid-template-columns: 1fr;
-        margin-top: -24px;
+    .dashboard-section--hero .dashboard-stats-grid,
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-top: -20px !important;
     }
-    .dash-welcome-title { font-size: 22px; }
+    .dash-welcome-title { font-size: 20px; }
     .donut-card-body {
         flex-direction: column;
         align-items: stretch;
@@ -2880,12 +2882,51 @@
     .dashboard-grid-bottom {
         grid-template-columns: 1fr;
     }
-    .dash-stat-value {
-        font-size: 1.75rem;
-    }
     .dash-stat-card {
-        min-height: 200px;
-        padding: 18px 18px 16px;
+        min-height: 118px !important;
+        padding: 12px 12px 10px !important;
+        border-radius: 16px !important;
+    }
+    .dash-stat-top {
+        gap: 8px !important;
+    }
+    .dash-stat-icon-circle {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 9px !important;
+        font-size: 0.95rem !important;
+    }
+    .dash-stat-label {
+        font-size: 0.62rem !important;
+        font-weight: 750 !important;
+    }
+    .dash-stat-value {
+        font-size: 1.25rem !important;
+        font-weight: 850 !important;
+        line-height: 1.1 !important;
+    }
+    .stat-badge-inline {
+        font-size: 0.58rem !important;
+        padding: 1px 4px !important;
+        border-radius: 5px !important;
+    }
+    .card-deco-icon {
+        display: none !important;
+    }
+    .dash-stat-subtext {
+        font-size: 0.6rem !important;
+    }
+    .dash-kpi-chart {
+        gap: 3px !important;
+        height: 24px !important;
+    }
+    .dash-kpi-bar {
+        width: 4px !important;
+        border-radius: 2px !important;
+    }
+    .dash-kpi-bar-label {
+        font-size: 0.52rem !important;
     }
 
     .dash-appt-stats-col {

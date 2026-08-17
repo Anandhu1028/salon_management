@@ -26,6 +26,17 @@
     object-fit: contain;
 }
 
+.pli-mobile-price {
+    display: none;
+}
+
+.pli-icon-stack {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 /* Searchable dropdowns used in management modals */
 .nice-select__native {
     position: absolute !important;
@@ -887,7 +898,7 @@
 
 
 .job-card-page .pli-col-amount .pli-col-text {
-    color: #0f766e;
+    color: #000000;
     font-weight: 700;
 }
 
@@ -1732,13 +1743,1356 @@
         background: #fff;
         border: 1.5px solid #E2E8F0;
     }
+}
 
-    .btn-filter-primary {
-        height: 46px;
-        border-radius: 12px;
-        font-size: 0.86rem;
-        font-weight: 750;
-        background: linear-gradient(135deg, #6366F1, #4F46E5);
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.32);
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM MOBILE SIDEBAR DRAWER (<= 1024px)
+   Dark Theme (same as desktop) + Always visible text (no hover required)
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .sidebar,
+    .sidebar:not(:hover),
+    aside.sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 300px !important;
+        max-width: 86vw !important;
+        border-radius: 0 24px 24px 0 !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s ease !important;
+        z-index: 1065 !important;
+        background: linear-gradient(45deg, #000E54 0%, #000000 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-left: 0 !important;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.6) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        white-space: normal !important;
+        margin: 0 !important;
+    }
+
+    .sidebar.show,
+    aside.sidebar.show {
+        transform: translateX(0) !important;
+        box-shadow: 14px 0 50px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    .sidebar-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(15, 23, 42, 0.55) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        z-index: 1060 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 0.25s ease !important;
+    }
+
+    .sidebar-overlay.visible {
+        opacity: 1 !important;
+        pointer-events: all !important;
+    }
+
+    /* Brand Header in Mobile Sidebar */
+    .sidebar .sidebar-brand,
+    .sidebar:not(:hover) .sidebar-brand {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 16px 18px !important;
+        gap: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        min-height: 72px !important;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04), transparent) !important;
+    }
+
+    .sidebar-brand-icon {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        border-radius: 12px !important;
+        background: linear-gradient(135deg, #6366F1 0%, #8650F3 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #fff !important;
+        font-size: 1.15rem !important;
+        box-shadow: 0 4px 14px rgba(134, 80, 243, 0.4) !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar .sidebar-brand-text,
+    .sidebar:not(:hover) .sidebar-brand-text {
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        margin-left: 12px !important;
+    }
+
+    .sidebar-brand-name {
+        font-size: 1.1rem !important;
+        font-weight: 850 !important;
+        color: #FFFFFF !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .sidebar-brand-sub {
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+        color: #818CF8 !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
+    }
+
+    .sidebar-close-btn {
+        display: flex !important;
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #CBD5E1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.85rem !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        margin-left: auto !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-close-btn:hover {
+        background: rgba(255, 255, 255, 0.16) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Navigation list */
+    .sidebar-nav {
+        padding: 14px 12px !important;
+        overflow-y: auto !important;
+        flex: 1 1 auto !important;
+    }
+
+    .sidebar .sidebar-section-label,
+    .sidebar:not(:hover) .sidebar-section-label {
+        opacity: 1 !important;
+        visibility: visible !important;
+        font-size: 0.65rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        color: #64748B !important;
+        margin: 16px 12px 6px !important;
+        text-transform: uppercase !important;
+        display: block !important;
+    }
+
+    .sidebar-menu {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        list-style: none !important;
+    }
+
+    .sidebar-menu li a,
+    .sidebar:not(:hover) .sidebar-menu li a,
+    .sidebar-nav-link {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 10px 12px !important;
+        gap: 0 !important;
+        border-radius: 14px !important;
+        color: #A1A1AA !important;
+        text-decoration: none !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        transition: all 0.16s ease !important;
+        background: transparent !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    .sidebar-menu li a:hover,
+    .sidebar-nav-link:hover {
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: #FFFFFF !important;
+    }
+
+    .sidebar-menu li.active a,
+    .sidebar:not(:hover) .sidebar-menu li.active a,
+    .sidebar-nav-link.active {
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.28) 0%, rgba(134, 80, 243, 0.14) 100%) !important;
+        color: #FFFFFF !important;
+        box-shadow: inset 0 0 0 1px rgba(134, 80, 243, 0.35) !important;
+    }
+
+    .sidebar-nav-icon {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 11px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.05rem !important;
+        flex-shrink: 0 !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        transition: transform 0.18s ease !important;
+    }
+
+    .sidebar-menu li.active a .sidebar-nav-icon,
+    .sidebar:not(:hover) .sidebar-menu li.active a .sidebar-nav-icon {
+        background: rgba(134, 80, 243, 0.2) !important;
+        border-color: rgba(134, 80, 243, 0.35) !important;
+        box-shadow: 0 0 16px rgba(134, 80, 243, 0.25) !important;
+    }
+
+    /* Icon color variants (desktop glowing colors) */
+    .nav-icon-dashboard { color: #60A5FA !important; box-shadow: 0 0 12px rgba(96, 165, 250, 0.15) !important; }
+    .nav-icon-jobs      { color: #4ADE80 !important; box-shadow: 0 0 12px rgba(74, 222, 128, 0.15) !important; }
+    .nav-icon-staff     { color: #38BDF8 !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.15) !important; }
+    .nav-icon-customers { color: #F472B6 !important; box-shadow: 0 0 12px rgba(244, 114, 182, 0.15) !important; }
+    .nav-icon-services  { color: #A78BFA !important; box-shadow: 0 0 12px rgba(167, 139, 250, 0.15) !important; }
+    .nav-icon-products  { color: #FB923C !important; box-shadow: 0 0 12px rgba(251, 146, 60, 0.15) !important; }
+
+    /* Nav Text: ALWAYS FULLY EXPANDED AND VISIBLE */
+    .sidebar .sidebar-nav-text,
+    .sidebar:not(:hover) .sidebar-nav-text,
+    .sidebar .sidebar-menu li a .sidebar-nav-text,
+    .sidebar:not(:hover) .sidebar-menu li a .sidebar-nav-text {
+        flex: 1 1 auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        width: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        display: block !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        color: #E2E8F0 !important;
+        white-space: nowrap !important;
+        margin-left: 12px !important;
+    }
+
+    .sidebar .sidebar-menu li.active a .sidebar-nav-text,
+    .sidebar:not(:hover) .sidebar-menu li.active a .sidebar-nav-text {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    /* Bottom Profile Card in Mobile Sidebar */
+    .sidebar-bottom {
+        padding: 14px 14px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        margin-top: auto !important;
+    }
+
+    .sidebar-profile-card {
+        padding: 10px 12px !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 14px !important;
+    }
+
+    .sidebar-profile {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+
+    .sidebar-profile-avatar-wrap {
+        width: 38px !important;
+        height: 38px !important;
+        position: relative !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-profile-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 11px !important;
+        background: linear-gradient(135deg, #6366F1 0%, #8650F3 100%) !important;
+        color: #fff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 800 !important;
+        font-size: 0.85rem !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+    }
+
+    .sidebar .sidebar-profile-info,
+    .sidebar:not(:hover) .sidebar-profile-info {
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        transform: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        margin-left: 12px !important;
+    }
+
+    .sidebar-profile-name {
+        font-size: 0.86rem !important;
+        font-weight: 750 !important;
+        color: #FFFFFF !important;
+        line-height: 1.2 !important;
+    }
+
+    .sidebar-profile-role {
+        font-size: 0.7rem !important;
+        color: #818CF8 !important;
+        font-weight: 550 !important;
+        line-height: 1.2 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL MOBILE RESPONSIVE ADAPTATIONS
+   Breakpoints: 320px–374px, 375px–430px, 431px–767px, 768px+
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Main container safe area for bottom navigation */
+    .app-shell {
+        overflow-x: hidden;
+    }
+
+    .app-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .app-content {
+        padding: 14px 12px !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* Mobile Header */
+    .app-header {
+        padding: 8px 12px !important;
+        height: 58px !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1020 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        border-bottom: 1px solid #EEF2F7 !important;
+    }
+
+    .header-search-wrap,
+    .header-icon-btn--theme,
+    .header-icon-btn--calendar,
+    .header-divider {
+        display: none !important;
+    }
+
+    .header-left {
+        gap: 10px !important;
+        min-width: 0 !important;
+    }
+
+    .sidebar-toggle {
+        display: flex !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 10px !important;
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.15rem !important;
+        color: #334155 !important;
+        cursor: pointer !important;
+    }
+
+    .header-title-group {
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+    }
+
+    .header-greeting-sub {
+        font-size: 0.62rem !important;
+        font-weight: 750 !important;
+        color: #6366F1 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        line-height: 1.2 !important;
+    }
+
+    .app-header .page-title {
+        font-size: 1.05rem !important;
+        font-weight: 850 !important;
+        color: #1E293B !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .header-actions {
+        gap: 8px !important;
+        margin-left: auto !important;
+    }
+
+    .header-icon-btn--notify {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        color: #475569 !important;
+    }
+
+    .header-avatar-wrap {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 50% !important;
+    }
+
+    /* Mobile Top Actions (Excel, PDF, Add Button, Filter) - 4 Icon-only buttons in 1 row, right-aligned */
+    .mgmt-top-actions {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        margin-bottom: 10px !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .mgmt-top-actions__right {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+        width: auto !important;
+        margin-left: auto !important;
+    }
+
+    .mgmt-action-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        max-width: 38px !important;
+        max-height: 38px !important;
+        padding: 0 !important;
+        border-radius: 10px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 38px !important;
+        font-size: 1rem !important;
+    }
+
+    .mgmt-action-btn__label {
+        display: none !important;
+    }
+
+    .mgmt-action-btn__icon {
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.05rem !important;
+    }
+
+    .mgmt-filter-wrapper {
+        display: inline-flex !important;
+        flex: 0 0 38px !important;
+    }
+
+    /* KPI Stat Cards (Strict 2x2 grid with identical heights and aligned icons/badges) */
+    .mgmt-stats-grid,
+    .mgmt-stats-grid.mgmt-stats-grid--4,
+    .dashboard-stats-grid,
+    .dashboard-section--hero .dashboard-stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+        width: 100% !important;
+    }
+
+    .dashboard-section--hero .dashboard-stats-grid {
+        margin-top: -20px !important;
+    }
+
+    .mgmt-stat-card {
+        min-height: 105px !important;
+        max-height: none !important;
+        padding: 12px !important;
+        border-radius: 14px !important;
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 4px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mgmt-stat-header {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .mgmt-stat-icon-wrap {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .mgmt-stat-icon-circle {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .mgmt-stat-icon-circle .kpi-3d-icon,
+    .mgmt-stat-icon-circle i,
+    .mgmt-stat-icon-circle svg {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .mgmt-stat-label {
+        font-size: 0.64rem !important;
+        font-weight: 750 !important;
+        letter-spacing: 0.03em !important;
+        text-transform: uppercase !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mgmt-stat-trend {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
+        font-size: 0.58rem !important;
+        font-weight: 750 !important;
+        padding: 2px 5px !important;
+        border-radius: 6px !important;
+    }
+
+    .mgmt-stat-body {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1px !important;
+    }
+
+    .mgmt-stat-value {
+        font-size: 1.35rem !important;
+        font-weight: 850 !important;
+        line-height: 1.1 !important;
+        color: #0F172A !important;
+    }
+
+    .mgmt-stat-sub {
+        font-size: 0.62rem !important;
+        color: #64748B !important;
+    }
+
+    .mgmt-stat-sparkline {
+        position: absolute !important;
+        bottom: 8px !important;
+        right: 8px !important;
+        width: 44px !important;
+        height: 20px !important;
+    }
+
+    /* Dashboard KPI Card Support */
+    .dash-stat-card {
+        min-height: 118px !important;
+        padding: 12px 12px 10px !important;
+        border-radius: 16px !important;
+    }
+    .dash-stat-top { gap: 8px !important; }
+    .dash-stat-icon-circle {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 9px !important;
+        font-size: 0.95rem !important;
+    }
+    .dash-stat-label { font-size: 0.62rem !important; font-weight: 750 !important; }
+    .dash-stat-value { font-size: 1.25rem !important; font-weight: 850 !important; line-height: 1.1 !important; }
+    .stat-badge-inline { font-size: 0.58rem !important; padding: 1px 4px !important; border-radius: 5px !important; }
+    .card-deco-icon { display: none !important; }
+    .dash-stat-subtext { font-size: 0.6rem !important; }
+    .dash-kpi-chart { gap: 3px !important; height: 24px !important; }
+    .dash-kpi-bar { width: 4px !important; border-radius: 2px !important; }
+    .dash-kpi-bar-label { font-size: 0.52rem !important; }
+
+    /* Content Card & Search Header (Tight, compact header with no vertical gap) */
+    .content-card,
+    .management-page .content-card,
+    .job-card-page .content-card {
+        border-radius: 16px !important;
+        border: 1px solid #EEF2F7 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        margin-top: 0 !important;
+        margin-bottom: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+    }
+
+    .content-card-header,
+    .management-page .content-card-header,
+    .job-card-page .content-card-header {
+        padding: 12px 14px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
+        border-bottom: 1px solid #F1F5F9 !important;
+    }
+
+    .content-card-header > div:first-child,
+    .management-page .content-card-header > div:first-child,
+    .job-card-page .content-card-header > div:first-child {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    .content-card-header h2,
+    .management-page .content-card-header h2,
+    .job-card-page .content-card-header h2 {
+        font-size: 1.05rem !important;
+        font-weight: 800 !important;
+        color: #0F172A !important;
+        margin: 0 0 1px !important;
+        line-height: 1.2 !important;
+    }
+
+    .content-card-header span,
+    .management-page .content-card-header span,
+    .job-card-page .content-card-header span {
+        font-size: 0.72rem !important;
+        color: #64748B !important;
+        font-weight: 500 !important;
+        display: block !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .content-card-header-actions,
+    .management-page .content-card-header-actions,
+    .job-card-page .content-card-header-actions {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    .job-card-search,
+    .management-page .job-card-search,
+    .job-card-page .job-card-search,
+    .staff-search,
+    .customer-search,
+    .service-search,
+    .product-search {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .search-box,
+    .job-card-page .search-box,
+    .management-page .search-box {
+        position: relative !important;
+        width: 100% !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .search-box input,
+    .job-card-page .search-box input,
+    .management-page .search-box input {
+        width: 100% !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 0.82rem !important;
+        border-radius: 10px !important;
+        padding-left: 34px !important;
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        margin: 0 !important;
+    }
+
+    .search-box i.bi-search {
+        position: absolute !important;
+        left: 11px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 0.82rem !important;
+        color: #94A3B8 !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MOBILE COMPACT RECORD CARD (Transforms Table Rows on Mobile)
+       ═══════════════════════════════════════════════════════════════ */
+    .premium-list-head {
+        display: none !important;
+    }
+
+    .premium-list {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 7px !important;
+        padding: 10px 10px 14px !important;
+        overflow-x: visible !important;
+        width: 100% !important;
+    }
+
+    .premium-list-item,
+    .premium-list--jobs .premium-list-item,
+    .premium-list--service .premium-list-item,
+    .premium-list--product .premium-list-item,
+    .premium-list--catalog .premium-list-item,
+    .premium-list--staff .premium-list-item,
+    .premium-list--customer .premium-list-item {
+        display: grid !important;
+        grid-template-columns: 20px 1fr auto auto !important;
+        grid-template-rows: auto !important;
+        grid-template-areas:
+            "rank name amount actions" !important;
+        column-gap: 8px !important;
+        padding: 10px 12px !important;
+        border-radius: 14px !important;
+        border: 1px solid #E9EFF8 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03) !important;
+        margin-bottom: 7px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+    }
+
+    .premium-list-item .pli-rank {
+        grid-area: rank !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.76rem !important;
+        font-weight: 700 !important;
+        color: #94A3B8 !important;
+        padding: 0 !important;
+    }
+
+    .premium-list-item .pli-col.col-left {
+        grid-area: name !important;
+        display: flex !important;
+        align-items: center !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .premium-list-item .pli-name-cell {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .premium-list-item .pli-name-stack {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        overflow: hidden !important;
+        text-align: left !important;
+        align-items: flex-start !important;
+        padding: 0 !important;
+    }
+
+    .premium-list-item .job-card-name,
+    .premium-list-item .staff-name,
+    .premium-list-item .customer-name,
+    .premium-list-item .service-name,
+    .premium-list-item .product-name,
+    .premium-list-item .pli-title {
+        font-size: 0.86rem !important;
+        font-weight: 750 !important;
+        color: #0F172A !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        margin-bottom: 2px !important;
+    }
+
+    .premium-list-item .job-card-number,
+    .premium-list-item .pli-subtext,
+    .premium-list-item .pli-service-cat,
+    .premium-list-item .pli-product-cat {
+        font-size: 0.68rem !important;
+        font-weight: 600 !important;
+        color: #64748B !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+    }
+
+    .premium-list--staff .pli-staff-email,
+    .premium-list--staff .pli-staff-phone,
+    .premium-list--customer .pli-customer-email,
+    .premium-list--customer .pli-customer-phone {
+        font-size: 0.70rem !important;
+        font-weight: 500 !important;
+        color: #64748B !important;
+        line-height: 1.35 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+    }
+
+    .premium-list--staff .pli-staff-email i,
+    .premium-list--staff .pli-staff-phone i,
+    .premium-list--customer .pli-customer-email i,
+    .premium-list--customer .pli-customer-phone i {
+        font-size: 0.72rem !important;
+        color: #94A3B8 !important;
+    }
+
+    .premium-list-item .pli-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 11px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .premium-list--staff .pli-icon {
+        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+        color: #fff !important;
+        font-weight: 750 !important;
+        box-shadow: 0 3px 10px rgba(99, 102, 241, 0.25) !important;
+    }
+
+    .premium-list--customer .pli-icon {
+        background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%) !important;
+        color: #fff !important;
+        font-weight: 750 !important;
+        box-shadow: 0 3px 10px rgba(236, 72, 153, 0.25) !important;
+    }
+
+    .premium-list--jobs .pli-col-amount,
+    .premium-list--service .price-cell,
+    .premium-list--product .price-cell,
+    .premium-list--product .pli-col-amount {
+        grid-area: amount !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        font-size: 0.86rem !important;
+        font-weight: 800 !important;
+        color: #059669 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        padding: 0 !important;
+        margin-right: 4px !important;
+    }
+
+    .premium-list-item .pli-col-actions,
+    .premium-list-item .actions-cell {
+        grid-area: actions !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: auto !important;
+    }
+
+    /* Hide desktop-only columns in mobile view */
+    .premium-list-item .pli-col-category,
+    .premium-list-item .pli-col-subcategory,
+    .premium-list-item .pli-col-customer,
+    .premium-list-item .pli-col-service,
+    .premium-list-item .pli-col-email,
+    .premium-list-item .pli-col-contact,
+    .premium-list-item .pli-col-joined,
+    .premium-list-item .status-cell {
+        display: none !important;
+    }
+
+    .pli-btn-dots {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        border-radius: 10px !important;
+        background: #F1F5F9 !important;
+        border: 1px solid #E2E8F0 !important;
+        color: #64748B !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.15rem !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .pli-btn-dots:hover,
+    .pli-btn-dots:focus {
+        background: #E2E8F0 !important;
+        color: #0F172A !important;
+    }
+
+    .pli-action-menu {
+        border-radius: 14px !important;
+        border: 1px solid #EEF2F7 !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14) !important;
+        padding: 6px !important;
+        min-width: 160px !important;
+        z-index: 1060 !important;
+        background: #FFFFFF !important;
+    }
+
+    .pli-menu-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        padding: 8px 12px !important;
+        border-radius: 9px !important;
+        font-size: 0.84rem !important;
+        font-weight: 650 !important;
+        color: #334155 !important;
+        border: 0 !important;
+        background: transparent !important;
+        width: 100% !important;
+        text-align: left !important;
+        cursor: pointer !important;
+        transition: all 0.12s ease !important;
+    }
+
+    .pli-menu-item:hover {
+        background: #F8FAFC !important;
+        color: #0F172A !important;
+    }
+
+    .pli-menu-item--danger {
+        color: #DC2626 !important;
+    }
+
+    .pli-menu-item--danger:hover {
+        background: #FEF2F2 !important;
+        color: #B91C1C !important;
+    }
+
+    .pli-menu-icon {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        border-radius: 7px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.85rem !important;
+    }
+
+    .pli-menu-icon--view { background: #EFF6FF !important; color: #2563EB !important; }
+    .pli-menu-icon--edit { background: #F5F3FF !important; color: #8B5CF6 !important; }
+    .pli-menu-icon--delete { background: #FEF2F2 !important; color: #DC2626 !important; }
+    .pli-menu-icon--status.pli-status-active { background: #F0FDF4 !important; color: #16A34A !important; }
+    .pli-menu-icon--status.pli-status-inactive { background: #F1F5F9 !important; color: #64748B !important; }
+
+    .pli-menu-status-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .pli-menu-status-left {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .pli-menu-status-state {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        padding: 2px 8px !important;
+        border-radius: 6px !important;
+    }
+
+    .pli-menu-status-state.active {
+        background: #DCFCE7 !important;
+        color: #15803D !important;
+    }
+
+    .pli-menu-status-state.inactive {
+        background: #F1F5F9 !important;
+        color: #64748B !important;
+    }
+
+    /* ── Mobile Status Dot (standalone glowing dot indicator) ── */
+    .pli-mob-status-dot {
+        width: 9px !important;
+        height: 9px !important;
+        min-width: 9px !important;
+        min-height: 9px !important;
+        border-radius: 50% !important;
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+        margin-right: 4px !important;
+        transition: background 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .pli-mob-status-dot--active {
+        background: #10B981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+    }
+
+    .pli-mob-status-dot--inactive {
+        background: #EF4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+    }
+
+    /* ── Mobile Status Badge (shown next to 3-dots button) ── */
+    .pli-mob-status-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.03em !important;
+        padding: 3px 8px 3px 6px !important;
+        border-radius: 999px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    .pli-mob-status-badge::before {
+        content: '' !important;
+        display: inline-block !important;
+        width: 5px !important;
+        height: 5px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Active: Green dot with soft emerald background */
+    .pli-mob-status-badge--active {
+        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+        color: #065F46 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12) !important;
+    }
+
+    .pli-mob-status-badge--active::before {
+        background: #10B981 !important;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+    }
+
+    /* Inactive: Red dot with soft rose background */
+    .pli-mob-status-badge--inactive {
+        background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+        color: #991B1B !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.12) !important;
+    }
+
+    .pli-mob-status-badge--inactive::before {
+        background: #EF4444 !important;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3) !important;
+    }
+
+    .pli-action-buttons-desktop {
+        display: none !important;
+    }
+
+    .premium-list--service .status-cell,
+    .premium-list--service .pli-col-category,
+    .premium-list--service .pli-col-subcategory,
+    .premium-list--product .status-cell,
+    .premium-list--product .pli-col-category,
+    .premium-list--product .pli-col-subcategory {
+        display: none !important;
+    }
+
+    /* Unused desktop-only table columns hidden on mobile */
+    .premium-list-item .pli-col-customer,
+    .premium-list-item .pli-col-service,
+    .premium-list-item .pli-col-subcategory {
+        display: none !important;
+    }
+
+    /* Mobile Modals as Bottom Sheets */
+    .modal-dialog {
+        margin: 0 !important;
+        max-width: 100% !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateY(0) !important;
+    }
+
+    .modal-content {
+        border-radius: 24px 24px 0 0 !important;
+        border: 0 !important;
+        max-height: 90vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.25) !important;
+    }
+
+    .modal-header {
+        padding: 14px 16px 12px !important;
+        border-bottom: 1px solid #F1F5F9 !important;
+        background: #FFFFFF !important;
+    }
+
+    .modal-body {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+        max-height: 60vh !important;
+        padding: 14px 16px !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .modal-footer {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 10 !important;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        background: #FFFFFF !important;
+        border-top: 1px solid #F1F5F9 !important;
+        display: flex !important;
+        gap: 10px !important;
+    }
+
+    .modal-footer .btn {
+        height: 44px !important;
+        border-radius: 11px !important;
+        font-size: 0.82rem !important;
+        font-weight: 750 !important;
+        flex: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #jobCardModal .job-card-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+    }
+
+    .form-control,
+    .form-select,
+    .nice-select__trigger {
+        height: 44px !important;
+        min-height: 44px !important;
+        font-size: 0.84rem !important;
+        border-radius: 10px !important;
+    }
+}
+
+/* Very Small Phones (320px–374px) */
+@media (max-width: 374px) {
+    .app-content {
+        padding: 10px 8px !important;
+    }
+
+    .app-header .page-title {
+        font-size: 0.95rem !important;
+    }
+
+    .mgmt-stat-card {
+        padding: 10px 10px 8px !important;
+    }
+
+    .mgmt-stat-value {
+        font-size: 1.15rem !important;
+    }
+
+    .mgmt-action-btn {
+        font-size: 0.72rem !important;
+        padding: 0 8px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP ACTIONS COLUMN & BUTTONS SPACING
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    /* ── Service / Product — 7-column aligned grid ── */
+    .premium-list--catalog.premium-list--feed.premium-list--service,
+    .premium-list--catalog.premium-list--feed.premium-list--product {
+        --pli-grid: 50px minmax(240px, 1.8fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr) !important;
+    }
+
+    /* ── Staff — 6-column aligned grid ── */
+    .premium-list--staff.premium-list--feed {
+        --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 130px minmax(150px, 1fr) !important;
+    }
+
+    /* ── Customer — 7-column aligned grid ── */
+    .premium-list--customer.premium-list--feed {
+        --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr) !important;
+    }
+
+    /* ── Job Cards — 7-column aligned grid ── */
+    .premium-list--jobs.premium-list--feed {
+        --pli-grid: 50px minmax(240px, 1.8fr) minmax(160px, 1.2fr) minmax(160px, 1.2fr) minmax(130px, 1fr) 110px minmax(150px, 1fr) !important;
+    }
+
+    /* Hide redundant email/phone subtext under name on desktop */
+    .premium-list--staff .pli-staff-email,
+    .premium-list--staff .pli-staff-phone,
+    .premium-list--customer .pli-customer-email,
+    .premium-list--customer .pli-customer-phone {
+        display: none !important;
+    }
+
+    .premium-list-item .pli-col-actions,
+    .premium-list-item .actions-cell {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 8px !important;
+    }
+
+    .pli-action-buttons-desktop {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+    }
+
+    .pli-action-buttons-desktop .mgmt-status-toggle {
+        margin: 0 2px 0 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    .pli-action-buttons-desktop .pli-btn-icon {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        border-radius: 9px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        font-size: 0.9rem !important;
+        flex-shrink: 0 !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .pli-action-buttons-desktop .pli-btn-icon--edit {
+        background: #F5F3FF !important;
+        color: #8B5CF6 !important;
+        border: 1px solid #EDE9FE !important;
+    }
+
+    .pli-action-buttons-desktop .pli-btn-icon--edit:hover {
+        background: #EDE9FE !important;
+        color: #7C3AED !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
+    }
+
+    .pli-action-buttons-desktop .pli-btn-icon--danger {
+        background: #FEF2F2 !important;
+        color: #DC2626 !important;
+        border: 1px solid #FEE2E2 !important;
+    }
+
+    .pli-action-buttons-desktop .pli-btn-icon--danger:hover {
+        background: #FEE2E2 !important;
+        color: #B91C1C !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2) !important;
     }
 }

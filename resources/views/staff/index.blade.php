@@ -149,11 +149,19 @@
                                     <div class="pli-icon pli-icon--indigo">
                                         {{ strtoupper(substr($member->name, 0, 1)) }}
                                     </div>
-                                    <span class="pli-title staff-name">{{ $member->name }}</span>
+                                    <div class="pli-name-stack">
+                                        <span class="pli-title staff-name">{{ $member->name }}</span>
+                                        @if($member->email)
+                                            <span class="pli-subtext pli-staff-email d-md-none"><i class="bi bi-envelope"></i> {{ $member->email }}</span>
+                                        @endif
+                                        @if($member->mobile_number)
+                                            <span class="pli-subtext pli-staff-phone d-md-none"><i class="bi bi-telephone"></i> {{ $member->mobile_number }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="pli-col col-center">
+                            <div class="pli-col col-center pli-col-email">
                                 @if($member->email)
                                     <div class="pli-contact-cell">
                                         @include('partials.contact-icons', ['type' => 'mail'])
@@ -164,7 +172,7 @@
                                 @endif
                             </div>
 
-                            <div class="pli-col col-center">
+                            <div class="pli-col col-center pli-col-contact">
                                 @if($member->mobile_number)
                                     <div class="pli-contact-cell">
                                         @include('partials.contact-icons', ['type' => 'phone'])
@@ -184,16 +192,52 @@
                             </div>
 
                             <div class="pli-col pli-col-actions col-actions actions-cell">
-                                @include('partials.status-toggle', [
-                                    'id' => $member->id,
-                                    'status' => $member->status,
-                                    'onChange' => 'onStaffStatusToggle(' . $member->id . ', ' . json_encode($member->name) . ', this)',
-                                ])
-                                <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Staff"
-                                    data-bs-toggle="modal" data-bs-target="#staffModal"
-                                    onclick='openEditStaffModal(@json($member))'>
-                                    @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
-                                </button>
+                                <div class="dropdown pli-dots-dropdown d-md-none">
+                                    <span id="mob-status-badge-{{ $member->id }}"
+                                        class="pli-mob-status-dot {{ $member->status === 'active' ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive' }}"
+                                        title="{{ ucfirst($member->status) }}"></span>
+                                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item"
+                                                data-bs-toggle="modal" data-bs-target="#staffModal"
+                                                onclick='openEditStaffModal(@json($member))'>
+                                                <span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span>
+                                                <span>Edit Staff</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item pli-menu-status-btn"
+                                                id="mob-staff-status-btn-{{ $member->id }}"
+                                                data-status="{{ $member->status }}"
+                                                onclick="triggerStaffStatusToggle({{ $member->id }}, @js($member->name))">
+                                                <span class="pli-menu-status-left">
+                                                    <span class="pli-menu-icon pli-menu-icon--status {{ $member->status === 'active' ? 'pli-status-active' : 'pli-status-inactive' }}">
+                                                        <i class="bi {{ $member->status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
+                                                    </span>
+                                                    <span>Toggle Status</span>
+                                                </span>
+                                                <span class="pli-menu-status-state {{ $member->status === 'active' ? 'active' : 'inactive' }}">
+                                                    {{ ucfirst($member->status) }}
+                                                </span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
+                                    @include('partials.status-toggle', [
+                                        'id' => $member->id,
+                                        'status' => $member->status,
+                                        'onChange' => 'onStaffStatusToggle(' . $member->id . ', ' . json_encode($member->name) . ', this)',
+                                    ])
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Staff"
+                                        data-bs-toggle="modal" data-bs-target="#staffModal"
+                                        onclick='openEditStaffModal(@json($member))'>
+                                        @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
+                                    </button>
+                                </div>
                             </div>
                         </article>
                     @endforeach
@@ -377,6 +421,13 @@
             document.getElementById('staff_status').value = staff.status ?? 'active';
         }
 
+        function triggerStaffStatusToggle(staffId, staffName) {
+            const mobBtn = document.getElementById(`mob-staff-status-btn-${staffId}`);
+            const currentStatus = mobBtn ? (mobBtn.dataset.status || 'active') : 'active';
+            const targetStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            confirmStatusChange(staffId, targetStatus, staffName);
+        }
+
         function onStaffStatusToggle(staffId, staffName, input) {
             const targetStatus = input.checked ? 'active' : 'inactive';
             input.checked = !input.checked;
@@ -447,23 +498,46 @@
         function updateStaffStatusUI(staffId, status) {
             const badge = document.getElementById(`status-badge-${staffId}`);
             const toggle = document.getElementById(`status-toggle-${staffId}`);
-
-            if (!badge || !toggle) return;
-
+            const mobBtn = document.getElementById(`mob-staff-status-btn-${staffId}`);
             const isActive = status === 'active';
-            toggle.checked = isActive;
 
-            const label = toggle.closest('.mgmt-status-toggle')?.querySelector('.mgmt-status-toggle__text');
-            if (label) {
-                label.textContent = isActive ? label.dataset.activeText : label.dataset.inactiveText;
+            if (toggle) {
+                toggle.checked = isActive;
+                const label = toggle.closest('.mgmt-status-toggle')?.querySelector('.mgmt-status-toggle__text');
+                if (label) {
+                    label.textContent = isActive ? label.dataset.activeText : label.dataset.inactiveText;
+                }
             }
 
-            if (isActive) {
-                badge.className = 'status-badge status-active';
-                badge.innerHTML = '<span></span><span class="status-text">Active</span>';
-            } else {
-                badge.className = 'status-badge status-inactive';
-                badge.innerHTML = '<span></span><span class="status-text">Inactive</span>';
+            if (badge) {
+                if (isActive) {
+                    badge.className = 'status-badge status-active';
+                    badge.innerHTML = '<span></span><span class="status-text">Active</span>';
+                } else {
+                    badge.className = 'status-badge status-inactive';
+                    badge.innerHTML = '<span></span><span class="status-text">Inactive</span>';
+                }
+            }
+
+            if (mobBtn) {
+                mobBtn.dataset.status = status;
+                const icon = mobBtn.querySelector('.pli-menu-icon');
+                if (icon) {
+                    icon.className = 'pli-menu-icon pli-menu-icon--status ' + (isActive ? 'pli-status-active' : 'pli-status-inactive');
+                    icon.innerHTML = `<i class="bi ${isActive ? 'bi-toggle-on' : 'bi-toggle-off'}"></i>`;
+                }
+                const stateBadge = mobBtn.querySelector('.pli-menu-status-state');
+                if (stateBadge) {
+                    stateBadge.className = 'pli-menu-status-state ' + (isActive ? 'active' : 'inactive');
+                    stateBadge.textContent = isActive ? 'Active' : 'Inactive';
+                }
+            }
+
+            // Update the mobile dot indicator near 3-dots button
+            const mobDot = document.getElementById(`mob-status-badge-${staffId}`);
+            if (mobDot) {
+                mobDot.className = 'pli-mob-status-dot ' + (isActive ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive');
+                mobDot.title = isActive ? 'Active' : 'Inactive';
             }
         }
     </script>

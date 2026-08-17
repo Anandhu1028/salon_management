@@ -135,13 +135,11 @@
                 <div class="premium-list premium-list--jobs premium-list--feed premium-list--compact premium-list--mgmt">
                     <div class="premium-list-head">
                         <span class="pli-head-cell col-center">#</span>
-                        <span class="pli-head-cell col-center pli-head-icon"></span>
                         <span class="pli-head-cell col-left">Job Card</span>
                         <span class="pli-head-cell col-center">Customer</span>
                         <span class="pli-head-cell col-center">Service</span>
                         <span class="pli-head-cell col-center">Sub Category</span>
                         <span class="pli-head-cell col-center">Amount</span>
-                        <span class="pli-head-cell col-center">Created</span>
                         <span class="pli-head-cell col-center">Actions</span>
                     </div>
 
@@ -149,17 +147,15 @@
                         <article class="premium-list-item" id="job-card-row-{{ $jobCard->id }}">
                             <div class="pli-rank col-center">{{ $listStart + $loop->iteration }}</div>
 
-                            <div class="pli-col pli-col-icon col-center">
-                                <div class="pli-icon pli-icon--cyan">
-                                    <i class="bi bi-clipboard2-check-fill"></i>
-                                </div>
-                            </div>
-
-                            <div class="pli-col pli-col-name col-left">
-                                <div class="pli-name-stack">
-                                    <span class="pli-title job-card-name">{{ $jobCard->job_card_name }}</span>
-                                    <span
-                                        class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span>
+                            <div class="pli-col col-left">
+                                <div class="pli-name-cell">
+                                    <div class="pli-icon pli-icon--cyan">
+                                        <i class="bi bi-clipboard2-check-fill"></i>
+                                    </div>
+                                    <div class="pli-name-stack">
+                                        <span class="pli-title job-card-name">{{ $jobCard->job_card_name }}</span>
+                                        <span class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -194,25 +190,52 @@
                                 <span class="pli-col-text">₹{{ number_format($jobCard->service?->price ?? 0, 0) }}</span>
                             </div>
 
-                            <div class="pli-col pli-col-joined col-center">
-                                <span
-                                    class="pli-col-text">{{ $jobCard->created_at ? $jobCard->created_at->format('d M Y') : '—' }}</span>
-                            </div>
-
                             <div class="pli-col pli-col-actions col-actions actions-cell col-center">
-                                <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View Job Card"
-                                    onclick='openJobCardDetailsModal(@json($jobCard))'>
-                                    @include('partials.action-icons', ['type' => 'view', 'size' => 16])
-                                </button>
-                                <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Job Card"
-                                    data-bs-toggle="modal" data-bs-target="#jobCardModal"
-                                    onclick='openEditJobCardModal(@json($jobCard))'>
-                                    @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
-                                </button>
-                                <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Job Card"
-                                    onclick="openDeleteJobCardModal({{ $jobCard->id }}, @js($jobCard->job_card_name))">
-                                    @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
-                                </button>
+                                <div class="dropdown pli-dots-dropdown d-md-none">
+                                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item"
+                                                onclick='openJobCardDetailsModal(@json($jobCard))'>
+                                                <span class="pli-menu-icon pli-menu-icon--view"><i class="bi bi-eye"></i></span>
+                                                <span>View Details</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item"
+                                                data-bs-toggle="modal" data-bs-target="#jobCardModal"
+                                                onclick='openEditJobCardModal(@json($jobCard))'>
+                                                <span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span>
+                                                <span>Edit Job Card</span>
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item pli-menu-item--danger"
+                                                onclick="openDeleteJobCardModal({{ $jobCard->id }}, @js($jobCard->job_card_name))">
+                                                <span class="pli-menu-icon pli-menu-icon--delete"><i class="bi bi-trash3"></i></span>
+                                                <span>Delete Job Card</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View Job Card"
+                                        onclick='openJobCardDetailsModal(@json($jobCard))'>
+                                        @include('partials.action-icons', ['type' => 'view', 'size' => 16])
+                                    </button>
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Job Card"
+                                        data-bs-toggle="modal" data-bs-target="#jobCardModal"
+                                        onclick='openEditJobCardModal(@json($jobCard))'>
+                                        @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
+                                    </button>
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Job Card"
+                                        onclick="openDeleteJobCardModal({{ $jobCard->id }}, @js($jobCard->job_card_name))">
+                                        @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
+                                    </button>
+                                </div>
                             </div>
                         </article>
                     @endforeach

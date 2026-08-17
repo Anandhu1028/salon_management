@@ -377,10 +377,24 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.remove('visible');
     };
 
+    const mobileNavMoreBtn = document.getElementById('mobileNavMoreBtn');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
     toggleButton.addEventListener('click', () => {
         sidebar.classList.toggle('show');
         overlay.classList.toggle('visible');
     });
+
+    if (sidebarCloseBtn) {
+        sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+    }
+
+    if (mobileNavMoreBtn) {
+        mobileNavMoreBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('visible');
+        });
+    }
 
     overlay.addEventListener('click', closeMobileSidebar);
     window.addEventListener('resize', () => {

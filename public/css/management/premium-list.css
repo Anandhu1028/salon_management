@@ -662,25 +662,26 @@
 /* ── Service / Product — 7-column aligned grid ── */
 .premium-list--catalog.premium-list--feed.premium-list--service,
 .premium-list--catalog.premium-list--feed.premium-list--product {
-    --pli-grid: 50px minmax(220px, 1.6fr) minmax(140px, 1fr) minmax(140px, 1fr) 120px 130px minmax(300px, 1.4fr);
+    --pli-grid: 50px minmax(240px, 1.8fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr);
 }
 
 /* ── Staff — 6-column aligned grid ── */
 .premium-list--staff.premium-list--feed {
-    --pli-grid: 50px minmax(220px, 1.6fr) minmax(180px, 1.2fr) minmax(140px, 1fr) 130px minmax(300px, 1.4fr);
+    --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 130px minmax(150px, 1fr);
     gap: 6px;
     padding: 0 12px 14px;
 }
 
 /* ── Customer — 7-column aligned grid ── */
 .premium-list--customer.premium-list--feed {
-    --pli-grid: 50px minmax(220px, 1.6fr) minmax(180px, 1.2fr) minmax(140px, 1fr) 120px 130px minmax(200px, 1fr);
+    --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr);
     gap: 6px;
     padding: 0 12px 14px;
 }
 
+/* ── Job Cards — 7-column aligned grid ── */
 .premium-list--jobs.premium-list--feed {
-    --pli-grid: 24px 40px minmax(110px, 1fr) minmax(100px, 0.9fr) minmax(100px, 0.9fr) minmax(80px, 0.8fr) 88px 80px minmax(120px, auto);
+    --pli-grid: 50px minmax(240px, 1.8fr) minmax(160px, 1.2fr) minmax(160px, 1.2fr) minmax(130px, 1fr) 110px minmax(150px, 1fr);
     gap: 6px;
     padding: 0 12px 14px;
 }

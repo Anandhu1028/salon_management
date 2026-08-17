@@ -9,7 +9,10 @@
             <div class="sidebar-brand-name">SalonPro</div>
             <div class="sidebar-brand-sub">Management System</div>
         </div>
-        <button type="button" class="sidebar-pin-hint" aria-hidden="true" tabindex="-1">
+        <button type="button" class="sidebar-close-btn d-lg-none" id="sidebarCloseBtn" aria-label="Close sidebar">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <button type="button" class="sidebar-pin-hint d-none d-lg-flex" aria-hidden="true" tabindex="-1">
             <i class="bi bi-layout-sidebar-inset"></i>
         </button>
     </div>

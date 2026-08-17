@@ -134,11 +134,19 @@
                                     <div class="pli-icon pli-icon--pink">
                                         {{ strtoupper(substr($customer->name, 0, 1)) }}
                                     </div>
-                                    <span class="pli-title customer-name">{{ $customer->name }}</span>
+                                    <div class="pli-name-stack">
+                                        <span class="pli-title customer-name">{{ $customer->name }}</span>
+                                        @if($customer->email)
+                                            <span class="pli-subtext pli-customer-email d-md-none"><i class="bi bi-envelope"></i> {{ $customer->email }}</span>
+                                        @endif
+                                        @if($customer->mobile_number)
+                                            <span class="pli-subtext pli-customer-phone d-md-none"><i class="bi bi-telephone"></i> {{ $customer->mobile_number }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="pli-col col-center">
+                            <div class="pli-col col-center pli-col-email">
                                 @if($customer->email)
                                     <div class="pli-contact-cell">
                                         @include('partials.contact-icons', ['type' => 'mail'])
@@ -149,7 +157,7 @@
                                 @endif
                             </div>
 
-                            <div class="pli-col col-center">
+                            <div class="pli-col col-center pli-col-contact">
                                 @if($customer->mobile_number)
                                     <div class="pli-contact-cell">
                                         @include('partials.contact-icons', ['type' => 'phone'])
@@ -160,9 +168,8 @@
                                 @endif
                             </div>
 
-                            <div class="pli-col col-center">
-                                <span
-                                    class="pli-col-text">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '—' }}</span>
+                            <div class="pli-col col-center pli-col-joined">
+                                <span class="pli-col-text">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '—' }}</span>
                             </div>
 
                             <div class="pli-col col-center status-cell">
@@ -173,15 +180,48 @@
                             </div>
 
                             <div class="pli-col pli-col-actions col-actions actions-cell">
-                                <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Customer"
-                                    data-bs-toggle="modal" data-bs-target="#customerModal"
-                                    onclick='openEditCustomerModal(@json($customer))'>
-                                    @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
-                                </button>
-                                <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Customer"
-                                    onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name))">
-                                    @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
-                                </button>
+                                <div class="dropdown pli-dots-dropdown d-md-none">
+                                    <span id="mob-cust-status-badge-{{ $customer->id }}"
+                                        class="pli-mob-status-dot pli-mob-status-dot--active"
+                                        title="Active"></span>
+                                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item"
+                                                data-bs-toggle="modal" data-bs-target="#customerModal"
+                                                onclick='openEditCustomerModal(@json($customer))'>
+                                                <span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span>
+                                                <span>Edit Customer</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item pli-menu-item pli-menu-status-btn"
+                                                id="mob-cust-status-btn-{{ $customer->id }}"
+                                                data-status="active">
+                                                <span class="pli-menu-status-left">
+                                                    <span class="pli-menu-icon pli-menu-icon--status pli-status-active">
+                                                        <i class="bi bi-toggle-on"></i>
+                                                    </span>
+                                                    <span>Toggle Status</span>
+                                                </span>
+                                                <span class="pli-menu-status-state active">Active</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Customer"
+                                        data-bs-toggle="modal" data-bs-target="#customerModal"
+                                        onclick='openEditCustomerModal(@json($customer))'>
+                                        @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
+                                    </button>
+                                    <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Customer"
+                                        onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name))">
+                                        @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
+                                    </button>
+                                </div>
                             </div>
                         </article>
                     @endforeach
