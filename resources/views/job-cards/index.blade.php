@@ -167,7 +167,22 @@
                             </div>
 
                             <div class="pli-col pli-col-customer col-center">
-                                <span class="pli-col-text">{{ $jobCard->customer->name ?? '—' }}</span>
+                                @if($jobCard->customers->isNotEmpty())
+                                    @php
+                                        $firstCustomer = $jobCard->customers->first();
+                                        $extraCount = $jobCard->customers->count() - 1;
+                                    @endphp
+                                    <div class="d-flex align-items-center justify-content-center gap-1 flex-wrap">
+                                        <span class="pli-col-text">{{ $firstCustomer->name }}</span>
+                                        @if($extraCount > 0)
+                                            <span class="badge rounded-pill bg-light text-primary border" title="{{ $jobCard->customers->pluck('name')->join(', ') }}" style="font-size: 0.72rem; font-weight: 600; cursor: help;">
+                                                +{{ $extraCount }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="pli-col-text">{{ $jobCard->customer->name ?? '—' }}</span>
+                                @endif
                             </div>
 
                             <div class="pli-col pli-col-service col-center">
@@ -190,7 +205,7 @@
                             <div class="pli-col pli-col-actions col-actions actions-cell col-center">
                                 <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View Job Card"
                                     onclick='openJobCardDetailsModal(@json($jobCard))'>
-                                    <i class="bi bi-eye"></i>
+                                    @include('partials.action-icons', ['type' => 'view', 'size' => 16])
                                 </button>
                                 <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Job Card"
                                     data-bs-toggle="modal" data-bs-target="#jobCardModal"
@@ -236,9 +251,9 @@
     {{-- ADD / EDIT JOB CARD MODAL --}}
     {{-- ========================================================= --}}
 
-    <div class="modal fade premium-modal" id="jobCardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+    <div class="modal fade premium-modal premium-modal--lg" id="jobCardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
         data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <form id="jobCardForm" method="POST" action="{{ route('job-cards.store') }}">
                     @csrf
@@ -263,7 +278,7 @@
                     <div class="modal-body job-card-form-grid">
 
                         {{-- Job Card Name --}}
-                        <div class="form-field">
+                        <div class="form-field job-card-form-grid__full">
                             <label for="job_card_name" class="form-label">
                                 Job Card Name <span>*</span>
                             </label>
@@ -274,13 +289,12 @@
                             </div>
                         </div>
 
-                        {{-- Customer --}}
+                        {{-- Customers (Multi-select) --}}
                         <div class="form-field">
-                            <label for="customer_id" class="form-label">
-                                Customer <span>*</span>
+                            <label for="customer_ids" class="form-label">
+                                Customer(s) <span>*</span>
                             </label>
-                            <select name="customer_id" id="customer_id" class="form-select" data-icon="bi-person" required>
-                                <option value="">Select customer</option>
+                            <select name="customer_ids[]" id="customer_ids" class="form-select" multiple data-placeholder="Select customer(s)" data-icon="bi-people" required>
                                 @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}">
                                         {{ $customer->name }}
@@ -292,11 +306,10 @@
                             </select>
                         </div>
 
-                        {{-- Staff Member --}}
+                        {{-- Staff Member(s) (Multi-select) --}}
                         <div class="form-field">
-                            <label for="staff_id" class="form-label">Staff Member</label>
-                            <select name="staff_id" id="staff_id" class="form-select" data-icon="bi-people">
-                                <option value="">Select staff member</option>
+                            <label for="staff_ids" class="form-label">Staff Member(s)</label>
+                            <select name="staff_ids[]" id="staff_ids" class="form-select" multiple data-placeholder="Select staff member(s)" data-icon="bi-person-badge">
                                 @foreach($staff as $member)
                                     <option value="{{ $member->id }}">{{ $member->name }}</option>
                                 @endforeach
@@ -332,17 +345,6 @@
                                 <option value="">Select service category (optional)</option>
                             </select>
                             <div class="field-help">Subcategory is automatically loaded from selected service.</div>
-                        </div>
-
-                        {{-- Priority / Status --}}
-                        <div class="form-field">
-                            <label for="job_card_status" class="form-label">Priority</label>
-                            <select name="status" id="job_card_status" class="form-select" data-dot>
-                                <option value="pending" selected>Normal</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
                         </div>
 
                     </div>
@@ -395,8 +397,11 @@
                         </div>
                         <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
                                     class="bi bi-people"></i></span><span
-                                class="job-card-details-row-label">Customer</span><strong><span
-                                    id="jobCardDetailsCustomer">—</span><small id="jobCardDetailsMobile"></small></strong>
+                                class="job-card-details-row-label">Customer(s)</span><strong id="jobCardDetailsCustomer">—</strong>
+                        </div>
+                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
+                                    class="bi bi-person-badge"></i></span><span
+                                class="job-card-details-row-label">Staff Assigned</span><strong id="jobCardDetailsStaff">—</strong>
                         </div>
                         <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
                                     class="bi bi-scissors"></i></span><span
@@ -416,7 +421,7 @@
                         <div class="job-card-details-invoice-line"><span>1</span><span><strong
                                     id="jobCardDetailsInvoiceService">—</strong><small
                                     id="jobCardDetailsCategory"></small></span><span>1</span><span
-                                id="jobCardDetailsRate">₹0</span><span id="jobCardDetailsAmount">₹0</span></div>
+                                    id="jobCardDetailsRate">₹0</span><span id="jobCardDetailsAmount">₹0</span></div>
                         <div class="job-card-details-totals"><span>Subtotal</span><strong
                                 id="jobCardDetailsSubtotal">₹0</strong><span>Discount</span><strong>₹0.00</strong><span>Tax
                                 (0%)</span><strong>₹0.00</strong><span
@@ -623,9 +628,18 @@
                 document.getElementById('jobCardModalTitle').textContent = 'Create Job Card';
                 document.getElementById('jobCardModalSubtitle').textContent = 'Create a new customer service job card.';
                 document.getElementById('jobCardSubmitButton').innerHTML = '<i class="bi bi-clipboard2-plus"></i> Create Job Card';
-                document.getElementById('job_card_status').value = 'pending';
+                
+                const statusSelect = document.getElementById('job_card_status');
+                if (statusSelect) {
+                    statusSelect.value = 'pending';
+                    window.refreshNiceSelect?.(statusSelect);
+                }
+
                 loadSubcategory(null);
-                window.refreshNiceSelect?.(document.getElementById('customer_id'));
+                window.setMultiSelectValues?.(document.getElementById('customer_ids'), []);
+                window.setMultiSelectValues?.(document.getElementById('staff_ids'), []);
+                window.refreshNiceSelect?.(document.getElementById('customer_ids'));
+                window.refreshNiceSelect?.(document.getElementById('staff_ids'));
                 window.refreshJobServicePicker?.();
             }
 
@@ -638,20 +652,46 @@
                 document.getElementById('jobCardSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Job Card';
 
                 document.getElementById('job_card_name').value = jobCard.job_card_name ?? '';
-                document.getElementById('customer_id').value = jobCard.customer_id ?? '';
                 document.getElementById('service_id').value = jobCard.service_id ?? '';
-                document.getElementById('staff_id').value = jobCard.staff_id ?? '';
-                document.getElementById('job_card_status').value = jobCard.status ?? 'pending';
+                
+                const statusSelect = document.getElementById('job_card_status');
+                if (statusSelect) {
+                    statusSelect.value = jobCard.status ?? 'pending';
+                    window.refreshNiceSelect?.(statusSelect);
+                }
+
+                const customerIds = (jobCard.customers && jobCard.customers.length)
+                    ? jobCard.customers.map(c => c.id)
+                    : (jobCard.customer_id ? [jobCard.customer_id] : []);
+
+                const staffIds = (jobCard.staff && jobCard.staff.length)
+                    ? jobCard.staff.map(s => s.id)
+                    : (jobCard.staff_id ? [jobCard.staff_id] : []);
+
+                window.setMultiSelectValues?.(document.getElementById('customer_ids'), customerIds);
+                window.setMultiSelectValues?.(document.getElementById('staff_ids'), staffIds);
+                window.refreshNiceSelect?.(document.getElementById('customer_ids'));
+                window.refreshNiceSelect?.(document.getElementById('staff_ids'));
 
                 loadSubcategory(jobCard.service_id, jobCard.subcategory);
-                window.refreshNiceSelect?.(document.getElementById('customer_id'));
-                window.refreshNiceSelect?.(document.getElementById('staff_id'));
                 window.refreshJobServicePicker?.();
             }
 
             function openJobCardDetailsModal(jobCard) {
                 const service = jobCard.service || {};
-                const customer = jobCard.customer || {};
+                const customers = (jobCard.customers && jobCard.customers.length)
+                    ? jobCard.customers
+                    : (jobCard.customer ? [jobCard.customer] : []);
+                const staffList = (jobCard.staff && jobCard.staff.length)
+                    ? jobCard.staff
+                    : (jobCard.primary_staff ? [jobCard.primary_staff] : []);
+
+                const customerText = customers.map(c => {
+                    return c.mobile_number ? `${c.name} (${c.mobile_number})` : c.name;
+                }).join(', ') || '—';
+
+                const staffText = staffList.map(s => s.name).join(', ') || '—';
+
                 const amount = Number(service.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
                 const created = jobCard.created_at ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
@@ -659,8 +699,8 @@
                 document.getElementById('jobCardDetailsAmount').textContent = `₹${amount}.00`;
                 document.getElementById('jobCardDetailsName').textContent = jobCard.job_card_name || '—';
                 document.getElementById('jobCardDetailsCreated').textContent = created;
-                document.getElementById('jobCardDetailsCustomer').textContent = customer.name || '—';
-                document.getElementById('jobCardDetailsMobile').textContent = customer.mobile_number || '';
+                document.getElementById('jobCardDetailsCustomer').textContent = customerText;
+                document.getElementById('jobCardDetailsStaff').textContent = staffText;
                 document.getElementById('jobCardDetailsService').textContent = service.service_name || '—';
                 document.getElementById('jobCardDetailsInvoiceService').textContent = service.service_name || '—';
                 document.getElementById('jobCardDetailsCategory').textContent = [service.category, service.subcategory].filter(Boolean).join(' · ');

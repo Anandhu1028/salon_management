@@ -245,15 +245,7 @@
     transform: translateY(-1px);
 }
 
-.job-card-page .premium-list--jobs .pli-btn-icon--edit {
-    background: linear-gradient(145deg, #EEF2FF, #E0E7FF);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
-}
 
-.job-card-page .premium-list--jobs .pli-btn-icon--danger {
-    background: linear-gradient(145deg, #FEF2F2, #FEE2E2);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
-}
 
 @media (max-width: 1200px) {
     .job-card-page .premium-list--jobs .premium-list-head,

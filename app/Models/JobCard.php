@@ -23,6 +23,11 @@ class JobCard extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function customers()
+    {
+        return $this->belongsToMany(Customer::class, 'job_card_customer')->withTimestamps();
+    }
+
     public function service()
     {
         return $this->belongsTo(Service::class);
@@ -30,6 +35,11 @@ class JobCard extends Model
 
     public function staff()
     {
-        return $this->belongsTo(Staff::class);
+        return $this->belongsToMany(Staff::class, 'job_card_staff')->withTimestamps();
+    }
+
+    public function primaryStaff()
+    {
+        return $this->belongsTo(Staff::class, 'staff_id');
     }
 }

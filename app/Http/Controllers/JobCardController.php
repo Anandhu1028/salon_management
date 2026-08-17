@@ -48,12 +48,17 @@ class JobCardController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Job Card', 'Customer', 'Service', 'Sub Category', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Staff Assigned', 'Service', 'Sub Category', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (JobCard $jobCard) => [
+            fn(JobCard $jobCard) => [
                 $jobCard->job_card_name,
-                $jobCard->customer->name ?? '—',
+                $jobCard->customers->isNotEmpty()
+                ? $jobCard->customers->pluck('name')->join(', ')
+                : ($jobCard->customer->name ?? '—'),
+                $jobCard->staff->isNotEmpty()
+                ? $jobCard->staff->pluck('name')->join(', ')
+                : '—',
                 $jobCard->service->service_name ?? '—',
                 $jobCard->subcategory ?: '—',
                 ucfirst(str_replace('_', ' ', $jobCard->status)),
@@ -66,12 +71,17 @@ class JobCardController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Job Card', 'Customer', 'Service', 'Sub Category', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Staff Assigned', 'Service', 'Sub Category', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (JobCard $jobCard) => [
+            fn(JobCard $jobCard) => [
                 $jobCard->job_card_name,
-                $jobCard->customer->name ?? '—',
+                $jobCard->customers->isNotEmpty()
+                ? $jobCard->customers->pluck('name')->join(', ')
+                : ($jobCard->customer->name ?? '—'),
+                $jobCard->staff->isNotEmpty()
+                ? $jobCard->staff->pluck('name')->join(', ')
+                : '—',
                 $jobCard->service->service_name ?? '—',
                 $jobCard->subcategory ?: '—',
                 ucfirst(str_replace('_', ' ', $jobCard->status)),
@@ -93,6 +103,16 @@ class JobCardController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->has('customer_id') && !$request->has('customer_ids')) {
+            $customerVal = $request->input('customer_id');
+            $request->merge(['customer_ids' => is_array($customerVal) ? $customerVal : array_filter([$customerVal])]);
+        }
+
+        if ($request->has('staff_id') && !$request->has('staff_ids')) {
+            $staffVal = $request->input('staff_id');
+            $request->merge(['staff_ids' => is_array($staffVal) ? $staffVal : array_filter([$staffVal])]);
+        }
+
         $validated = $request->validate([
             'job_card_name' => [
                 'required',
@@ -100,8 +120,12 @@ class JobCardController extends Controller
                 'max:150',
             ],
 
-            'customer_id' => [
+            'customer_ids' => [
                 'required',
+                'array',
+                'min:1',
+            ],
+            'customer_ids.*' => [
                 'exists:customers,id',
             ],
 
@@ -110,7 +134,8 @@ class JobCardController extends Controller
                 'exists:services,id',
             ],
 
-            'staff_id' => ['nullable', 'exists:staff,id'],
+            'staff_ids' => ['nullable', 'array'],
+            'staff_ids.*' => ['exists:staff,id'],
 
             'subcategory' => [
                 'required',
@@ -119,7 +144,7 @@ class JobCardController extends Controller
             ],
 
             'status' => [
-                'required',
+                'nullable',
                 Rule::in([
                     'pending',
                     'in_progress',
@@ -134,7 +159,7 @@ class JobCardController extends Controller
             ->firstOrFail();
 
         if (
-            ! $service->subcategory ||
+            !$service->subcategory ||
             $service->subcategory !== $validated['subcategory']
         ) {
             return back()
@@ -145,7 +170,20 @@ class JobCardController extends Controller
                 ->withInput();
         }
 
-        JobCard::create($validated);
+        $customerIds = $validated['customer_ids'];
+        $staffIds = $validated['staff_ids'] ?? [];
+
+        $jobCard = JobCard::create([
+            'job_card_name' => $validated['job_card_name'],
+            'customer_id' => $customerIds[0] ?? null,
+            'staff_id' => $staffIds[0] ?? null,
+            'service_id' => $validated['service_id'],
+            'subcategory' => $validated['subcategory'],
+            'status' => $validated['status'] ?? 'pending',
+        ]);
+
+        $jobCard->customers()->sync($customerIds);
+        $jobCard->staff()->sync($staffIds);
 
         return redirect()
             ->route('job-cards.index')
@@ -158,7 +196,18 @@ class JobCardController extends Controller
     /**
      * Update job card.
      */
-    public function update(  Request $request,  JobCard $jobCard     ) {
+    public function update(Request $request, JobCard $jobCard)
+    {
+        if ($request->has('customer_id') && !$request->has('customer_ids')) {
+            $customerVal = $request->input('customer_id');
+            $request->merge(['customer_ids' => is_array($customerVal) ? $customerVal : array_filter([$customerVal])]);
+        }
+
+        if ($request->has('staff_id') && !$request->has('staff_ids')) {
+            $staffVal = $request->input('staff_id');
+            $request->merge(['staff_ids' => is_array($staffVal) ? $staffVal : array_filter([$staffVal])]);
+        }
+
         $validated = $request->validate([
             'job_card_name' => [
                 'required',
@@ -166,8 +215,12 @@ class JobCardController extends Controller
                 'max:150',
             ],
 
-            'customer_id' => [
+            'customer_ids' => [
                 'required',
+                'array',
+                'min:1',
+            ],
+            'customer_ids.*' => [
                 'exists:customers,id',
             ],
 
@@ -176,7 +229,8 @@ class JobCardController extends Controller
                 'exists:services,id',
             ],
 
-            'staff_id' => ['nullable', 'exists:staff,id'],
+            'staff_ids' => ['nullable', 'array'],
+            'staff_ids.*' => ['exists:staff,id'],
 
             'subcategory' => [
                 'required',
@@ -185,7 +239,7 @@ class JobCardController extends Controller
             ],
 
             'status' => [
-                'required',
+                'nullable',
                 Rule::in([
                     'pending',
                     'in_progress',
@@ -200,7 +254,7 @@ class JobCardController extends Controller
             ->firstOrFail();
 
         if (
-            ! $service->subcategory ||
+            !$service->subcategory ||
             $service->subcategory !== $validated['subcategory']
         ) {
             return back()
@@ -211,7 +265,20 @@ class JobCardController extends Controller
                 ->withInput();
         }
 
-        $jobCard->update($validated);
+        $customerIds = $validated['customer_ids'];
+        $staffIds = $validated['staff_ids'] ?? [];
+
+        $jobCard->update([
+            'job_card_name' => $validated['job_card_name'],
+            'customer_id' => $customerIds[0] ?? null,
+            'staff_id' => $staffIds[0] ?? null,
+            'service_id' => $validated['service_id'],
+            'subcategory' => $validated['subcategory'],
+            'status' => $validated['status'] ?? $jobCard->status ?? 'pending',
+        ]);
+
+        $jobCard->customers()->sync($customerIds);
+        $jobCard->staff()->sync($staffIds);
 
         return redirect()
             ->route('job-cards.index')
@@ -241,6 +308,7 @@ class JobCardController extends Controller
 
         return JobCard::with([
             'customer',
+            'customers',
             'service',
             'staff',
         ])
@@ -256,8 +324,19 @@ class JobCardController extends Controller
                             'like',
                             "%{$search}%"
                         )
-                        ->orWhereHas('customer', function ($customer) use ($search) {
+                        ->orWhereHas('customers', function ($customer) use ($search) {
                             $customer->where(
+                                'name',
+                                'like',
+                                "%{$search}%"
+                            )->orWhere(
+                                    'mobile_number',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                        })
+                        ->orWhereHas('staff', function ($staff) use ($search) {
+                            $staff->where(
                                 'name',
                                 'like',
                                 "%{$search}%"

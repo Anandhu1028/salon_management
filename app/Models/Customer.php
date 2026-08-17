@@ -17,6 +17,6 @@ class Customer extends Model
 
     public function jobCards()
     {
-        return $this->hasMany(JobCard::class);
+        return $this->belongsToMany(JobCard::class, 'job_card_customer')->withTimestamps();
     }
 }

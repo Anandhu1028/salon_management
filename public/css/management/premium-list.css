@@ -32,55 +32,127 @@
     margin: 0;
 }
 
-/* Icon-only Edit & Delete (reference style) */
+/* ── Premium Action Buttons (View, Edit, Delete) ─────────────── */
 .actions-cell .pli-btn-icon,
-.premium-list--mgmt .pli-btn-icon--edit,
-.premium-list--mgmt .pli-btn-icon--danger {
+.premium-list .pli-btn-icon,
+.pli-btn-icon {
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    min-height: 36px;
     padding: 0;
     border-radius: 10px;
-    border: none;
-    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
+    text-decoration: none;
 }
 
-.pli-btn-icon--edit {
-    background: #EDE9FE;
-    color: #6366F1;
+.actions-cell .pli-btn-icon:hover,
+.premium-list .pli-btn-icon:hover,
+.pli-btn-icon:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 }
 
-.pli-btn-icon--edit .pli-action-icon {
-    color: #6366F1;
+.actions-cell .pli-btn-icon:active,
+.premium-list .pli-btn-icon:active,
+.pli-btn-icon:active {
+    transform: translateY(0);
 }
 
-.pli-btn-icon--edit:hover {
-    background: #DDD6FE;
-    color: #4F46E5;
-    border-color: transparent;
+/* View Button (Blue) */
+.pli-btn-icon--view,
+.actions-cell .pli-btn-icon--view {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+    border: 1px solid #DBEAFE !important;
 }
 
-.pli-btn-icon--edit:hover .pli-action-icon {
-    color: #4F46E5;
+.pli-btn-icon--view .pli-action-icon,
+.pli-btn-icon--view i,
+.pli-btn-icon--view svg {
+    color: #2563EB !important;
+    stroke: #2563EB !important;
 }
 
-.pli-btn-icon--danger {
-    background: #FECACA;
-    color: #EF4444;
+.pli-btn-icon--view:hover,
+.actions-cell .pli-btn-icon--view:hover {
+    background: #DBEAFE !important;
+    border-color: #BFDBFE !important;
+    color: #1D4ED8 !important;
 }
 
-.pli-btn-icon--danger .pli-action-icon {
-    color: #EF4444;
+.pli-btn-icon--view:hover .pli-action-icon,
+.pli-btn-icon--view:hover i,
+.pli-btn-icon--view:hover svg {
+    color: #1D4ED8 !important;
+    stroke: #1D4ED8 !important;
 }
 
-.pli-btn-icon--danger:hover {
-    background: #FCA5A5;
-    color: #DC2626;
-    border-color: transparent;
+/* Edit Button (Purple) */
+.pli-btn-icon--edit,
+.actions-cell .pli-btn-icon--edit {
+    background: #F5F3FF !important;
+    color: #8B5CF6 !important;
+    border: 1px solid #EDE9FE !important;
 }
 
-.pli-btn-icon--danger:hover .pli-action-icon {
-    color: #DC2626;
+.pli-btn-icon--edit .pli-action-icon,
+.pli-btn-icon--edit i,
+.pli-btn-icon--edit svg {
+    color: #8B5CF6 !important;
+    stroke: #8B5CF6 !important;
+}
+
+.pli-btn-icon--edit:hover,
+.actions-cell .pli-btn-icon--edit:hover {
+    background: #EDE9FE !important;
+    border-color: #DDD6FE !important;
+    color: #7C3AED !important;
+}
+
+.pli-btn-icon--edit:hover .pli-action-icon,
+.pli-btn-icon--edit:hover i,
+.pli-btn-icon--edit:hover svg {
+    color: #7C3AED !important;
+    stroke: #7C3AED !important;
+}
+
+/* Delete Button (Red) */
+.pli-btn-icon--danger,
+.pli-btn-icon--delete,
+.actions-cell .pli-btn-icon--danger {
+    background: #FEF2F2 !important;
+    color: #EF4444 !important;
+    border: 1px solid #FEE2E2 !important;
+}
+
+.pli-btn-icon--danger .pli-action-icon,
+.pli-btn-icon--danger i,
+.pli-btn-icon--danger svg {
+    color: #EF4444 !important;
+    stroke: #EF4444 !important;
+}
+
+.pli-btn-icon--danger:hover,
+.pli-btn-icon--delete:hover,
+.actions-cell .pli-btn-icon--danger:hover {
+    background: #FEE2E2 !important;
+    border-color: #FECACA !important;
+    color: #DC2626 !important;
+}
+
+.pli-btn-icon--danger:hover .pli-action-icon,
+.pli-btn-icon--danger:hover i,
+.pli-btn-icon--danger:hover svg {
+    color: #DC2626 !important;
+    stroke: #DC2626 !important;
 }
 
 .status-cell {
