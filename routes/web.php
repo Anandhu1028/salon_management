@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/export/pdf', [CustomerController::class, 'exportPdf']) ->name('customers.export.pdf');
         Route::post('/customers', [CustomerController::class, 'store']) ->name('customers.store');
         Route::put('/customers/{customer}', [CustomerController::class, 'update']) ->name('customers.update');
+        Route::patch('/customers/{customer}/status', [CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
         Route::delete('/customers/{customer}', [CustomerController::class, 'destroy']) ->name('customers.destroy');
     });
 

@@ -672,9 +672,9 @@
     padding: 0 12px 14px;
 }
 
-/* ── Customer — 7-column aligned grid ── */
+/* ── Customer — 6-column aligned grid ── */
 .premium-list--customer.premium-list--feed {
-    --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr);
+    --pli-grid: 50px minmax(240px, 1.8fr) minmax(180px, 1.3fr) minmax(140px, 1.1fr) 130px minmax(150px, 1fr);
     gap: 6px;
     padding: 0 12px 14px;
 }

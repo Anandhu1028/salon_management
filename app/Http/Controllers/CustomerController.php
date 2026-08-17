@@ -140,6 +140,21 @@ class CustomerController extends Controller
     }
 
     /**
+     * Toggle customer active/inactive status.
+     */
+    public function toggleStatus(Customer $customer)
+    {
+        $newStatus = $customer->status === 'active' ? 'inactive' : 'active';
+        $customer->update(['status' => $newStatus]);
+
+        return response()->json([
+            'success' => true,
+            'status' => $newStatus,
+            'message' => "Customer status updated to {$newStatus}.",
+        ]);
+    }
+
+    /**
      * Delete customer.
      */
     public function destroy(Customer $customer)

@@ -120,7 +120,6 @@
                         <span class="pli-head-cell col-left">Name</span>
                         <span class="pli-head-cell col-center">Email</span>
                         <span class="pli-head-cell col-center">Contact</span>
-                        <span class="pli-head-cell col-center">Joined</span>
                         <span class="pli-head-cell col-center">Status</span>
                         <span class="pli-head-cell col-center">Actions</span>
                     </div>
@@ -168,22 +167,19 @@
                                 @endif
                             </div>
 
-                            <div class="pli-col col-center pli-col-joined">
-                                <span class="pli-col-text">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '—' }}</span>
-                            </div>
-
                             <div class="pli-col col-center status-cell">
-                                <span class="status-badge status-active">
+                                <span id="status-badge-{{ $customer->id }}"
+                                    class="status-badge {{ $customer->status === 'active' ? 'status-active' : 'status-inactive' }}">
                                     <span></span>
-                                    <span class="status-text">Active</span>
+                                    <span class="status-text">{{ ucfirst($customer->status) }}</span>
                                 </span>
                             </div>
 
                             <div class="pli-col pli-col-actions col-actions actions-cell">
                                 <div class="dropdown pli-dots-dropdown d-md-none">
                                     <span id="mob-cust-status-badge-{{ $customer->id }}"
-                                        class="pli-mob-status-dot pli-mob-status-dot--active"
-                                        title="Active"></span>
+                                        class="pli-mob-status-dot {{ $customer->status === 'active' ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive' }}"
+                                        title="{{ ucfirst($customer->status) }}"></span>
                                     <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
@@ -199,19 +195,27 @@
                                         <li>
                                             <button type="button" class="dropdown-item pli-menu-item pli-menu-status-btn"
                                                 id="mob-cust-status-btn-{{ $customer->id }}"
-                                                data-status="active">
+                                                data-status="{{ $customer->status }}"
+                                                onclick="triggerCustomerStatusToggle({{ $customer->id }}, @js($customer->name))">
                                                 <span class="pli-menu-status-left">
-                                                    <span class="pli-menu-icon pli-menu-icon--status pli-status-active">
-                                                        <i class="bi bi-toggle-on"></i>
+                                                    <span class="pli-menu-icon pli-menu-icon--status {{ $customer->status === 'active' ? 'pli-status-active' : 'pli-status-inactive' }}">
+                                                        <i class="bi {{ $customer->status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
                                                     </span>
                                                     <span>Toggle Status</span>
                                                 </span>
-                                                <span class="pli-menu-status-state active">Active</span>
+                                                <span class="pli-menu-status-state {{ $customer->status === 'active' ? 'active' : 'inactive' }}">
+                                                    {{ ucfirst($customer->status) }}
+                                                </span>
                                             </button>
                                         </li>
                                     </ul>
                                 </div>
                                 <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
+                                    @include('partials.status-toggle', [
+                                        'id' => $customer->id,
+                                        'status' => $customer->status,
+                                        'onChange' => 'onCustomerStatusToggle(' . $customer->id . ', ' . json_encode($customer->name) . ', this)',
+                                    ])
                                     <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Customer"
                                         data-bs-toggle="modal" data-bs-target="#customerModal"
                                         onclick='openEditCustomerModal(@json($customer))'>
@@ -338,6 +342,34 @@
 
 
     {{-- ========================================================= --}}
+    {{-- STATUS CONFIRMATION MODAL --}}
+    {{-- ========================================================= --}}
+    <div class="modal fade premium-modal" id="statusConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="confirm-modal-body">
+                    <div class="confirm-icon warning" id="statusConfirmIcon">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h5 class="confirm-title" id="statusConfirmTitle">Change Status?</h5>
+                    <p class="confirm-message" id="statusConfirmMessage">
+                        Are you sure you want to change this customer's status?
+                    </p>
+                    <div class="confirm-actions">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="cancelStatusButton">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" id="confirmStatusButton">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- ========================================================= --}}
     {{-- DELETE CONFIRMATION MODAL --}}
     {{-- ========================================================= --}}
 
@@ -363,6 +395,138 @@
     @push('scripts')
         <script>
             let deleteCustomerId = null;
+            let currentCustomerId = null;
+            let currentTargetStatus = null;
+
+            function triggerCustomerStatusToggle(customerId, customerName) {
+                const mobBtn = document.getElementById(`mob-cust-status-btn-${customerId}`);
+                const currentStatus = mobBtn ? mobBtn.dataset.status : 'active';
+                const targetStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+                currentCustomerId = customerId;
+                currentTargetStatus = targetStatus;
+
+                const message = `Are you sure you want to mark ${customerName} as ${targetStatus}?`;
+                document.getElementById('statusConfirmMessage').textContent = message;
+
+                const icon = document.getElementById('statusConfirmIcon');
+                if (targetStatus === 'inactive') {
+                    icon.className = 'confirm-icon danger';
+                    icon.innerHTML = '<i class="bi bi-person-x"></i>';
+                } else {
+                    icon.className = 'confirm-icon warning';
+                    icon.innerHTML = '<i class="bi bi-person-check"></i>';
+                }
+
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('statusConfirmModal'));
+                modal.show();
+            }
+
+            function onCustomerStatusToggle(customerId, customerName, toggleElement) {
+                const targetStatus = toggleElement.checked ? 'active' : 'inactive';
+                toggleElement.checked = !toggleElement.checked; // Revert until confirmed
+
+                currentCustomerId = customerId;
+                currentTargetStatus = targetStatus;
+
+                const message = `Are you sure you want to mark ${customerName} as ${targetStatus}?`;
+                document.getElementById('statusConfirmMessage').textContent = message;
+
+                const icon = document.getElementById('statusConfirmIcon');
+                if (targetStatus === 'inactive') {
+                    icon.className = 'confirm-icon danger';
+                    icon.innerHTML = '<i class="bi bi-person-x"></i>';
+                } else {
+                    icon.className = 'confirm-icon warning';
+                    icon.innerHTML = '<i class="bi bi-person-check"></i>';
+                }
+
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('statusConfirmModal'));
+                modal.show();
+            }
+
+            document.getElementById('confirmStatusButton')?.addEventListener('click', async function () {
+                if (!currentCustomerId) return;
+
+                const button = this;
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+
+                try {
+                    const response = await fetch(`/customers/${currentCustomerId}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfMeta.getAttribute('content')
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Unable to update status.');
+                    }
+
+                    const modalElement = document.getElementById('statusConfirmModal');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) modal.hide();
+
+                    updateCustomerStatusUI(currentCustomerId, data.status);
+                    showToast(data.message, 'success');
+
+                    currentCustomerId = null;
+                    currentTargetStatus = null;
+
+                } catch (error) {
+                    showToast(error.message, 'danger');
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Confirm';
+                }
+            });
+
+            function updateCustomerStatusUI(customerId, status) {
+                const badge = document.getElementById(`status-badge-${customerId}`);
+                const toggle = document.getElementById(`status-toggle-${customerId}`);
+                const mobBtn = document.getElementById(`mob-cust-status-btn-${customerId}`);
+                const isActive = status === 'active';
+
+                if (toggle) {
+                    toggle.checked = isActive;
+                }
+
+                if (badge) {
+                    if (isActive) {
+                        badge.className = 'status-badge status-active';
+                        badge.innerHTML = '<span></span><span class="status-text">Active</span>';
+                    } else {
+                        badge.className = 'status-badge status-inactive';
+                        badge.innerHTML = '<span></span><span class="status-text">Inactive</span>';
+                    }
+                }
+
+                if (mobBtn) {
+                    mobBtn.dataset.status = status;
+                    const icon = mobBtn.querySelector('.pli-menu-icon');
+                    if (icon) {
+                        icon.className = 'pli-menu-icon pli-menu-icon--status ' + (isActive ? 'pli-status-active' : 'pli-status-inactive');
+                        icon.innerHTML = `<i class="bi ${isActive ? 'bi-toggle-on' : 'bi-toggle-off'}"></i>`;
+                    }
+                    const stateBadge = mobBtn.querySelector('.pli-menu-status-state');
+                    if (stateBadge) {
+                        stateBadge.className = 'pli-menu-status-state ' + (isActive ? 'active' : 'inactive');
+                        stateBadge.textContent = isActive ? 'Active' : 'Inactive';
+                    }
+                }
+
+                const mobDot = document.getElementById(`mob-cust-status-badge-${customerId}`);
+                if (mobDot) {
+                    mobDot.className = 'pli-mob-status-dot ' + (isActive ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive');
+                    mobDot.title = isActive ? 'Active' : 'Inactive';
+                }
+            }
 
             function openAddCustomerModal() {
                 const form = document.getElementById('customerForm');
