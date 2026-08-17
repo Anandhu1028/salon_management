@@ -36,11 +36,22 @@ class JobCardController extends Controller
 
         $staff = Staff::where('status', 'active')->orderBy('name')->get();
 
+        $filterCustomers = $customers;
+        $filterServices = $services;
+        $filterSubcategories = Service::whereNotNull('subcategory')
+            ->distinct()
+            ->pluck('subcategory')
+            ->filter()
+            ->values();
+
         return view('job-cards.index', compact(
             'jobCards',
             'customers',
             'services',
             'staff',
+            'filterCustomers',
+            'filterServices',
+            'filterSubcategories',
             'search',
             'filter'
         ));
@@ -305,6 +316,11 @@ class JobCardController extends Controller
     {
         $search = trim($request->input('search', ''));
         $filter = trim($request->input('filter', ''));
+        $jobCard = trim($request->input('job_card', ''));
+        $customerId = $request->input('customer_id');
+        $serviceId = $request->input('service_id');
+        $subcategory = trim($request->input('subcategory', ''));
+        $amountRange = $request->input('amount_range');
 
         return JobCard::with([
             'customer',
@@ -349,6 +365,39 @@ class JobCardController extends Controller
                                 "%{$search}%"
                             );
                         });
+                });
+            })
+            ->when($jobCard !== '', function ($query) use ($jobCard) {
+                $cleanId = preg_replace('/[^0-9]/', '', $jobCard);
+                $query->where(function ($q) use ($jobCard, $cleanId) {
+                    $q->where('job_card_name', 'like', "%{$jobCard}%");
+                    if ($cleanId !== '') {
+                        $q->orWhere('id', (int) $cleanId);
+                    }
+                });
+            })
+            ->when(!empty($customerId), function ($query) use ($customerId) {
+                $query->where(function ($q) use ($customerId) {
+                    $q->where('customer_id', $customerId)
+                      ->orWhereHas('customers', fn ($c) => $c->where('customers.id', $customerId));
+                });
+            })
+            ->when(!empty($serviceId), function ($query) use ($serviceId) {
+                $query->where('service_id', $serviceId);
+            })
+            ->when($subcategory !== '', function ($query) use ($subcategory) {
+                $query->where('subcategory', $subcategory);
+            })
+            ->when(!empty($amountRange) && $amountRange !== 'all', function ($query) use ($amountRange) {
+                $query->whereHas('service', function ($serviceQuery) use ($amountRange) {
+                    match ($amountRange) {
+                        'under_500' => $serviceQuery->where('price', '<', 500),
+                        '500_1000' => $serviceQuery->whereBetween('price', [500, 1000]),
+                        '1001_2500' => $serviceQuery->whereBetween('price', [1001, 2500]),
+                        '2501_5000' => $serviceQuery->whereBetween('price', [2501, 5000]),
+                        'above_5000' => $serviceQuery->where('price', '>', 5000),
+                        default => null,
+                    };
                 });
             })
             ->when(in_array($filter, ['pending', 'in_progress', 'completed', 'cancelled'], true), function ($query) use ($filter) {

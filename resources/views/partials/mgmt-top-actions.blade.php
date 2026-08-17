@@ -31,11 +31,19 @@
             <span class="mgmt-action-btn__label">{{ $addLabel }}</span>
         </button>
 
-        @include('partials.mgmt-filter-btn', [
-            'route' => $filterRoute,
-            'filter' => $filter ?? '',
-            'search' => $search ?? '',
-            'options' => $filterOptions,
-        ])
+        @if(!empty($filterModule))
+            @include('partials.mgmt-filter-popover', [
+                'filterModule' => $filterModule,
+                'filterRoute' => $filterRoute,
+                'filterData' => $filterData ?? [],
+            ])
+        @else
+            @include('partials.mgmt-filter-btn', [
+                'route' => $filterRoute,
+                'filter' => $filter ?? '',
+                'search' => $search ?? '',
+                'options' => $filterOptions ?? [],
+            ])
+        @endif
     </div>
 </div>

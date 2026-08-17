@@ -163,7 +163,10 @@ class StaffController extends Controller
     private function filteredQuery(Request $request)
     {
         $search = trim($request->input('search', ''));
-        $filter = trim($request->input('filter', ''));
+        $name = trim($request->input('name', ''));
+        $email = trim($request->input('email', ''));
+        $contact = trim($request->input('contact', ''));
+        $status = trim($request->input('status', $request->input('filter', '')));
 
         return Staff::query()
             ->when($search !== '', function ($query) use ($search) {
@@ -173,8 +176,11 @@ class StaffController extends Controller
                         ->orWhere('mobile_number', 'like', "%{$search}%");
                 });
             })
-            ->when(in_array($filter, ['active', 'inactive'], true), function ($query) use ($filter) {
-                $query->where('status', $filter);
+            ->when($name !== '', fn ($q) => $q->where('name', 'like', "%{$name}%"))
+            ->when($email !== '', fn ($q) => $q->where('email', 'like', "%{$email}%"))
+            ->when($contact !== '', fn ($q) => $q->where('mobile_number', 'like', "%{$contact}%"))
+            ->when(in_array($status, ['active', 'inactive'], true), function ($query) use ($status) {
+                $query->where('status', $status);
             })
             ->latest();
     }

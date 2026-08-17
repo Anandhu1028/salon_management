@@ -156,11 +156,21 @@ class CustomerController extends Controller
     {
         $search = trim($request->input('search', ''));
         $filter = trim($request->input('filter', ''));
+        $name = trim($request->input('name', ''));
+        $email = trim($request->input('email', ''));
+        $contact = trim($request->input('contact', ''));
+        $status = trim($request->input('status', $filter));
 
-        return Customer::query()
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
+        $query = match ($status) {
+            'inactive' => Customer::onlyTrashed(),
+            'all' => Customer::withTrashed(),
+            default => Customer::query(),
+        };
+
+        return $query
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere(
                             'mobile_number',
@@ -169,11 +179,14 @@ class CustomerController extends Controller
                         );
                 });
             })
-            ->when($filter === 'with_email', function ($query) {
-                $query->whereNotNull('email')->where('email', '!=', '');
+            ->when($name !== '', fn ($q) => $q->where('name', 'like', "%{$name}%"))
+            ->when($email !== '', fn ($q) => $q->where('email', 'like', "%{$email}%"))
+            ->when($contact !== '', fn ($q) => $q->where('mobile_number', 'like', "%{$contact}%"))
+            ->when($filter === 'with_email', function ($q) {
+                $q->whereNotNull('email')->where('email', '!=', '');
             })
-            ->when($filter === 'new_month', function ($query) {
-                $query->where('created_at', '>=', now()->startOfMonth());
+            ->when($filter === 'new_month', function ($q) {
+                $q->where('created_at', '>=', now()->startOfMonth());
             })
             ->latest();
     }

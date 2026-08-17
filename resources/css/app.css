@@ -1161,3 +1161,584 @@
 
 /* ── modal-icon-box.info color variant ──────────────────────── */
 .modal-icon-box.info { background: linear-gradient(135deg, #CFFAFE 0%, #BAE6FD 100%); color: #0284C7; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM FILTER POPOVER — Page-specific filter system
+   ═══════════════════════════════════════════════════════════════ */
+
+.mgmt-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Floating popover panel */
+.mgmt-filter-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 1055;
+    width: 360px;
+    background: #fff;
+    border: 1.5px solid #E4E9F4;
+    border-radius: 20px;
+    box-shadow:
+        0 2px 4px rgba(15, 23, 42, 0.03),
+        0 12px 40px -6px rgba(15, 23, 42, 0.14),
+        0 4px 16px -4px rgba(99, 102, 241, 0.08);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.975);
+    pointer-events: none;
+    transition:
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mgmt-filter-popover.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+/* Popover Header */
+.mgmt-filter-popover__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #F0F4FA;
+    background: linear-gradient(to bottom, #FAFCFF, #F6F8FF);
+}
+
+.mgmt-filter-icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #EEF2FF, #DDE4FF);
+    color: #4F46E5;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.15);
+}
+
+.mgmt-filter-title {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1E293B;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.mgmt-filter-subtitle {
+    display: block;
+    font-size: 0.67rem;
+    color: #A0AEC0;
+    margin-top: 1px;
+    line-height: 1.3;
+}
+
+.mgmt-filter-reset-link {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #6366F1;
+    text-decoration: none;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.mgmt-filter-reset-link:hover {
+    background: #E0E7FF;
+    color: #4338CA;
+    border-color: #A5B4FC;
+}
+
+.mgmt-filter-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid #E8EDF5;
+    border-radius: 7px;
+    background: #fff;
+    color: #94A3B8;
+    font-size: 0.65rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.mgmt-filter-close-btn:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+    color: #475569;
+}
+
+/* Popover Body */
+.mgmt-filter-popover__body {
+    padding: 16px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #C7D2FE transparent;
+}
+
+.mgmt-filter-popover__body::-webkit-scrollbar {
+    width: 3px;
+}
+
+.mgmt-filter-popover__body::-webkit-scrollbar-thumb {
+    background: #C7D2FE;
+    border-radius: 999px;
+}
+
+/* Filter Group */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    background: #FAFBFF;
+    border: 1px solid #EEF1F9;
+    border-radius: 12px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.filter-group:focus-within {
+    border-color: #C7D2FE;
+    background: #F8F7FF;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7C8BA1;
+    margin-bottom: 2px;
+}
+
+.filter-label i {
+    font-size: 0.7rem;
+    color: #A5B4FC;
+}
+
+/* Filter Input */
+.filter-input-wrap {
+    position: relative;
+}
+
+.filter-input,
+.filter-select {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 0.79rem;
+    color: #1E293B;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.filter-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23A5B4FC' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.filter-input::placeholder {
+    color: #B0BFCF;
+    font-size: 0.76rem;
+}
+
+.filter-clear-input {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 0;
+    border-radius: 50%;
+    background: #E2E8F0;
+    color: #64748B;
+    font-size: 0.55rem;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.filter-clear-input:hover {
+    background: #C7D2FE;
+    color: #4338CA;
+}
+
+/* Segmented Status Group */
+.filter-segmented-group {
+    display: flex;
+    gap: 4px;
+    background: #F1F5F9;
+    border-radius: 8px;
+    padding: 3px;
+}
+
+.filter-segmented-btn {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #64748B;
+    font-size: 0.7rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1;
+}
+
+.filter-segmented-btn input[type="radio"] {
+    display: none;
+}
+
+.filter-segmented-btn:hover {
+    color: #4338CA;
+    background: rgba(255,255,255,0.7);
+}
+
+.filter-segmented-btn.is-active,
+.filter-segmented-btn:has(input[type="radio"]:checked) {
+    background: #fff;
+    color: #4338CA;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(99, 102, 241, 0.12);
+}
+
+/* Popover Footer */
+.mgmt-filter-popover__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 11px 16px 14px;
+    border-top: 1px solid #F0F4FA;
+    background: linear-gradient(to bottom, #F6F8FF, #FAFCFF);
+}
+
+.btn-filter-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 0.73rem;
+    font-weight: 650;
+    color: #64748B;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.14s ease;
+    white-space: nowrap;
+}
+
+.btn-filter-secondary:hover {
+    background: #E8EDF5;
+    color: #334155;
+    border-color: #CBD5E1;
+}
+
+.btn-filter-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 16px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(99, 102, 241, 0.28);
+    transition: filter 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.btn-filter-primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(99, 102, 241, 0.36);
+}
+
+/* Active filter badge on button */
+.mgmt-action-btn--filter.is-active {
+    background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+    border-color: #C7D2FE;
+    color: #4338CA;
+}
+
+.mgmt-action-btn--filter.is-active .bi-funnel-fill {
+    color: #6366F1;
+}
+
+/* Drag handle for mobile bottom sheet */
+.mgmt-filter-drag-handle {
+    display: none;
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: #CBD5E1;
+    margin: 10px auto 4px;
+}
+
+/* Clear All link */
+.mgmt-filter-clear-link {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #EF4444;
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.mgmt-filter-clear-link:hover {
+    color: #DC2626;
+    background: #FEF2F2;
+}
+
+/* Active filter count chip */
+.mgmt-filter-active-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #EEF2FF;
+    color: #4F46E5;
+    font-size: 0.67rem;
+    font-weight: 750;
+    border: 1px solid #C7D2FE;
+    line-height: 1.4;
+}
+
+/* Popover Info Banner */
+.mgmt-filter-info-banner {
+    margin: 10px 16px 2px;
+    padding: 9px 12px;
+    background: #F8F7FF;
+    border: 1px solid #EEF0FD;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mgmt-filter-info-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: #EEF2FF;
+    color: #6366F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.mgmt-filter-info-text {
+    font-size: 0.71rem;
+    color: #4F46E5;
+    font-weight: 550;
+    line-height: 1.35;
+}
+
+/* Mobile overlay & bottom sheet — zero blur, matching modal backdrop dim */
+.mgmt-filter-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1054;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    transition: opacity 0.24s ease;
+}
+
+.mgmt-filter-overlay.is-open {
+    display: block;
+    opacity: 1;
+}
+
+@media (max-width: 640px) {
+    .mgmt-filter-drag-handle {
+        display: block;
+    }
+
+    .mgmt-filter-popover {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 24px 24px 0 0;
+        z-index: 1060;
+        border: 0;
+        box-shadow: 0 -10px 35px rgba(15, 23, 42, 0.2);
+        transform: translateY(100%);
+        max-height: 88vh;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        transition:
+            opacity 0.22s ease,
+            transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .mgmt-filter-popover.is-open {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .mgmt-filter-popover form {
+        display: flex;
+        flex-direction: column;
+        max-height: 88vh;
+        overflow: hidden;
+    }
+
+    .mgmt-filter-popover__header {
+        padding: 8px 18px 12px;
+        background: #fff;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .mgmt-filter-title {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: #0F172A;
+    }
+
+    .mgmt-filter-close-btn {
+        display: none;
+    }
+
+    .mgmt-filter-info-banner {
+        margin: 12px 18px 2px;
+        padding: 10px 14px;
+        border-radius: 12px;
+    }
+
+    .mgmt-filter-popover__body {
+        flex: 1 1 auto;
+        max-height: 52vh;
+        overflow-y: auto;
+        padding: 14px 18px 8px;
+        gap: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-group {
+        padding: 12px 14px;
+        border-radius: 13px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        gap: 6px;
+    }
+
+    .filter-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #1E293B;
+    }
+
+    .filter-input,
+    .filter-select {
+        height: 42px;
+        font-size: 0.82rem;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .filter-segmented-group {
+        padding: 4px;
+        border-radius: 9px;
+        gap: 4px;
+    }
+
+    .filter-segmented-btn {
+        padding: 8px 10px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        border-radius: 7px;
+    }
+
+    .mgmt-filter-popover__footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 14px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+        background: #fff;
+        border-top: 1px solid #F1F5F9;
+        gap: 10px;
+        box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .btn-filter-secondary {
+        height: 46px;
+        min-width: 90px;
+        border-radius: 12px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #334155;
+        background: #fff;
+        border: 1.5px solid #E2E8F0;
+    }
+
+    .btn-filter-primary {
+        height: 46px;
+        border-radius: 12px;
+        font-size: 0.86rem;
+        font-weight: 750;
+        background: linear-gradient(135deg, #6366F1, #4F46E5);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.32);
+    }
+}

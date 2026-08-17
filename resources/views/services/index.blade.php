@@ -11,13 +11,11 @@
             'addLabel' => 'Add Service',
             'addModal' => '#serviceModal',
             'addOnclick' => 'openAddServiceModal()',
+            'filterModule' => 'services',
             'filterRoute' => route('services.index'),
-            'filter' => $filter ?? '',
-            'search' => $search ?? '',
-            'filterOptions' => [
-                '' => 'All Services',
-                'active' => 'Active',
-                'inactive' => 'Inactive',
+            'filterData' => [
+                'categories' => $filterCategories ?? [],
+                'subcategories' => $filterSubcategories ?? [],
             ],
             'excelUrl' => route('services.export.excel', request()->query()),
             'pdfUrl' => route('services.export.pdf', request()->query()),

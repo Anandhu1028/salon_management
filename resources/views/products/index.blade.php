@@ -11,13 +11,11 @@
             'addLabel' => 'Add Product',
             'addModal' => '#productModal',
             'addOnclick' => 'openAddProductModal()',
+            'filterModule' => 'products',
             'filterRoute' => route('products.index'),
-            'filter' => $filter ?? '',
-            'search' => $search ?? '',
-            'filterOptions' => [
-                '' => 'All Products',
-                'active' => 'Active',
-                'inactive' => 'Inactive',
+            'filterData' => [
+                'categories' => $filterCategories ?? [],
+                'subcategories' => $filterSubcategories ?? [],
             ],
             'excelUrl' => route('products.export.excel', request()->query()),
             'pdfUrl' => route('products.export.pdf', request()->query()),

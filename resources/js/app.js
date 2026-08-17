@@ -387,3 +387,109 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth > 1024) closeMobileSidebar();
     });
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM FILTER POPOVER — open / close / keyboard / segmented btns
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+    const trigger  = document.getElementById('mgmtFilterTrigger');
+    const popover  = document.getElementById('mgmtFilterPopover');
+    const overlay  = document.getElementById('mgmtFilterOverlay');
+    const closeBtn = document.getElementById('mgmtFilterCloseBtn');
+
+    if (!trigger || !popover) return;
+
+    let isOpen = false;
+
+    const openPopover = () => {
+        isOpen = true;
+        popover.classList.add('is-open');
+        overlay?.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+
+        if (window.innerWidth <= 640) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Keep popover inside viewport
+            const rect = trigger.getBoundingClientRect();
+            const popW = 360;
+            if (rect.right < popW) {
+                popover.style.right = 'auto';
+                popover.style.left = '0';
+            } else {
+                popover.style.left = 'auto';
+                popover.style.right = '0';
+            }
+        }
+    };
+
+    const closePopover = () => {
+        isOpen = false;
+        popover.classList.remove('is-open');
+        overlay?.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    };
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isOpen ? closePopover() : openPopover();
+    });
+
+    closeBtn?.addEventListener('click', closePopover);
+    overlay?.addEventListener('click', closePopover);
+
+    // Touch swipe down on drag handle to close
+    const dragHandle = popover.querySelector('.mgmt-filter-drag-handle');
+    if (dragHandle) {
+        let startY = 0;
+        let currentY = 0;
+        dragHandle.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        dragHandle.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 0) {
+                popover.style.transform = `translateY(${diff}px)`;
+            }
+        }, { passive: true });
+
+        dragHandle.addEventListener('touchend', () => {
+            const diff = currentY - startY;
+            if (diff > 80) {
+                popover.style.transform = '';
+                closePopover();
+            } else {
+                popover.style.transform = '';
+            }
+            startY = 0;
+            currentY = 0;
+        });
+    }
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (isOpen && !popover.contains(e.target) && e.target !== trigger) {
+            closePopover();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isOpen) closePopover();
+    });
+
+    // Sync segmented radio button active states on click
+    popover.querySelectorAll('.filter-segmented-btn').forEach(label => {
+        label.addEventListener('click', () => {
+            const name = label.querySelector('input')?.name;
+            if (!name) return;
+            popover.querySelectorAll(`.filter-segmented-btn input[name="${name}"]`).forEach(input => {
+                input.closest('.filter-segmented-btn')?.classList.remove('is-active');
+            });
+            label.classList.add('is-active');
+        });
+    });
+});

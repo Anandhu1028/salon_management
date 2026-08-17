@@ -11,14 +11,8 @@
             'addLabel' => 'Add Customer',
             'addModal' => '#customerModal',
             'addOnclick' => 'openAddCustomerModal()',
+            'filterModule' => 'customers',
             'filterRoute' => route('customers.index'),
-            'filter' => $filter ?? '',
-            'search' => $search ?? '',
-            'filterOptions' => [
-                '' => 'All Customers',
-                'with_email' => 'With Email',
-                'new_month' => 'New This Month',
-            ],
             'excelUrl' => route('customers.export.excel', request()->query()),
             'pdfUrl' => route('customers.export.pdf', request()->query()),
         ])

@@ -11,14 +11,8 @@
             'addLabel' => 'Add Staff',
             'addModal' => '#staffModal',
             'addOnclick' => 'openAddStaffModal()',
+            'filterModule' => 'staff',
             'filterRoute' => route('staff.index'),
-            'filter' => $filter ?? '',
-            'search' => $search ?? '',
-            'filterOptions' => [
-                '' => 'All Staff',
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-            ],
             'excelUrl' => route('staff.export.excel', request()->query()),
             'pdfUrl' => route('staff.export.pdf', request()->query()),
         ])

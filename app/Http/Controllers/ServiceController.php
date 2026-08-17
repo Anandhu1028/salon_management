@@ -24,8 +24,22 @@ class ServiceController extends Controller
             ->paginate(9)
             ->withQueryString();
 
+        $filterCategories = Service::whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values();
+
+        $filterSubcategories = Service::whereNotNull('subcategory')
+            ->distinct()
+            ->pluck('subcategory')
+            ->filter()
+            ->values();
+
         return view('services.index', compact(
             'services',
+            'filterCategories',
+            'filterSubcategories',
             'search',
             'filter'
         ));
@@ -234,6 +248,11 @@ class ServiceController extends Controller
     {
         $search = trim($request->input('search', ''));
         $filter = trim($request->input('filter', ''));
+        $name = trim($request->input('name', ''));
+        $category = trim($request->input('category', ''));
+        $subcategory = trim($request->input('subcategory', ''));
+        $priceRange = $request->input('price_range');
+        $status = trim($request->input('status', $filter));
 
         return Service::query()
             ->when($search !== '', function ($query) use ($search) {
@@ -255,8 +274,21 @@ class ServiceController extends Controller
                         );
                 });
             })
-            ->when(in_array($filter, ['active', 'inactive'], true), function ($query) use ($filter) {
-                $query->where('status', $filter);
+            ->when($name !== '', fn ($q) => $q->where('service_name', 'like', "%{$name}%"))
+            ->when($category !== '', fn ($q) => $q->where('category', $category))
+            ->when($subcategory !== '', fn ($q) => $q->where('subcategory', $subcategory))
+            ->when(!empty($priceRange) && $priceRange !== 'all', function ($query) use ($priceRange) {
+                match ($priceRange) {
+                    'under_500' => $query->where('price', '<', 500),
+                    '500_1000' => $query->whereBetween('price', [500, 1000]),
+                    '1001_2500' => $query->whereBetween('price', [1001, 2500]),
+                    '2501_5000' => $query->whereBetween('price', [2501, 5000]),
+                    'above_5000' => $query->where('price', '>', 5000),
+                    default => null,
+                };
+            })
+            ->when(in_array($status, ['active', 'inactive'], true), function ($query) use ($status) {
+                $query->where('status', $status);
             })
             ->latest();
     }
