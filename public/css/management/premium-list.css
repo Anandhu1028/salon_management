@@ -1494,32 +1494,259 @@
 }
 
 .premium-modal .form-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #1E293B;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
+    display: block;
 }
 
-.premium-modal .form-control,
-.premium-modal .form-select {
-    height: 44px;
-    border-radius: 12px;
-    border-color: #E2E8F0;
-    font-size: 0.875rem;
+.premium-modal .form-label span {
+    color: #EF4444;
+}
+
+/* ── Field Control Wrap (Input with Leading Icon Badge) ──────── */
+.field-control-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 50px;
+    min-height: 50px;
     padding: 0 14px;
-    background: #F8FAFC;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
     transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
-.premium-modal .form-control:focus,
-.premium-modal .form-select:focus {
-    background: #fff;
-    border-color: #818CF8;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+.field-control-wrap:focus-within {
+    background: #FFFFFF;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
 }
 
+.field-control-wrap .form-control {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: 100% !important;
+    min-height: auto !important;
+    color: #1E293B !important;
+    font-size: 0.88rem !important;
+    font-weight: 500;
+}
+
+.field-control-wrap .form-control::placeholder {
+    color: #94A3B8;
+    opacity: 1;
+}
+
+.field-control-wrap .form-control:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Form field leading icon badge */
+.form-field-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: #F3F0FF;
+    color: #7C5CF6;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(124, 92, 246, 0.08);
+}
+
+.form-field-icon--dot {
+    background: #ECFDF5;
+    color: #10B981;
+}
+
+.form-field-icon .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10B981;
+    display: inline-block;
+    box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.2);
+}
+
+/* ── Unified form-control height & NiceSelect Trigger ─────────── */
+.premium-modal .form-control:not(.field-control-wrap .form-control),
+.premium-modal .form-select,
+.premium-modal .nice-select__trigger {
+    height: 50px;
+    min-height: 50px;
+    padding: 0 14px;
+    border-width: 1.5px;
+    border-color: #E2E8F0;
+    border-radius: 12px;
+    background: #FFFFFF;
+    color: #1E293B;
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.premium-modal .form-control:not(.field-control-wrap .form-control):focus,
+.premium-modal .form-select:focus {
+    background: #fff;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
+}
+
+.premium-modal .nice-select__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.premium-modal .nice-select__trigger:hover {
+    border-color: #CBD5E1;
+}
+
+.premium-modal .nice-select.is-open .nice-select__trigger,
+.premium-modal .nice-select__trigger:focus-visible {
+    outline: 0;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
+}
+
+.premium-modal .nice-select__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.premium-modal .nice-select__value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1E293B;
+}
+
+.premium-modal .nice-select__trigger .bi-chevron-down {
+    color: #64748B;
+    font-size: 13px;
+    margin-left: auto;
+    transition: transform 0.18s ease;
+}
+
+.premium-modal .nice-select.is-open .nice-select__trigger .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.premium-modal .form-select:disabled,
+.premium-modal .nice-select__trigger:disabled {
+    color: #94A3B8;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.premium-modal .nice-select__trigger:disabled .form-field-icon {
+    background: #F1F5F9;
+    color: #94A3B8;
+}
+
+/* Input-group text should match height */
+.premium-modal .input-group-text {
+    height: 48px;
+    border-radius: 12px 0 0 12px;
+    border-color: #E2E8F0;
+    background: #F1F5F9;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+}
+
+.premium-modal .input-group .form-control {
+    border-radius: 0 12px 12px 0;
+}
+
+/* ── Size modifiers ───────────────────────────────────────────── */
+.premium-modal--md .modal-dialog  { max-width: 560px; }
+.premium-modal--lg .modal-dialog  { max-width: 680px; }
+
+/* ── 2-column form grid utility ──────────────────────────────── */
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+}
+
+.modal-form-grid .form-field--full {
+    grid-column: 1 / -1;
+}
+
+/* No extra bottom margin when field is inside grid */
+.modal-form-grid .form-field {
+    margin-bottom: 0;
+}
+
+/* ── Textarea inside modal ────────────────────────────────────── */
+.premium-modal textarea.form-control {
+    height: auto;
+    min-height: 88px;
+    line-height: 1.55;
+    padding: 12px 14px;
+    resize: vertical;
+}
+
+/* ── Footer buttons — premium style ──────────────────────────── */
+.premium-modal .modal-footer .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 42px;
+}
+
+.premium-modal .modal-footer .btn-primary {
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+    border: 0;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.38);
+    transition: filter 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.premium-modal .modal-footer .btn-primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.45);
+}
+
+.premium-modal .modal-footer .btn-primary:active {
+    filter: brightness(0.97);
+    transform: translateY(0);
+}
+
+.premium-modal .modal-footer .btn-light {
+    color: #475569;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.premium-modal .modal-footer .btn-light:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+}
+
+/* ── Confirm modals ───────────────────────────────────────────── */
 .premium-modal .confirm-modal-body {
     padding: 36px 28px 28px;
     background: linear-gradient(180deg, #FAFBFF 0%, #FFFFFF 100%);
@@ -1541,7 +1768,6 @@
 }
 
 .premium-modal .confirm-actions .btn {
-    /* flex: 1; */
     border-radius: 12px;
     padding: 11px 16px;
     font-weight: 600;
@@ -1550,4 +1776,18 @@
 
 .premium-modal.modal-sm .modal-dialog {
     max-width: 380px;
+}
+
+/* ── Responsive: 1-col on mobile ─────────────────────────────── */
+@media (max-width: 575px) {
+    .modal-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .modal-form-grid .form-field--full {
+        grid-column: 1;
+    }
+    .premium-modal--md .modal-dialog,
+    .premium-modal--lg .modal-dialog {
+        max-width: calc(100% - 24px);
+    }
 }

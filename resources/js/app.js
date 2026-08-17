@@ -40,7 +40,17 @@ function createNiceSelect(select) {
     trigger.type = 'button';
     trigger.className = 'nice-select__trigger';
     trigger.setAttribute('aria-haspopup', 'listbox');
-    trigger.innerHTML = '<span class="nice-select__value"></span><i class="bi bi-chevron-down" aria-hidden="true"></i>';
+
+    const icon = select.dataset.icon;
+    const hasDot = select.dataset.dot !== undefined;
+    let iconMarkup = '';
+    if (hasDot) {
+        iconMarkup = '<span class="form-field-icon form-field-icon--dot"><span class="status-dot"></span></span>';
+    } else if (icon) {
+        iconMarkup = `<span class="form-field-icon"><i class="bi ${icon}" aria-hidden="true"></i></span>`;
+    }
+
+    trigger.innerHTML = `<div class="nice-select__left">${iconMarkup}<span class="nice-select__value"></span></div><i class="bi bi-chevron-down" aria-hidden="true"></i>`;
 
     const panel = document.createElement('div');
     panel.className = 'nice-select__panel';

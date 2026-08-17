@@ -106,7 +106,8 @@
                                 <input type="hidden" name="filter" value="{{ $filter }}">
                             @endif
                             @if($search)
-                                <a href="{{ route('customers.index', array_filter(['filter' => $filter ?? ''])) }}" title="Clear search">
+                                <a href="{{ route('customers.index', array_filter(['filter' => $filter ?? ''])) }}"
+                                    title="Clear search">
                                     <i class="bi bi-x"></i>
                                 </a>
                             @endif
@@ -166,7 +167,8 @@
                             </div>
 
                             <div class="pli-col col-center">
-                                <span class="pli-col-text">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '—' }}</span>
+                                <span
+                                    class="pli-col-text">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '—' }}</span>
                             </div>
 
                             <div class="pli-col col-center status-cell">
@@ -177,22 +179,13 @@
                             </div>
 
                             <div class="pli-col pli-col-actions col-actions actions-cell">
-                                <button
-                                    type="button"
-                                    class="pli-btn-icon pli-btn-icon--edit"
-                                    title="Edit Customer"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#customerModal"
-                                    onclick='openEditCustomerModal(@json($customer))'
-                                >
+                                <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Customer"
+                                    data-bs-toggle="modal" data-bs-target="#customerModal"
+                                    onclick='openEditCustomerModal(@json($customer))'>
                                     @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
                                 </button>
-                                <button
-                                    type="button"
-                                    class="pli-btn-icon pli-btn-icon--danger"
-                                    title="Delete Customer"
-                                    onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name))"
-                                >
+                                <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Customer"
+                                    onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name))">
                                     @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
                                 </button>
                             </div>
@@ -230,7 +223,7 @@
     {{-- ADD / EDIT CUSTOMER MODAL --}}
     {{-- ========================================================= --}}
 
-    <div class="modal fade premium-modal" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade premium-modal premium-modal--md" id="customerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form id="customerForm" method="POST" action="{{ route('customers.store') }}">
@@ -253,40 +246,55 @@
 
                     {{-- Body --}}
                     <div class="modal-body">
+                        <div class="modal-form-grid">
 
-                        {{-- Name --}}
-                        <div class="form-field">
-                            <label for="customer_name" class="form-label">
-                                Customer Name <span>*</span>
-                            </label>
-                            <input type="text" name="name" id="customer_name" class="form-control"
-                                placeholder="Enter customer's full name" required>
+                            {{-- Name — full width --}}
+                            <div class="form-field form-field--full">
+                                <label for="customer_name" class="form-label">
+                                    Customer Name <span>*</span>
+                                </label>
+                                <div class="field-control-wrap">
+                                    <span class="form-field-icon"><i class="bi bi-person"></i></span>
+                                    <input type="text" name="name" id="customer_name" class="form-control"
+                                        placeholder="Enter customer's full name" required>
+                                </div>
+                            </div>
+
+                            {{-- Email --}}
+                            <div class="form-field">
+                                <label for="customer_email" class="form-label">
+                                    Email Address
+                                </label>
+                                <div class="field-control-wrap">
+                                    <span class="form-field-icon"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" name="email" id="customer_email" class="form-control"
+                                        placeholder="e.g. customer@example.com">
+                                </div>
+                            </div>
+
+                            {{-- Mobile --}}
+                            <div class="form-field">
+                                <label for="customer_mobile" class="form-label">
+                                    Mobile Number
+                                </label>
+                                <div class="field-control-wrap">
+                                    <span class="form-field-icon"><i class="bi bi-telephone"></i></span>
+                                    <input type="text" name="mobile_number" id="customer_mobile" class="form-control"
+                                        placeholder="e.g. +91 98765 43210" maxlength="20">
+                                </div>
+                            </div>
+
                         </div>
-
-                        {{-- Email --}}
-                        <div class="form-field">
-                            <label for="customer_email" class="form-label">
-                                Email Address
-                            </label>
-                            <input type="email" name="email" id="customer_email" class="form-control"
-                                placeholder="e.g. customer@example.com">
-                        </div>
-
-                        {{-- Mobile --}}
-                        <div class="form-field">
-                            <label for="customer_mobile" class="form-label">
-                                Mobile Number
-                            </label>
-                            <input type="text" name="mobile_number" id="customer_mobile" class="form-control"
-                                placeholder="e.g. +91 98765 43210" maxlength="20">
-                        </div>
-
                     </div>
 
                     {{-- Footer --}}
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="customerSubmitButton">Save Customer</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="customerSubmitButton">
+                            <i class="bi bi-person-plus"></i> Create Customer
+                        </button>
                     </div>
 
                 </form>
@@ -329,7 +337,7 @@
                 document.getElementById('customerFormMethod').value = 'POST';
                 document.getElementById('customerModalTitle').textContent = 'Add Customer';
                 document.getElementById('customerModalSubtitle').textContent = 'Add a new customer to your salon.';
-                document.getElementById('customerSubmitButton').textContent = 'Save Customer';
+                document.getElementById('customerSubmitButton').innerHTML = '<i class="bi bi-person-plus"></i> Create Customer';
             }
 
             function openEditCustomerModal(customer) {
@@ -338,7 +346,7 @@
                 document.getElementById('customerFormMethod').value = 'PUT';
                 document.getElementById('customerModalTitle').textContent = 'Edit Customer';
                 document.getElementById('customerModalSubtitle').textContent = 'Update customer information.';
-                document.getElementById('customerSubmitButton').textContent = 'Update Customer';
+                document.getElementById('customerSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Customer';
 
                 document.getElementById('customer_name').value = customer.name ?? '';
                 document.getElementById('customer_email').value = customer.email ?? '';
