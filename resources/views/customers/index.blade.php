@@ -299,34 +299,54 @@
                             </div>
 
                             {{-- WhatsApp --}}
-                            @include('partials.phone-input', [
-                                'name' => 'whatsapp_number',
-                                'id' => 'customer_whatsapp',
-                                'codeName' => 'whatsapp_country_code',
-                                'codeId' => 'customer_whatsapp_country_code',
-                                'label' => 'WhatsApp Number',
-                                'icon' => 'bi-whatsapp',
-                                'placeholder' => '98765 43210',
-                                'hint' => 'Enter 10-digit WhatsApp number',
-                                'required' => true,
-                                'defaultCode' => '+91',
-                                'countryCodes' => $countryCodes
-                            ])
+                            <div class="form-field">
+                                <label for="customer_whatsapp" class="form-label">
+                                    WhatsApp Number <span>*</span>
+                                </label>
+                                <div class="phone-input-group">
+                                    <div class="phone-prefix-box">
+                                        <select name="whatsapp_country_code" id="customer_whatsapp_country_code" class="phone-prefix-select">
+                                            @foreach($countryCodes ?? [] as $code)
+                                                <option value="{{ $code->dial_code }}" {{ $code->is_default ? 'selected' : '' }} title="{{ $code->name }}">
+                                                    {{ $code->dial_code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="bi bi-chevron-down phone-prefix-arrow"></i>
+                                    </div>
+                                    <div class="phone-number-box">
+                                        <span class="form-field-icon"><i class="bi bi-whatsapp"></i></span>
+                                        <input type="tel" name="whatsapp_number" id="customer_whatsapp" class="form-control"
+                                            placeholder="98765 43210" maxlength="20">
+                                    </div>
+                                </div>
+                                <span class="form-field-hint">Enter 10-digit WhatsApp number</span>
+                            </div>
 
                             {{-- Mobile --}}
-                            @include('partials.phone-input', [
-                                'name' => 'mobile_number',
-                                'id' => 'customer_mobile',
-                                'codeName' => 'mobile_country_code',
-                                'codeId' => 'customer_mobile_country_code',
-                                'label' => 'Mobile Number',
-                                'icon' => 'bi-telephone',
-                                'placeholder' => '98765 43210',
-                                'hint' => 'Enter 10-digit mobile number',
-                                'required' => true,
-                                'defaultCode' => '+91',
-                                'countryCodes' => $countryCodes
-                            ])
+                            <div class="form-field">
+                                <label for="customer_mobile" class="form-label">
+                                    Mobile Number <span>*</span>
+                                </label>
+                                <div class="phone-input-group">
+                                    <div class="phone-prefix-box">
+                                        <select name="mobile_country_code" id="customer_mobile_country_code" class="phone-prefix-select">
+                                            @foreach($countryCodes ?? [] as $code)
+                                                <option value="{{ $code->dial_code }}" {{ $code->is_default ? 'selected' : '' }} title="{{ $code->name }}">
+                                                    {{ $code->dial_code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="bi bi-chevron-down phone-prefix-arrow"></i>
+                                    </div>
+                                    <div class="phone-number-box">
+                                        <span class="form-field-icon"><i class="bi bi-telephone"></i></span>
+                                        <input type="tel" name="mobile_number" id="customer_mobile" class="form-control"
+                                            placeholder="98765 43210" maxlength="20">
+                                    </div>
+                                </div>
+                                <span class="form-field-hint">Enter 10-digit mobile number</span>
+                            </div>
 
                         </div>
                     </div>
@@ -354,14 +374,20 @@
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="confirm-modal-body">
-                    <div class="confirm-icon primary" id="confirmationIcon">
-                        <i class="bi bi-arrow-repeat"></i>
+                    <div class="confirm-icon warning" id="statusConfirmIcon">
+                        <i class="bi bi-exclamation-triangle"></i>
                     </div>
                     <h5 class="confirm-title" id="statusConfirmTitle">Change Status?</h5>
-                    <p class="confirm-message" id="statusConfirmMessage">Are you sure you want to change customer status?</p>
+                    <p class="confirm-message" id="statusConfirmMessage">
+                        Are you sure you want to change this customer's status?
+                    </p>
                     <div class="confirm-actions">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmStatusButton">Confirm</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="cancelStatusButton">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" id="confirmStatusButton">
+                            Confirm
+                        </button>
                     </div>
                 </div>
             </div>
@@ -372,15 +398,16 @@
     {{-- ========================================================= --}}
     {{-- DELETE CONFIRMATION MODAL --}}
     {{-- ========================================================= --}}
+
     <div class="modal fade premium-modal" id="deleteCustomerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="confirm-modal-body">
                     <div class="confirm-icon danger">
-                        <i class="bi bi-trash3-fill"></i>
+                        @include('partials.action-icons', ['type' => 'delete'])
                     </div>
                     <h5 class="confirm-title">Delete Customer?</h5>
-                    <p class="confirm-message" id="deleteCustomerMessage">Are you sure you want to delete this customer?</p>
+                    <p class="confirm-message" id="deleteCustomerMessage">This action cannot be undone.</p>
                     <div class="confirm-actions">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger" id="confirmDeleteCustomerButton">Delete</button>
@@ -390,12 +417,15 @@
         </div>
     </div>
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let statusCustomerId = null;
-            let statusTargetStatus = null;
+
+    @push('scripts')
+        <script>
             let deleteCustomerId = null;
+            let currentCustomerId = null;
+            let currentTargetStatus = null;
+
+            function triggerCustomerStatusToggle(customerId, customerName) {
+                const mobBtn = document.getElementById(`mob-cust-status-btn-${customerId}`);
                 const currentStatus = mobBtn ? mobBtn.dataset.status : 'active';
                 const targetStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
@@ -532,10 +562,8 @@
                 document.getElementById('customerModalTitle').textContent = 'Add Customer';
                 document.getElementById('customerModalSubtitle').textContent = 'Add a new customer to your salon.';
                 document.getElementById('customerSubmitButton').innerHTML = '<i class="bi bi-person-plus"></i> Create Customer';
-                if (window.setCountryCodeValue) {
-                    window.setCountryCodeValue('customer_mobile_country_code', '+91');
-                    window.setCountryCodeValue('customer_whatsapp_country_code', '+91');
-                }
+                document.getElementById('customer_mobile_country_code').value = '+91';
+                document.getElementById('customer_whatsapp_country_code').value = '+91';
             }
 
             function openEditCustomerModal(customer) {
@@ -547,13 +575,10 @@
                 document.getElementById('customerSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Customer';
 
                 document.getElementById('customer_name').value = customer.name ?? '';
+                document.getElementById('customer_mobile_country_code').value = customer.mobile_country_code || '+91';
                 document.getElementById('customer_mobile').value = customer.mobile_number ?? '';
+                document.getElementById('customer_whatsapp_country_code').value = customer.whatsapp_country_code || '+91';
                 document.getElementById('customer_whatsapp').value = customer.whatsapp_number ?? '';
-
-                if (window.setCountryCodeValue) {
-                    window.setCountryCodeValue('customer_mobile_country_code', customer.mobile_country_code || '+91');
-                    window.setCountryCodeValue('customer_whatsapp_country_code', customer.whatsapp_country_code || '+91');
-                }
             }
 
             function openDeleteCustomerModal(customerId, customerName) {
@@ -619,19 +644,6 @@
                     button.textContent = 'Delete';
                 }
             });
-
-            // Reinitialize country code dropdowns when modal is shown
-            const customerModalElement = document.getElementById('customerModal');
-            if (customerModalElement) {
-                customerModalElement.addEventListener('show.bs.modal', function () {
-                    setTimeout(() => {
-                        if (window.initCountryCodeDropdowns) {
-                            window.initCountryCodeDropdowns();
-                        }
-                    }, 100);
-                });
-            }
-        });
         </script>
     @endpush
 

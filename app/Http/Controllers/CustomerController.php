@@ -24,12 +24,14 @@ class CustomerController extends Controller
             ->withQueryString();
 
         $countryCodes = CountryCode::getActiveCodes();
+        $defaultCountryCode = CountryCode::getDefaultCode();
 
         return view('customers.index', compact(
             'customers',
             'search',
             'filter',
-            'countryCodes'
+            'countryCodes',
+            'defaultCountryCode'
         ));
     }
 

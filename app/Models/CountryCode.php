@@ -18,15 +18,6 @@ class CountryCode extends Model
         'is_default' => 'boolean',
     ];
 
-    public function getFlagAttribute(): string
-    {
-        if (empty($this->iso_code) || strlen($this->iso_code) < 2) {
-            return '🌐';
-        }
-        $code = strtoupper($this->iso_code);
-        return mb_chr(127397 + ord($code[0])) . mb_chr(127397 + ord($code[1]));
-    }
-
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -41,5 +32,15 @@ class CountryCode extends Model
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Get the configured default dial code.
+     */
+    public static function getDefaultCode()
+    {
+        return static::active()
+            ->where('is_default', true)
+            ->value('dial_code') ?? '+91';
     }
 }

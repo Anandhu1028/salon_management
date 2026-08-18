@@ -25,8 +25,9 @@ class StaffController extends Controller
             ->withQueryString();
 
         $countryCodes = CountryCode::getActiveCodes();
+        $defaultCountryCode = CountryCode::getDefaultCode();
 
-        return view('staff.index', compact('staff', 'search', 'filter', 'countryCodes'));
+        return view('staff.index', compact('staff', 'search', 'filter', 'countryCodes', 'defaultCountryCode'));
     }
 
     public function exportExcel(Request $request)

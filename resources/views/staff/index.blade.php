@@ -323,34 +323,54 @@
                             </div>
 
                             {{-- WhatsApp Number --}}
-                            @include('partials.phone-input', [
-                                'name' => 'whatsapp_number',
-                                'id' => 'staff_whatsapp',
-                                'codeName' => 'whatsapp_country_code',
-                                'codeId' => 'staff_whatsapp_country_code',
-                                'label' => 'WhatsApp Number',
-                                'icon' => 'bi-whatsapp',
-                                'placeholder' => '98765 43210',
-                                'hint' => 'Enter 10-digit WhatsApp number',
-                                'required' => true,
-                                'defaultCode' => '+91',
-                                'countryCodes' => $countryCodes
-                            ])
+                            <div class="form-field">
+                                <label for="staff_whatsapp" class="form-label">
+                                    WhatsApp Number <span>*</span>
+                                </label>
+                                <div class="phone-input-group">
+                                    <div class="phone-prefix-box">
+                                        <select name="whatsapp_country_code" id="staff_whatsapp_country_code" class="phone-prefix-select">
+                                            @foreach($countryCodes ?? [] as $code)
+                                                <option value="{{ $code->dial_code }}" {{ $code->is_default ? 'selected' : '' }} title="{{ $code->name }}">
+                                                    {{ $code->dial_code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="bi bi-chevron-down phone-prefix-arrow"></i>
+                                    </div>
+                                    <div class="phone-number-box">
+                                        <span class="form-field-icon"><i class="bi bi-whatsapp"></i></span>
+                                        <input type="tel" name="whatsapp_number" id="staff_whatsapp" class="form-control"
+                                            placeholder="98765 43210" maxlength="20">
+                                    </div>
+                                </div>
+                                <span class="form-field-hint">Enter 10-digit WhatsApp number</span>
+                            </div>
 
                             {{-- Mobile Number --}}
-                            @include('partials.phone-input', [
-                                'name' => 'mobile_number',
-                                'id' => 'staff_mobile',
-                                'codeName' => 'mobile_country_code',
-                                'codeId' => 'staff_mobile_country_code',
-                                'label' => 'Mobile Number',
-                                'icon' => 'bi-telephone',
-                                'placeholder' => '98765 43210',
-                                'hint' => 'Enter 10-digit mobile number',
-                                'required' => true,
-                                'defaultCode' => '+91',
-                                'countryCodes' => $countryCodes
-                            ])
+                            <div class="form-field">
+                                <label for="staff_mobile" class="form-label">
+                                    Mobile Number <span>*</span>
+                                </label>
+                                <div class="phone-input-group">
+                                    <div class="phone-prefix-box">
+                                        <select name="mobile_country_code" id="staff_mobile_country_code" class="phone-prefix-select">
+                                            @foreach($countryCodes ?? [] as $code)
+                                                <option value="{{ $code->dial_code }}" {{ $code->is_default ? 'selected' : '' }} title="{{ $code->name }}">
+                                                    {{ $code->dial_code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="bi bi-chevron-down phone-prefix-arrow"></i>
+                                    </div>
+                                    <div class="phone-number-box">
+                                        <span class="form-field-icon"><i class="bi bi-telephone"></i></span>
+                                        <input type="tel" name="mobile_number" id="staff_mobile" class="form-control"
+                                            placeholder="98765 43210" maxlength="20">
+                                    </div>
+                                </div>
+                                <span class="form-field-hint">Enter 10-digit mobile number</span>
+                            </div>
 
                         </div>
                     </div>
@@ -411,10 +431,8 @@
             document.getElementById('staffModalSubtitle').textContent = 'Add a new staff member to your salon.';
             document.getElementById('staffSubmitButton').innerHTML = '<i class="bi bi-plus-circle"></i> Create Staff';
             document.getElementById('staff_status').value = 'active';
-            if (window.setCountryCodeValue) {
-                window.setCountryCodeValue('staff_mobile_country_code', '+91');
-                window.setCountryCodeValue('staff_whatsapp_country_code', '+91');
-            }
+            document.getElementById('staff_mobile_country_code').value = '+91';
+            document.getElementById('staff_whatsapp_country_code').value = '+91';
         }
 
         function openEditStaffModal(staff) {
@@ -426,14 +444,11 @@
             document.getElementById('staffSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Staff';
 
             document.getElementById('staff_name').value = staff.name ?? '';
+            document.getElementById('staff_mobile_country_code').value = staff.mobile_country_code || '+91';
             document.getElementById('staff_mobile').value = staff.mobile_number ?? '';
+            document.getElementById('staff_whatsapp_country_code').value = staff.whatsapp_country_code || '+91';
             document.getElementById('staff_whatsapp').value = staff.whatsapp_number ?? '';
             document.getElementById('staff_status').value = staff.status ?? 'active';
-
-            if (window.setCountryCodeValue) {
-                window.setCountryCodeValue('staff_mobile_country_code', staff.mobile_country_code || '+91');
-                window.setCountryCodeValue('staff_whatsapp_country_code', staff.whatsapp_country_code || '+91');
-            }
         }
 
         function triggerStaffStatusToggle(staffId, staffName) {
@@ -554,18 +569,6 @@
                 mobDot.className = 'pli-mob-status-dot ' + (isActive ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive');
                 mobDot.title = isActive ? 'Active' : 'Inactive';
             }
-        }
-
-        // Reinitialize country code dropdowns when modal is shown
-        const staffModalElement = document.getElementById('staffModal');
-        if (staffModalElement) {
-            staffModalElement.addEventListener('show.bs.modal', function () {
-                setTimeout(() => {
-                    if (window.initCountryCodeDropdowns) {
-                        window.initCountryCodeDropdowns();
-                    }
-                }, 100);
-            });
         }
     </script>
 @endpush
