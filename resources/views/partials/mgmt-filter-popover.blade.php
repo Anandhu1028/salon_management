@@ -28,7 +28,7 @@
     } elseif ($module === 'staff' || $module === 'customers') {
         $filteredParams = [
             'name' => request('name', ''),
-            'email' => request('email', ''),
+            'whatsapp' => request('whatsapp', ''),
             'contact' => request('contact', ''),
             'status' => request('status', request('filter', '')),
         ];
@@ -237,19 +237,19 @@
                         </div>
                     </div>
 
-                    {{-- Email --}}
+                    {{-- WhatsApp --}}
                     <div class="filter-group">
-                        <label class="filter-label" for="filter_staff_email">
-                            <i class="bi bi-envelope"></i> Email
+                        <label class="filter-label" for="filter_staff_whatsapp">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
                         </label>
                         <div class="filter-input-wrap">
                             <input
                                 type="text"
-                                name="email"
-                                id="filter_staff_email"
+                                name="whatsapp"
+                                id="filter_staff_whatsapp"
                                 class="filter-input"
-                                placeholder="Search email address..."
-                                value="{{ request('email', '') }}"
+                                placeholder="Search WhatsApp number..."
+                                value="{{ request('whatsapp', '') }}"
                             >
                         </div>
                     </div>
@@ -315,19 +315,19 @@
                         </div>
                     </div>
 
-                    {{-- Email --}}
+                    {{-- WhatsApp --}}
                     <div class="filter-group">
-                        <label class="filter-label" for="filter_cust_email">
-                            <i class="bi bi-envelope"></i> Email
+                        <label class="filter-label" for="filter_cust_whatsapp">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
                         </label>
                         <div class="filter-input-wrap">
                             <input
                                 type="text"
-                                name="email"
-                                id="filter_cust_email"
+                                name="whatsapp"
+                                id="filter_cust_whatsapp"
                                 class="filter-input"
-                                placeholder="Search email address..."
-                                value="{{ request('email', '') }}"
+                                placeholder="Search WhatsApp number..."
+                                value="{{ request('whatsapp', '') }}"
                             >
                         </div>
                     </div>

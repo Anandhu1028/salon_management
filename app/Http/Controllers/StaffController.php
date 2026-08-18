@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ExportsManagementList;
+use App\Models\CountryCode;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -23,18 +24,20 @@ class StaffController extends Controller
             ->paginate(9)
             ->withQueryString();
 
-        return view('staff.index', compact('staff', 'search', 'filter'));
+        $countryCodes = CountryCode::getActiveCodes();
+
+        return view('staff.index', compact('staff', 'search', 'filter', 'countryCodes'));
     }
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Name', 'Email', 'Mobile', 'Status'];
+        $headers = ['Name', 'WhatsApp', 'Mobile', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(Staff $staff) => [
                 $staff->name,
-                $staff->email ?: '—',
-                $staff->mobile_number ?: '—',
+                $staff->whatsapp_number ? ($staff->whatsapp_country_code . ' ' . $staff->whatsapp_number) : '—',
+                $staff->mobile_number ? ($staff->mobile_country_code . ' ' . $staff->mobile_number) : '—',
                 ucfirst($staff->status),
             ]
         );
@@ -44,13 +47,13 @@ class StaffController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Name', 'Email', 'Mobile', 'Status'];
+        $headers = ['Name', 'WhatsApp', 'Mobile', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(Staff $staff) => [
                 $staff->name,
-                $staff->email ?: '—',
-                $staff->mobile_number ?: '—',
+                $staff->whatsapp_number ? ($staff->whatsapp_country_code . ' ' . $staff->whatsapp_number) : '—',
+                $staff->mobile_number ? ($staff->mobile_country_code . ' ' . $staff->mobile_number) : '—',
                 ucfirst($staff->status),
             ]
         );
@@ -76,13 +79,25 @@ class StaffController extends Controller
                 'max:150',
             ],
 
-            'email' => [
+            'mobile_country_code' => [
                 'nullable',
-                'email',
-                'max:255',
+                'string',
+                'max:5',
             ],
 
             'mobile_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'whatsapp_country_code' => [
+                'nullable',
+                'string',
+                'max:5',
+            ],
+
+            'whatsapp_number' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -113,13 +128,25 @@ class StaffController extends Controller
                 'max:150',
             ],
 
-            'email' => [
+            'mobile_country_code' => [
                 'nullable',
-                'email',
-                'max:255',
+                'string',
+                'max:5',
             ],
 
             'mobile_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'whatsapp_country_code' => [
+                'nullable',
+                'string',
+                'max:5',
+            ],
+
+            'whatsapp_number' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -164,7 +191,7 @@ class StaffController extends Controller
     {
         $search = trim($request->input('search', ''));
         $name = trim($request->input('name', ''));
-        $email = trim($request->input('email', ''));
+        $whatsapp = trim($request->input('whatsapp', ''));
         $contact = trim($request->input('contact', ''));
         $status = trim($request->input('status', $request->input('filter', '')));
 
@@ -172,12 +199,12 @@ class StaffController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('whatsapp_number', 'like', "%{$search}%")
                         ->orWhere('mobile_number', 'like', "%{$search}%");
                 });
             })
             ->when($name !== '', fn ($q) => $q->where('name', 'like', "%{$name}%"))
-            ->when($email !== '', fn ($q) => $q->where('email', 'like', "%{$email}%"))
+            ->when($whatsapp !== '', fn ($q) => $q->where('whatsapp_number', 'like', "%{$whatsapp}%"))
             ->when($contact !== '', fn ($q) => $q->where('mobile_number', 'like', "%{$contact}%"))
             ->when(in_array($status, ['active', 'inactive'], true), function ($query) use ($status) {
                 $query->where('status', $status);

@@ -134,7 +134,7 @@
                     <div class="premium-list-head">
                         <span class="pli-head-cell col-center">#</span>
                         <span class="pli-head-cell col-left">Name</span>
-                        <span class="pli-head-cell col-center">Email</span>
+                        <span class="pli-head-cell col-center">WhatsApp</span>
                         <span class="pli-head-cell col-center">Contact</span>
                         <span class="pli-head-cell col-center">Status</span>
                         <span class="pli-head-cell col-center">Actions</span>
@@ -151,21 +151,21 @@
                                     </div>
                                     <div class="pli-name-stack">
                                         <span class="pli-title staff-name">{{ $member->name }}</span>
-                                        @if($member->email)
-                                            <span class="pli-subtext pli-staff-email d-md-none"><i class="bi bi-envelope"></i> {{ $member->email }}</span>
+                                        @if($member->whatsapp_number)
+                                            <span class="pli-subtext pli-staff-whatsapp d-md-none"><i class="bi bi-whatsapp text-success"></i> {{ $member->whatsapp_country_code ? $member->whatsapp_country_code . ' ' : '' }}{{ $member->whatsapp_number }}</span>
                                         @endif
                                         @if($member->mobile_number)
-                                            <span class="pli-subtext pli-staff-phone d-md-none"><i class="bi bi-telephone"></i> {{ $member->mobile_number }}</span>
+                                            <span class="pli-subtext pli-staff-phone d-md-none"><i class="bi bi-telephone"></i> {{ $member->mobile_country_code ? $member->mobile_country_code . ' ' : '' }}{{ $member->mobile_number }}</span>
                                         @endif
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pli-col col-center pli-col-email">
-                                @if($member->email)
+                            <div class="pli-col col-center pli-col-whatsapp">
+                                @if($member->whatsapp_number)
                                     <div class="pli-contact-cell">
-                                        @include('partials.contact-icons', ['type' => 'mail'])
-                                        <span class="pli-col-text">{{ $member->email }}</span>
+                                        @include('partials.contact-icons', ['type' => 'whatsapp'])
+                                        <span class="pli-col-text">{{ $member->whatsapp_country_code ? $member->whatsapp_country_code . ' ' : '' }}{{ $member->whatsapp_number }}</span>
                                     </div>
                                 @else
                                     <span class="pli-col-text text-muted">—</span>
@@ -176,7 +176,7 @@
                                 @if($member->mobile_number)
                                     <div class="pli-contact-cell">
                                         @include('partials.contact-icons', ['type' => 'phone'])
-                                        <span class="pli-col-text">{{ $member->mobile_number }}</span>
+                                        <span class="pli-col-text">{{ $member->mobile_country_code ? $member->mobile_country_code . ' ' : '' }}{{ $member->mobile_number }}</span>
                                     </div>
                                 @else
                                     <span class="pli-col-text text-muted">—</span>
@@ -322,29 +322,35 @@
                                 </select>
                             </div>
 
-                            {{-- Email --}}
-                            <div class="form-field">
-                                <label for="staff_email" class="form-label">
-                                    Email Address
-                                </label>
-                                <div class="field-control-wrap">
-                                    <span class="form-field-icon"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" name="email" id="staff_email" class="form-control"
-                                        placeholder="e.g. staff@salon.com">
-                                </div>
-                            </div>
+                            {{-- WhatsApp Number --}}
+                            @include('partials.phone-input', [
+                                'name' => 'whatsapp_number',
+                                'id' => 'staff_whatsapp',
+                                'codeName' => 'whatsapp_country_code',
+                                'codeId' => 'staff_whatsapp_country_code',
+                                'label' => 'WhatsApp Number',
+                                'icon' => 'bi-whatsapp',
+                                'placeholder' => '98765 43210',
+                                'hint' => 'Enter 10-digit WhatsApp number',
+                                'required' => true,
+                                'defaultCode' => '+91',
+                                'countryCodes' => $countryCodes
+                            ])
 
                             {{-- Mobile Number --}}
-                            <div class="form-field">
-                                <label for="staff_mobile" class="form-label">
-                                    Mobile Number
-                                </label>
-                                <div class="field-control-wrap">
-                                    <span class="form-field-icon"><i class="bi bi-telephone"></i></span>
-                                    <input type="text" name="mobile_number" id="staff_mobile" class="form-control"
-                                        placeholder="e.g. +91 98765 43210" maxlength="20">
-                                </div>
-                            </div>
+                            @include('partials.phone-input', [
+                                'name' => 'mobile_number',
+                                'id' => 'staff_mobile',
+                                'codeName' => 'mobile_country_code',
+                                'codeId' => 'staff_mobile_country_code',
+                                'label' => 'Mobile Number',
+                                'icon' => 'bi-telephone',
+                                'placeholder' => '98765 43210',
+                                'hint' => 'Enter 10-digit mobile number',
+                                'required' => true,
+                                'defaultCode' => '+91',
+                                'countryCodes' => $countryCodes
+                            ])
 
                         </div>
                     </div>
@@ -405,6 +411,10 @@
             document.getElementById('staffModalSubtitle').textContent = 'Add a new staff member to your salon.';
             document.getElementById('staffSubmitButton').innerHTML = '<i class="bi bi-plus-circle"></i> Create Staff';
             document.getElementById('staff_status').value = 'active';
+            if (window.setCountryCodeValue) {
+                window.setCountryCodeValue('staff_mobile_country_code', '+91');
+                window.setCountryCodeValue('staff_whatsapp_country_code', '+91');
+            }
         }
 
         function openEditStaffModal(staff) {
@@ -416,9 +426,14 @@
             document.getElementById('staffSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Staff';
 
             document.getElementById('staff_name').value = staff.name ?? '';
-            document.getElementById('staff_email').value = staff.email ?? '';
             document.getElementById('staff_mobile').value = staff.mobile_number ?? '';
+            document.getElementById('staff_whatsapp').value = staff.whatsapp_number ?? '';
             document.getElementById('staff_status').value = staff.status ?? 'active';
+
+            if (window.setCountryCodeValue) {
+                window.setCountryCodeValue('staff_mobile_country_code', staff.mobile_country_code || '+91');
+                window.setCountryCodeValue('staff_whatsapp_country_code', staff.whatsapp_country_code || '+91');
+            }
         }
 
         function triggerStaffStatusToggle(staffId, staffName) {
@@ -539,6 +554,18 @@
                 mobDot.className = 'pli-mob-status-dot ' + (isActive ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive');
                 mobDot.title = isActive ? 'Active' : 'Inactive';
             }
+        }
+
+        // Reinitialize country code dropdowns when modal is shown
+        const staffModalElement = document.getElementById('staffModal');
+        if (staffModalElement) {
+            staffModalElement.addEventListener('show.bs.modal', function () {
+                setTimeout(() => {
+                    if (window.initCountryCodeDropdowns) {
+                        window.initCountryCodeDropdowns();
+                    }
+                }, 100);
+            });
         }
     </script>
 @endpush

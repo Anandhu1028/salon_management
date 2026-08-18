@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ExportsManagementList;
+use App\Models\CountryCode;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 
@@ -22,22 +23,25 @@ class CustomerController extends Controller
             ->paginate(9)
             ->withQueryString();
 
+        $countryCodes = CountryCode::getActiveCodes();
+
         return view('customers.index', compact(
             'customers',
             'search',
-            'filter'
+            'filter',
+            'countryCodes'
         ));
     }
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Name', 'Email', 'Mobile', 'Joined'];
+        $headers = ['Name', 'WhatsApp', 'Mobile', 'Joined'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn (Customer $customer) => [
                 $customer->name,
-                $customer->email ?: '—',
-                $customer->mobile_number ?: '—',
+                $customer->whatsapp_number ? ($customer->whatsapp_country_code . ' ' . $customer->whatsapp_number) : '—',
+                $customer->mobile_number ? ($customer->mobile_country_code . ' ' . $customer->mobile_number) : '—',
                 $customer->created_at?->format('d M Y') ?? '—',
             ]
         );
@@ -47,13 +51,13 @@ class CustomerController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Name', 'Email', 'Mobile', 'Joined'];
+        $headers = ['Name', 'WhatsApp', 'Mobile', 'Joined'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn (Customer $customer) => [
                 $customer->name,
-                $customer->email ?: '—',
-                $customer->mobile_number ?: '—',
+                $customer->whatsapp_number ? ($customer->whatsapp_country_code . ' ' . $customer->whatsapp_number) : '—',
+                $customer->mobile_number ? ($customer->mobile_country_code . ' ' . $customer->mobile_number) : '—',
                 $customer->created_at?->format('d M Y') ?? '—',
             ]
         );
@@ -79,13 +83,25 @@ class CustomerController extends Controller
                 'max:150',
             ],
 
-            'email' => [
+            'mobile_country_code' => [
                 'nullable',
-                'email',
-                'max:255',
+                'string',
+                'max:5',
             ],
 
             'mobile_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'whatsapp_country_code' => [
+                'nullable',
+                'string',
+                'max:5',
+            ],
+
+            'whatsapp_number' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -116,13 +132,25 @@ class CustomerController extends Controller
                 'max:150',
             ],
 
-            'email' => [
+            'mobile_country_code' => [
                 'nullable',
-                'email',
-                'max:255',
+                'string',
+                'max:5',
             ],
 
             'mobile_number' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'whatsapp_country_code' => [
+                'nullable',
+                'string',
+                'max:5',
+            ],
+
+            'whatsapp_number' => [
                 'nullable',
                 'string',
                 'max:20',
@@ -172,7 +200,7 @@ class CustomerController extends Controller
         $search = trim($request->input('search', ''));
         $filter = trim($request->input('filter', ''));
         $name = trim($request->input('name', ''));
-        $email = trim($request->input('email', ''));
+        $whatsapp = trim($request->input('whatsapp', ''));
         $contact = trim($request->input('contact', ''));
         $status = trim($request->input('status', $filter));
 
@@ -186,7 +214,7 @@ class CustomerController extends Controller
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('whatsapp_number', 'like', "%{$search}%")
                         ->orWhere(
                             'mobile_number',
                             'like',
@@ -195,10 +223,10 @@ class CustomerController extends Controller
                 });
             })
             ->when($name !== '', fn ($q) => $q->where('name', 'like', "%{$name}%"))
-            ->when($email !== '', fn ($q) => $q->where('email', 'like', "%{$email}%"))
+            ->when($whatsapp !== '', fn ($q) => $q->where('whatsapp_number', 'like', "%{$whatsapp}%"))
             ->when($contact !== '', fn ($q) => $q->where('mobile_number', 'like', "%{$contact}%"))
-            ->when($filter === 'with_email', function ($q) {
-                $q->whereNotNull('email')->where('email', '!=', '');
+            ->when($filter === 'with_whatsapp', function ($q) {
+                $q->whereNotNull('whatsapp_number')->where('whatsapp_number', '!=', '');
             })
             ->when($filter === 'new_month', function ($q) {
                 $q->where('created_at', '>=', now()->startOfMonth());

@@ -1584,15 +1584,16 @@
 .field-control-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     height: 50px;
     min-height: 50px;
-    padding: 0 14px;
+    padding: 0 12px;
     background: #FFFFFF;
     border: 1.5px solid #E2E8F0;
     border-radius: 12px;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
     transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    position: relative;
 }
 
 .field-control-wrap:focus-within {
@@ -1603,14 +1604,18 @@
 
 .field-control-wrap .form-control {
     border: 0 !important;
+    outline: none !important;
     background: transparent !important;
     box-shadow: none !important;
-    padding: 0 !important;
+    padding: 0 4px !important;
     height: 100% !important;
     min-height: auto !important;
     color: #1E293B !important;
     font-size: 0.88rem !important;
     font-weight: 500;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
 }
 
 .field-control-wrap .form-control::placeholder {
@@ -1621,6 +1626,148 @@
 .field-control-wrap .form-control:focus {
     outline: none !important;
     box-shadow: none !important;
+}
+
+/* ── Phone Input Group (Country code pill + Input box) ───────── */
+.phone-input-group {
+    display: flex;
+    align-items: stretch;
+    height: 50px;
+    min-height: 50px;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    overflow: hidden;
+}
+
+.phone-input-group:focus-within {
+    background: #FFFFFF;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
+}
+
+/* Left prefix box */
+.phone-prefix-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 78px;
+    min-width: 78px;
+    background: #F8FAFC;
+    border-right: 1.5px solid #E2E8F0;
+    padding: 0 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.phone-input-group:focus-within .phone-prefix-box {
+    background: #F5F3FF;
+    border-right-color: #EDE9FE;
+}
+
+.phone-prefix-select,
+.premium-modal .phone-prefix-box select.phone-prefix-select {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 14px 0 2px !important;
+    color: #1E293B !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-align: center;
+}
+
+.phone-prefix-select:focus,
+.premium-modal .phone-prefix-box select.phone-prefix-select:focus {
+    outline: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.phone-prefix-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #64748B;
+    pointer-events: none;
+    transition: color 0.15s ease;
+}
+
+.phone-input-group:focus-within .phone-prefix-arrow {
+    color: #7C5CF6;
+}
+
+/* Right number box */
+.phone-number-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+    background: #FFFFFF;
+}
+
+.phone-number-box .form-field-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: #F3F0FF;
+    color: #7C5CF6;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(124, 92, 246, 0.08);
+}
+
+.phone-number-box .form-control {
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: 100% !important;
+    min-height: auto !important;
+    color: #1E293B !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+}
+
+.phone-number-box .form-control::placeholder {
+    color: #94A3B8;
+    opacity: 1;
+    font-size: 0.88rem;
+}
+
+.phone-number-box .form-control:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.form-field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: #64748B;
+    font-weight: 400;
 }
 
 /* Form field leading icon badge */
@@ -1637,6 +1784,12 @@
     font-size: 15px;
     flex-shrink: 0;
     box-shadow: 0 1px 2px rgba(124, 92, 246, 0.08);
+}
+
+.form-field-icon--whatsapp {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.08) !important;
 }
 
 .form-field-icon--dot {

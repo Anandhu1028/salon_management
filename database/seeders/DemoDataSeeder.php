@@ -26,17 +26,17 @@ class DemoDataSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $staff = [
-            ['name' => 'Anandhu K', 'email' => 'anandhu@gmail.com', 'mobile_number' => '97463274402', 'status' => 'active'],
-            ['name' => 'Priya Sharma', 'email' => 'priya.sharma@salonpro.com', 'mobile_number' => '9876543210', 'status' => 'active'],
-            ['name' => 'Rahul Menon', 'email' => 'rahul.m@salonpro.com', 'mobile_number' => '9123456780', 'status' => 'active'],
-            ['name' => 'Sneha Patel', 'email' => 'sneha.p@salonpro.com', 'mobile_number' => '9988776655', 'status' => 'active'],
-            ['name' => 'Arjun Nair', 'email' => 'arjun.n@salonpro.com', 'mobile_number' => '9012345678', 'status' => 'inactive'],
-            ['name' => 'Meera Thomas', 'email' => null, 'mobile_number' => '8899776655', 'status' => 'active'],
-            ['name' => 'Divya Krishnan', 'email' => 'divya.k@salonpro.com', 'mobile_number' => '8765432109', 'status' => 'active'],
-            ['name' => 'Vikram Singh', 'email' => 'vikram.s@salonpro.com', 'mobile_number' => '8654321098', 'status' => 'active'],
-            ['name' => 'Nisha Gupta', 'email' => 'nisha.g@salonpro.com', 'mobile_number' => '8543210987', 'status' => 'inactive'],
-            ['name' => 'Karan Desai', 'email' => 'karan.d@salonpro.com', 'mobile_number' => '8432109876', 'status' => 'active'],
-            ['name' => 'Pooja Reddy', 'email' => 'pooja.r@salonpro.com', 'mobile_number' => '8321098765', 'status' => 'active'],
+            ['name' => 'Anandhu K', 'mobile_country_code' => '+91', 'mobile_number' => '9746327440', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9746327440', 'status' => 'active'],
+            ['name' => 'Priya Sharma', 'mobile_country_code' => '+91', 'mobile_number' => '9876543210', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9876543210', 'status' => 'active'],
+            ['name' => 'Rahul Menon', 'mobile_country_code' => '+91', 'mobile_number' => '9123456780', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9123456780', 'status' => 'active'],
+            ['name' => 'Sneha Patel', 'mobile_country_code' => '+91', 'mobile_number' => '9988776655', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9988776655', 'status' => 'active'],
+            ['name' => 'Arjun Nair', 'mobile_country_code' => '+91', 'mobile_number' => '9012345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9012345678', 'status' => 'inactive'],
+            ['name' => 'Meera Thomas', 'mobile_country_code' => '+91', 'mobile_number' => '8899776655', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8899776655', 'status' => 'active'],
+            ['name' => 'Divya Krishnan', 'mobile_country_code' => '+91', 'mobile_number' => '8765432109', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8765432109', 'status' => 'active'],
+            ['name' => 'Vikram Singh', 'mobile_country_code' => '+91', 'mobile_number' => '8654321098', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8654321098', 'status' => 'active'],
+            ['name' => 'Nisha Gupta', 'mobile_country_code' => '+91', 'mobile_number' => '8543210987', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8543210987', 'status' => 'inactive'],
+            ['name' => 'Karan Desai', 'mobile_country_code' => '+91', 'mobile_number' => '8432109876', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8432109876', 'status' => 'active'],
+            ['name' => 'Pooja Reddy', 'mobile_country_code' => '+91', 'mobile_number' => '8321098765', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8321098765', 'status' => 'active'],
         ];
 
         $staffModels = [];
@@ -45,18 +45,18 @@ class DemoDataSeeder extends Seeder
         }
 
         $customers = [
-            ['name' => 'Aisha Khan', 'email' => 'aisha.khan@gmail.com', 'mobile_number' => '9812345678'],
-            ['name' => 'David Joseph', 'email' => 'david.j@outlook.com', 'mobile_number' => '9823456789'],
-            ['name' => 'Fatima Ali', 'email' => 'fatima.ali@gmail.com', 'mobile_number' => '9834567890'],
-            ['name' => 'George Mathew', 'email' => null, 'mobile_number' => '9845678901'],
-            ['name' => 'Hema Reddy', 'email' => 'hema.reddy@gmail.com', 'mobile_number' => '9856789012'],
-            ['name' => 'Ibrahim Shah', 'email' => 'ibrahim.s@gmail.com', 'mobile_number' => '9867890123'],
-            ['name' => 'Jyoti Verma', 'email' => 'jyoti.v@gmail.com', 'mobile_number' => '9878901234'],
-            ['name' => 'Kevin D\'Souza', 'email' => 'kevin.d@gmail.com', 'mobile_number' => '9889012345'],
-            ['name' => 'Lakshmi Iyer', 'email' => 'lakshmi.i@gmail.com', 'mobile_number' => '9890123456'],
-            ['name' => 'Manoj Pillai', 'email' => 'manoj.p@gmail.com', 'mobile_number' => '9901234567'],
-            ['name' => 'Neha Kapoor', 'email' => 'neha.k@gmail.com', 'mobile_number' => '9912345678'],
-            ['name' => 'Rohit Saxena', 'email' => 'rohit.s@gmail.com', 'mobile_number' => '9923456789'],
+            ['name' => 'Aisha Khan', 'mobile_country_code' => '+91', 'mobile_number' => '9812345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9812345678'],
+            ['name' => 'David Joseph', 'mobile_country_code' => '+91', 'mobile_number' => '9823456789', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9823456789'],
+            ['name' => 'Fatima Ali', 'mobile_country_code' => '+91', 'mobile_number' => '9834567890', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9834567890'],
+            ['name' => 'George Mathew', 'mobile_country_code' => '+91', 'mobile_number' => '9845678901', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9845678901'],
+            ['name' => 'Hema Reddy', 'mobile_country_code' => '+91', 'mobile_number' => '9856789012', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9856789012'],
+            ['name' => 'Ibrahim Shah', 'mobile_country_code' => '+91', 'mobile_number' => '9867890123', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9867890123'],
+            ['name' => 'Jyoti Verma', 'mobile_country_code' => '+91', 'mobile_number' => '9878901234', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9878901234'],
+            ['name' => 'Kevin D\'Souza', 'mobile_country_code' => '+91', 'mobile_number' => '9889012345', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9889012345'],
+            ['name' => 'Lakshmi Iyer', 'mobile_country_code' => '+91', 'mobile_number' => '9890123456', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9890123456'],
+            ['name' => 'Manoj Pillai', 'mobile_country_code' => '+91', 'mobile_number' => '9901234567', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9901234567'],
+            ['name' => 'Neha Kapoor', 'mobile_country_code' => '+91', 'mobile_number' => '9912345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9912345678'],
+            ['name' => 'Rohit Saxena', 'mobile_country_code' => '+91', 'mobile_number' => '9923456789', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9923456789'],
         ];
 
         $customerModels = [];

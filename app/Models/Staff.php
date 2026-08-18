@@ -10,8 +10,10 @@ class Staff extends Model
 
     protected $fillable = [
         'name',
-        'email',
+        'mobile_country_code',
         'mobile_number',
+        'whatsapp_country_code',
+        'whatsapp_number',
         'status',
     ];
 

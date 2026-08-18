@@ -20,29 +20,29 @@ class DashboardDemoDataSeeder extends Seeder
         $now = now();
 
         foreach ([
-            ['name' => 'Anjali Nair', 'email' => 'anjali.nair@salonpro.test', 'mobile_number' => '9001001001', 'status' => 'active'],
-            ['name' => 'Rohan Varma', 'email' => 'rohan.varma@salonpro.test', 'mobile_number' => '9001001002', 'status' => 'active'],
-            ['name' => 'Kavya Iyer', 'email' => 'kavya.iyer@salonpro.test', 'mobile_number' => '9001001003', 'status' => 'active'],
-            ['name' => 'Sanjay Kumar', 'email' => 'sanjay.kumar@salonpro.test', 'mobile_number' => '9001001004', 'status' => 'inactive'],
+            ['name' => 'Anjali Nair', 'mobile_country_code' => '+91', 'mobile_number' => '9001001001', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001001', 'status' => 'active'],
+            ['name' => 'Rohan Varma', 'mobile_country_code' => '+91', 'mobile_number' => '9001001002', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001002', 'status' => 'active'],
+            ['name' => 'Kavya Iyer', 'mobile_country_code' => '+91', 'mobile_number' => '9001001003', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001003', 'status' => 'active'],
+            ['name' => 'Sanjay Kumar', 'mobile_country_code' => '+91', 'mobile_number' => '9001001004', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001004', 'status' => 'inactive'],
         ] as $row) {
-            Staff::firstOrCreate(['email' => $row['email']], $row);
+            Staff::firstOrCreate(['name' => $row['name']], $row);
         }
 
         $customerRows = [
-            ['name' => 'Nandita Bose', 'email' => 'nandita.bose@example.test', 'mobile_number' => '9002001001'],
-            ['name' => 'Aditya Rao', 'email' => 'aditya.rao@example.test', 'mobile_number' => '9002001002'],
-            ['name' => 'Sana Mirza', 'email' => 'sana.mirza@example.test', 'mobile_number' => '9002001003'],
-            ['name' => 'Vivek Nambiar', 'email' => 'vivek.nambiar@example.test', 'mobile_number' => '9002001004'],
-            ['name' => 'Ishita Das', 'email' => 'ishita.das@example.test', 'mobile_number' => '9002001005'],
-            ['name' => 'Harish Babu', 'email' => 'harish.babu@example.test', 'mobile_number' => '9002001006'],
-            ['name' => 'Riya Choudhary', 'email' => 'riya.choudhary@example.test', 'mobile_number' => '9002001007'],
-            ['name' => 'Joel Fernandes', 'email' => 'joel.fernandes@example.test', 'mobile_number' => '9002001008'],
-            ['name' => 'Tanvi Kulkarni', 'email' => 'tanvi.kulkarni@example.test', 'mobile_number' => '9002001009'],
-            ['name' => 'Farhan Siddiqui', 'email' => 'farhan.siddiqui@example.test', 'mobile_number' => '9002001010'],
+            ['name' => 'Nandita Bose', 'mobile_country_code' => '+91', 'mobile_number' => '9002001001', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001001'],
+            ['name' => 'Aditya Rao', 'mobile_country_code' => '+91', 'mobile_number' => '9002001002', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001002'],
+            ['name' => 'Sana Mirza', 'mobile_country_code' => '+91', 'mobile_number' => '9002001003', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001003'],
+            ['name' => 'Vivek Nambiar', 'mobile_country_code' => '+91', 'mobile_number' => '9002001004', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001004'],
+            ['name' => 'Ishita Das', 'mobile_country_code' => '+91', 'mobile_number' => '9002001005', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001005'],
+            ['name' => 'Harish Babu', 'mobile_country_code' => '+91', 'mobile_number' => '9002001006', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001006'],
+            ['name' => 'Riya Choudhary', 'mobile_country_code' => '+91', 'mobile_number' => '9002001007', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001007'],
+            ['name' => 'Joel Fernandes', 'mobile_country_code' => '+91', 'mobile_number' => '9002001008', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001008'],
+            ['name' => 'Tanvi Kulkarni', 'mobile_country_code' => '+91', 'mobile_number' => '9002001009', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001009'],
+            ['name' => 'Farhan Siddiqui', 'mobile_country_code' => '+91', 'mobile_number' => '9002001010', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001010'],
         ];
 
         $customers = collect($customerRows)->map(function (array $row, int $index) use ($now) {
-            $customer = Customer::firstOrCreate(['email' => $row['email']], $row);
+            $customer = Customer::firstOrCreate(['name' => $row['name']], $row);
             if ($customer->wasRecentlyCreated) {
                 $customer->forceFill(['created_at' => $now->copy()->subDays(155 - ($index * 11))])->saveQuietly();
             }
