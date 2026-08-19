@@ -91,6 +91,100 @@
     padding: 0 16px 18px;
 }
 
+/* ============================================================
+   PREMIUM JOB CARD LIST — PROPER 8-COLUMN GRID
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .premium-list-head,
+.job-card-page .premium-list--jobs .premium-list-item {
+    display: grid !important;
+    grid-template-columns: var(--pli-grid) !important;
+    column-gap: 12px !important;
+    align-items: center !important;
+}
+
+
+/* ============================================================
+   ACTIONS COLUMN — ALWAYS COLUMN 8
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .pli-col-actions {
+    grid-column: 8 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 6px !important;
+    white-space: nowrap !important;
+}
+
+
+/* Action buttons stay on ONE LINE */
+.job-card-page .premium-list--jobs .pli-action-buttons-desktop {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+}
+
+
+/* ============================================================
+   HEADER — ACTIONS
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .premium-list-head
+.pli-head-cell:last-child {
+    grid-column: 8 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+
+/* ============================================================
+   AMOUNT
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .pli-col-amount {
+    grid-column: 7 !important;
+    grid-row: 1 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+
+/* ============================================================
+   BUTTON SIZE
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .pli-btn-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    flex: 0 0 34px !important;
+}
+
+
+/* ============================================================
+   PREVENT CONTENT FROM BREAKING THE GRID
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .premium-list-item > * {
+    min-width: 0;
+}
+
 .job-card-page .premium-list--jobs .premium-list-head {
     background: linear-gradient(135deg, #F8FAFF 0%, #EEF2FF 52%, #F5F3FF 100%);
     border: 1px solid #E0E7FF;
