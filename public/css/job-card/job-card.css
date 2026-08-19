@@ -1379,3 +1379,322 @@
     flex: 1;
     min-width: 0;
 }
+/* ============================================================
+   JOB CARD ACTIONS — PREMIUM 3 DOT MENU
+   ============================================================ */
+
+.job-card-page .pli-col-actions {
+    position: relative;
+    overflow: visible !important;
+}
+
+
+/* Wrapper */
+.job-card-page .pli-action-menu-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ============================================================
+   THREE DOT BUTTON
+   ============================================================ */
+
+.job-card-page .pli-action-dots {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #DCE3ED;
+    border-radius: 9px;
+
+    background: linear-gradient(
+        145deg,
+        #FFFFFF 0%,
+        #F8FAFC 100%
+    );
+
+    color: #64748B;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        inset 0 1px 0 rgba(255,255,255,.8);
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.job-card-page .pli-action-dots i {
+    font-size: 15px;
+    line-height: 1;
+}
+
+
+.job-card-page .pli-action-dots:hover,
+.job-card-page .pli-action-dots.is-open {
+    background: #F8FAFF;
+    border-color: #C7D2FE;
+    color: #4F46E5;
+
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.12),
+        0 0 0 3px rgba(99, 102, 241, 0.06);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   SMALL ACTION POPOVER
+   ============================================================ */
+
+.job-card-page .pli-action-popover {
+    position: absolute;
+
+    top: calc(100% + 7px);
+    right: 0;
+
+    width: 185px;
+
+    padding: 6px;
+
+    background: rgba(255,255,255,.98);
+
+    border: 1px solid #E2E8F0;
+    border-radius: 13px;
+
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.14),
+        0 5px 12px rgba(15, 23, 42, 0.07);
+
+    backdrop-filter: blur(10px);
+
+    z-index: 100;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform:
+        translateY(-5px)
+        scale(.97);
+
+    transform-origin: top right;
+
+    transition:
+        opacity .16s ease,
+        visibility .16s ease,
+        transform .16s ease;
+}
+
+
+/* Open state */
+.job-card-page .pli-action-menu-wrap.is-open .pli-action-popover {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* ============================================================
+   POPOVER ACTION
+   ============================================================ */
+
+.job-card-page .pli-popover-action {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 38px;
+
+    padding: 6px 8px;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #334155;
+
+    font-family: inherit;
+    font-size: .75rem;
+    font-weight: 600;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
+}
+
+
+.job-card-page .pli-popover-action:hover {
+    background: #F8FAFC;
+    color: #1E293B;
+}
+
+
+/* ============================================================
+   ACTION ICON
+   ============================================================ */
+
+.job-card-page .pli-popover-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-size: .75rem;
+
+    transition: transform .15s ease;
+}
+
+
+.job-card-page .pli-popover-action:hover .pli-popover-icon {
+    transform: scale(1.05);
+}
+
+
+/* View */
+.job-card-page .pli-popover-icon--view {
+    color: #6366F1;
+
+    background: linear-gradient(
+        135deg,
+        #F5F3FF,
+        #EDE9FE
+    );
+
+    border: 1px solid #DDD6FE;
+}
+
+
+/* Edit */
+.job-card-page .pli-popover-icon--edit {
+    color: #2563EB;
+
+    background: linear-gradient(
+        135deg,
+        #EFF6FF,
+        #DBEAFE
+    );
+
+    border: 1px solid #BFDBFE;
+}
+
+
+/* Delete */
+.job-card-page .pli-popover-icon--delete {
+    color: #EF4444;
+
+    background: linear-gradient(
+        135deg,
+        #FEF2F2,
+        #FEE2E2
+    );
+
+    border: 1px solid #FECACA;
+}
+
+
+/* ============================================================
+   DELETE HOVER
+   ============================================================ */
+
+.job-card-page .pli-popover-action--danger {
+    color: #475569;
+}
+
+.job-card-page .pli-popover-action--danger:hover {
+    background: #FFF7F7;
+    color: #DC2626;
+}
+
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.job-card-page .pli-popover-divider {
+    height: 1px;
+
+    margin: 5px 4px;
+
+    background: #EEF2F7;
+}
+
+
+/* ============================================================
+   MAKE SURE THE ROW DOESN'T CLIP THE MENU
+   ============================================================ */
+
+.job-card-page .premium-list--jobs,
+.job-card-page .premium-list--jobs .premium-list-item,
+.job-card-page .premium-list--jobs .pli-col-actions {
+    overflow: visible !important;
+}
+
+
+/* ============================================================
+   LAST ROW — OPEN MENU UPWARD IF NEEDED
+   ============================================================ */
+
+.job-card-page .premium-list-item:last-child .pli-action-popover {
+    top: auto;
+    bottom: calc(100% + 7px);
+
+    transform-origin: bottom right;
+    transform: translateY(5px) scale(.97);
+}
+
+.job-card-page
+.premium-list-item:last-child
+.pli-action-menu-wrap.is-open
+.pli-action-popover {
+    transform: translateY(0) scale(1);
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+
+    .job-card-page .pli-action-popover {
+        width: 175px;
+    }
+
+    .job-card-page .pli-action-dots {
+        width: 34px;
+        height: 34px;
+    }
+}

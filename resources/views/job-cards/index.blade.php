@@ -503,20 +503,57 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
-                                    <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View Job Card"
-                                        onclick='openJobCardDetailsModal(@json($jobCard))'>
-                                        @include('partials.action-icons', ['type' => 'view', 'size' => 16])
+                                <div class="pli-action-menu-wrap">
+                                    <button
+                                        type="button"
+                                        class="pli-action-dots"
+                                        aria-label="Job card actions"
+                                        aria-expanded="false"
+                                        onclick="toggleJobCardActions(this)"
+                                    >
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Job Card"
-                                        data-bs-toggle="modal" data-bs-target="#jobCardModal"
-                                        onclick='openEditJobCardModal(@json($jobCard))'>
-                                        @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
-                                    </button>
-                                    <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Job Card"
-                                        onclick="openDeleteJobCardModal({{ $jobCard->id }}, @js($jobCard->job_card_name))">
-                                        @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
-                                    </button>
+
+                                    <div class="pli-action-popover">
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            onclick='openJobCardDetailsModal(@json($jobCard)); closeJobCardActions(this)'
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--view">
+                                                <i class="bi bi-eye"></i>
+                                            </span>
+                                            <span>View Details</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#jobCardModal"
+                                            onclick='openEditJobCardModal(@json($jobCard)); closeJobCardActions(this)'
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </span>
+                                            <span>Edit Job Card</span>
+                                        </button>
+
+                                        <div class="pli-popover-divider"></div>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action pli-popover-action--danger"
+                                            onclick="openDeleteJobCardModal({{ $jobCard->id }}, @js($jobCard->job_card_name)); closeJobCardActions(this)"
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--delete">
+                                                <i class="bi bi-trash3"></i>
+                                            </span>
+                                            <span>Delete Job Card</span>
+                                        </button>
+
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -1539,6 +1576,102 @@
                 // Renumber items before submission to ensure correct indexing
                 renumberServiceItems();
             });
+
+
+
+
+             function toggleJobCardActions(button) {
+        const wrapper = button.closest('.pli-action-menu-wrap');
+
+        // Close all other action menus
+        document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(menu => {
+            if (menu !== wrapper) {
+                menu.classList.remove('is-open');
+
+                const menuButton = menu.querySelector('.pli-action-dots');
+                if (menuButton) {
+                    menuButton.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+
+        const isOpen = wrapper.classList.toggle('is-open');
+
+        button.classList.toggle('is-open', isOpen);
+        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+
+    function closeJobCardActions(element) {
+        const wrapper = element.closest('.pli-action-menu-wrap');
+
+        if (!wrapper) {
+            return;
+        }
+
+        wrapper.classList.remove('is-open');
+
+        const button = wrapper.querySelector('.pli-action-dots');
+
+        if (button) {
+            button.classList.remove('is-open');
+            button.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+
+    // Close when clicking outside
+    document.addEventListener('click', function (event) {
+
+        if (!event.target.closest('.pli-action-menu-wrap')) {
+
+            document
+                .querySelectorAll('.pli-action-menu-wrap.is-open')
+                .forEach(wrapper => {
+
+                    wrapper.classList.remove('is-open');
+
+                    const button =
+                        wrapper.querySelector('.pli-action-dots');
+
+                    if (button) {
+                        button.classList.remove('is-open');
+                        button.setAttribute(
+                            'aria-expanded',
+                            'false'
+                        );
+                    }
+                });
+        }
+
+    });
+
+
+    // Close when pressing Escape
+    document.addEventListener('keydown', function (event) {
+
+        if (event.key !== 'Escape') {
+            return;
+        }
+
+        document
+            .querySelectorAll('.pli-action-menu-wrap.is-open')
+            .forEach(wrapper => {
+
+                wrapper.classList.remove('is-open');
+
+                const button =
+                    wrapper.querySelector('.pli-action-dots');
+
+                if (button) {
+                    button.classList.remove('is-open');
+                    button.setAttribute(
+                        'aria-expanded',
+                        'false'
+                    );
+                }
+            });
+    });
         </script>
     @endpush
 
