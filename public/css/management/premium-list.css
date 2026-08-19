@@ -239,6 +239,10 @@
     --pli-grid: 36px minmax(150px, 1.1fr) minmax(120px, 1fr) minmax(120px, 1fr) 110px 96px minmax(180px, auto);
 }
 
+.premium-list--attendance {
+    --pli-grid: 36px minmax(160px, 1.2fr) minmax(100px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(90px, 1fr) minmax(180px, auto);
+}
+
 .premium-list--table .premium-list-head,
 .premium-list--table .premium-list-item {
     min-width: 0;
@@ -259,6 +263,11 @@
 .premium-list--jobs.premium-list--table .premium-list-head,
 .premium-list--jobs.premium-list--table .premium-list-item {
     min-width: 960px;
+}
+
+.premium-list--attendance.premium-list--table .premium-list-head,
+.premium-list--attendance.premium-list--table .premium-list-item {
+    min-width: 1000px;
 }
 
 /* ── Flat table layout (reference UI) ── */
@@ -659,9 +668,13 @@
     height: 5px;
 }
 
-/* ── Service / Product — 7-column aligned grid ── */
-.premium-list--catalog.premium-list--feed.premium-list--service,
+/* ── Product — 8-column aligned grid ── */
 .premium-list--catalog.premium-list--feed.premium-list--product {
+    --pli-grid: 46px minmax(180px, 1.5fr) 110px 110px 90px 90px 90px 68px;
+}
+
+/* ── Service — 7-column aligned grid ── */
+.premium-list--catalog.premium-list--feed.premium-list--service {
     --pli-grid: 50px minmax(240px, 1.8fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr);
 }
 
@@ -686,6 +699,14 @@
     padding: 0 12px 14px;
 }
 
+/* ── Attendance — 8-column aligned grid ── */
+.premium-list--attendance.premium-list--feed {
+    --pli-grid: 50px minmax(200px, 1.4fr) minmax(95px, 1fr) minmax(85px, 0.95fr) minmax(85px, 0.95fr) minmax(85px, 0.95fr) minmax(100px, 1.1fr) minmax(130px, auto);
+    gap: 6px;
+    padding: 0 12px 14px;
+}
+
+
 /* ── Aligned list min-widths ── */
 .premium-list--service .premium-list-head,
 .premium-list--service .premium-list-item,
@@ -707,6 +728,11 @@
 .premium-list--jobs.premium-list--feed .premium-list-head,
 .premium-list--jobs.premium-list--feed .premium-list-item {
     min-width: 980px;
+}
+
+.premium-list--attendance.premium-list--feed .premium-list-head,
+.premium-list--attendance.premium-list--feed .premium-list-item {
+    min-width: 1000px;
 }
 
 /* ── Mgmt typography ── */
@@ -2002,6 +2028,73 @@
 
 .premium-modal.modal-sm .modal-dialog {
     max-width: 380px;
+}
+
+/* ── Attendance Table — Premium Badges & Styling ─────────────── */
+.premium-list--attendance .pli-col {
+    font-size: 0.8125rem;
+}
+
+.premium-list--attendance .att-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.premium-list--attendance .att-badge--present {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.premium-list--attendance .att-badge--absent {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.premium-list--attendance .att-badge--leave {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.premium-list--attendance .att-badge--total {
+    background: #EDE9FE;
+    color: #5B21B6;
+}
+
+.premium-list--attendance .att-progress-bar {
+    height: 6px;
+    border-radius: 12px;
+    background: #F1F5F9;
+    overflow: hidden;
+    margin: 0;
+}
+
+.premium-list--attendance .att-progress-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+
+.premium-list--attendance .att-progress-fill--present {
+    background: linear-gradient(90deg, #10B981, #34D399);
+}
+
+.premium-list--feed.premium-list--compact .pli-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.12);
+}
+
+.premium-list--feed.premium-list--compact .pli-icon i {
+    font-size: 0.9375rem;
 }
 
 /* ── Responsive: 1-col on mobile ─────────────────────────────── */

@@ -45,33 +45,53 @@ class ServiceController extends Controller
         ));
     }
 
+    /**
+     * Export services as Excel/CSV.
+     */
     public function exportExcel(Request $request)
     {
-        $headers = ['Service', 'Category', 'Sub Category', 'Price', 'Status'];
+        $headers = [
+            'Service',
+            'Category',
+            'Sub Category',
+            'Status',
+        ];
+
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn (Service $service) => [
                 $service->service_name,
                 $service->category,
                 $service->subcategory ?: '—',
-                number_format((float) $service->price, 2),
                 ucfirst($service->status),
             ]
         );
 
-        return $this->exportCsvResponse($headers, $rows, 'services-list');
+        return $this->exportCsvResponse(
+            $headers,
+            $rows,
+            'services-list'
+        );
     }
 
+    /**
+     * Export services as PDF.
+     */
     public function exportPdf(Request $request)
     {
-        $headers = ['Service', 'Category', 'Sub Category', 'Price', 'Status'];
+        $headers = [
+            'Service',
+            'Category',
+            'Sub Category',
+            'Status',
+        ];
+
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn (Service $service) => [
                 $service->service_name,
                 $service->category,
                 $service->subcategory ?: '—',
-                '₹' . number_format((float) $service->price, 2),
                 ucfirst($service->status),
             ]
         );
@@ -86,14 +106,28 @@ class ServiceController extends Controller
     }
 
     /**
-     * Suggest icon from service name (JSON).
+     * Suggest icon from service name.
      */
     public function suggestIcon(Request $request)
     {
         $validated = $request->validate([
-            'service_name' => ['nullable', 'string', 'max:150'],
-            'category' => ['nullable', 'string', 'max:100'],
-            'subcategory' => ['nullable', 'string', 'max:100'],
+            'service_name' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'category' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'subcategory' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
         ]);
 
         $result = ServiceIconResolver::resolve(
@@ -107,7 +141,9 @@ class ServiceController extends Controller
             'primary' => $result['primary'],
             'alternatives' => $result['alternatives'],
             'category' => $result['category'],
-            'label' => ServiceIconResolver::label($result['primary']),
+            'label' => ServiceIconResolver::label(
+                $result['primary']
+            ),
         ]);
     }
 
@@ -116,7 +152,9 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate($this->serviceRules());
+        $validated = $request->validate(
+            $this->serviceRules()
+        );
 
         if (empty($validated['icon'])) {
             $resolved = ServiceIconResolver::resolve(
@@ -124,9 +162,12 @@ class ServiceController extends Controller
                 $validated['category'],
                 $validated['subcategory'] ?? null
             );
+
             $validated['icon'] = $resolved['primary'];
         } else {
-            $validated['icon'] = ServiceIconResolver::normalize($validated['icon']);
+            $validated['icon'] = ServiceIconResolver::normalize(
+                $validated['icon']
+            );
         }
 
         Service::create($validated);
@@ -146,7 +187,9 @@ class ServiceController extends Controller
         Request $request,
         Service $service
     ) {
-        $validated = $request->validate($this->serviceRules());
+        $validated = $request->validate(
+            $this->serviceRules()
+        );
 
         $validated['icon'] = ServiceIconResolver::normalize(
             $validated['icon'] ?? $service->icon
@@ -198,7 +241,9 @@ class ServiceController extends Controller
     }
 
     /**
-     * @return array<string, mixed>
+     * Service validation rules.
+     *
+     * Price intentionally does not exist.
      */
     private function serviceRules(): array
     {
@@ -212,7 +257,9 @@ class ServiceController extends Controller
             'icon' => [
                 'nullable',
                 'string',
-                Rule::in(ServiceIconResolver::validKeys()),
+                Rule::in(
+                    ServiceIconResolver::validKeys()
+                ),
             ],
 
             'category' => [
@@ -227,13 +274,6 @@ class ServiceController extends Controller
                 'max:100',
             ],
 
-            'price' => [
-                'required',
-                'numeric',
-                'min:0',
-                'max:99999999.99',
-            ],
-
             'status' => [
                 'required',
                 Rule::in([
@@ -244,52 +284,107 @@ class ServiceController extends Controller
         ];
     }
 
+    /**
+     * Filter services.
+     *
+     * No price filtering because services no longer have prices.
+     */
     private function filteredQuery(Request $request)
     {
-        $search = trim($request->input('search', ''));
-        $filter = trim($request->input('filter', ''));
-        $name = trim($request->input('name', ''));
-        $category = trim($request->input('category', ''));
-        $subcategory = trim($request->input('subcategory', ''));
-        $priceRange = $request->input('price_range');
-        $status = trim($request->input('status', $filter));
+        $search = trim(
+            $request->input('search', '')
+        );
+
+        $filter = trim(
+            $request->input('filter', '')
+        );
+
+        $name = trim(
+            $request->input('name', '')
+        );
+
+        $category = trim(
+            $request->input('category', '')
+        );
+
+        $subcategory = trim(
+            $request->input('subcategory', '')
+        );
+
+        $status = trim(
+            $request->input(
+                'status',
+                $filter
+            )
+        );
 
         return Service::query()
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where(
-                        'service_name',
-                        'like',
-                        "%{$search}%"
-                    )
-                        ->orWhere(
-                            'category',
+
+            ->when(
+                $search !== '',
+                function ($query) use ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where(
+                            'service_name',
                             'like',
                             "%{$search}%"
                         )
-                        ->orWhere(
-                            'subcategory',
-                            'like',
-                            "%{$search}%"
-                        );
-                });
-            })
-            ->when($name !== '', fn ($q) => $q->where('service_name', 'like', "%{$name}%"))
-            ->when($category !== '', fn ($q) => $q->where('category', $category))
-            ->when($subcategory !== '', fn ($q) => $q->where('subcategory', $subcategory))
-            ->when(!empty($priceRange) && $priceRange !== 'all', function ($query) use ($priceRange) {
-                match ($priceRange) {
-                    'under_500' => $query->where('price', '<', 500),
-                    '500_1000' => $query->whereBetween('price', [500, 1000]),
-                    '1001_2500' => $query->whereBetween('price', [1001, 2500]),
-                    '2501_5000' => $query->whereBetween('price', [2501, 5000]),
-                    'above_5000' => $query->where('price', '>', 5000),
-                    default => null,
-                };
-            })
-            ->when(in_array($status, ['active', 'inactive'], true), function ($query) use ($status) {
-                $query->where('status', $status);
-            })
+                            ->orWhere(
+                                'category',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'subcategory',
+                                'like',
+                                "%{$search}%"
+                            );
+                    });
+                }
+            )
+
+            ->when(
+                $name !== '',
+                fn ($q) =>
+                    $q->where(
+                        'service_name',
+                        'like',
+                        "%{$name}%"
+                    )
+            )
+
+            ->when(
+                $category !== '',
+                fn ($q) =>
+                    $q->where(
+                        'category',
+                        $category
+                    )
+            )
+
+            ->when(
+                $subcategory !== '',
+                fn ($q) =>
+                    $q->where(
+                        'subcategory',
+                        $subcategory
+                    )
+            )
+
+            ->when(
+                in_array(
+                    $status,
+                    ['active', 'inactive'],
+                    true
+                ),
+                function ($query) use ($status) {
+                    $query->where(
+                        'status',
+                        $status
+                    );
+                }
+            )
+
             ->latest();
     }
 }

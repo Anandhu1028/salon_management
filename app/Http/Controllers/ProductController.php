@@ -20,6 +20,7 @@ class ProductController extends Controller
         $filter = trim($request->input('filter', ''));
 
         $products = $this->filteredQuery($request)
+            ->withCount('purchases')
             ->paginate(9)
             ->withQueryString();
 
@@ -49,7 +50,7 @@ class ProductController extends Controller
         $headers = ['Product', 'Category', 'Sub Category', 'Price', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (Product $product) => [
+            fn(Product $product) => [
                 $product->product_name,
                 $product->category,
                 $product->subcategory ?: '—',
@@ -66,7 +67,7 @@ class ProductController extends Controller
         $headers = ['Product', 'Category', 'Sub Category', 'Price', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
-            fn (Product $product) => [
+            fn(Product $product) => [
                 $product->product_name,
                 $product->category,
                 $product->subcategory ?: '—',
@@ -137,7 +138,8 @@ class ProductController extends Controller
     /**
      * Update product.
      */
-    public function update( Request $request, Product $product ) {
+    public function update(Request $request, Product $product)
+    {
         $validated = $request->validate([
             'product_name' => [
                 'required',
@@ -248,9 +250,9 @@ class ProductController extends Controller
                         );
                 });
             })
-            ->when($name !== '', fn ($q) => $q->where('product_name', 'like', "%{$name}%"))
-            ->when($category !== '', fn ($q) => $q->where('category', $category))
-            ->when($subcategory !== '', fn ($q) => $q->where('subcategory', $subcategory))
+            ->when($name !== '', fn($q) => $q->where('product_name', 'like', "%{$name}%"))
+            ->when($category !== '', fn($q) => $q->where('category', $category))
+            ->when($subcategory !== '', fn($q) => $q->where('subcategory', $subcategory))
             ->when(!empty($priceRange) && $priceRange !== 'all', function ($query) use ($priceRange) {
                 match ($priceRange) {
                     'under_500' => $query->where('price', '<', 500),
@@ -265,5 +267,94 @@ class ProductController extends Controller
                 $query->where('status', $status);
             })
             ->latest();
+    }
+
+
+
+    /**
+     * Store a purchase for a product.
+     * Price is taken from the product record — never trusted from the client.
+     */
+    public function storePurchase(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'purchase_date' => [
+                'required',
+                'date',
+            ],
+
+            'quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:999999999',
+            ],
+        ]);
+
+        $purchase = $product->purchases()->create($validated);
+
+        $pricePerUnit = (float) $product->price;
+        $totalAmount  = $pricePerUnit * $purchase->quantity;
+
+        // Return the new purchases_count so the UI can update without a reload.
+        $purchasesCount = $product->purchases()->count();
+
+        return response()->json([
+            'success'         => true,
+            'message'         => 'Purchase recorded successfully.',
+            'purchases_count' => $purchasesCount,
+            'purchase'        => [
+                'id'             => $purchase->id,
+                'purchase_date'  => $purchase->purchase_date->format('d/m/Y'),
+                'quantity'       => $purchase->quantity,
+                'price_per_unit' => number_format($pricePerUnit, 2),
+                'total_amount'   => number_format($totalAmount, 2),
+            ],
+        ]);
+    }
+
+    /**
+     * Purchase history for a product.
+     * All monetary values are derived from products.price — no stored price per row.
+     */
+    public function purchaseHistory(Product $product)
+    {
+        $purchases = $product->purchases()
+            ->latest('purchase_date')
+            ->latest('id')
+            ->get();
+
+        $pricePerUnit   = (float) $product->price;
+        $totalPurchases = $purchases->count();
+        $totalQuantity  = $purchases->sum('quantity');
+        $totalAmount    = $purchases->sum(fn ($p) => $p->quantity * $pricePerUnit);
+
+        return response()->json([
+            'success' => true,
+
+            'product' => [
+                'id'          => $product->id,
+                'name'        => $product->product_name,
+                'category'    => $product->category,
+                'subcategory' => $product->subcategory,
+                'price'       => number_format($pricePerUnit, 2),
+            ],
+
+            'summary' => [
+                'total_purchases' => $totalPurchases,
+                'total_quantity'  => $totalQuantity,
+                'total_amount'    => number_format($totalAmount, 2),
+            ],
+
+            'purchases' => $purchases->map(function ($purchase) use ($pricePerUnit) {
+                return [
+                    'id'             => $purchase->id,
+                    'purchase_date'  => $purchase->purchase_date->format('d M Y'),
+                    'quantity'       => $purchase->quantity,
+                    'price_per_unit' => number_format($pricePerUnit, 2),
+                    'total_amount'   => number_format($purchase->quantity * $pricePerUnit, 2),
+                ];
+            })->values(),
+        ]);
     }
 }

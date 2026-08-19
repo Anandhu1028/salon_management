@@ -4,19 +4,19 @@
 
 <div class="mgmt-top-actions">
     <div class="mgmt-top-actions__right">
-        <a href="{{ $excelUrl }}" class="mgmt-action-btn mgmt-action-btn--excel" title="Export to Excel">
+        <!-- <a href="">
             <span class="mgmt-action-btn__icon" aria-hidden="true">
                 <i class="bi bi-file-earmark-spreadsheet-fill"></i>
             </span>
             <span class="mgmt-action-btn__label">Excel</span>
         </a>
 
-        <a href="{{ $pdfUrl }}" class="mgmt-action-btn mgmt-action-btn--pdf" title="Export to PDF">
+        <a href="">
             <span class="mgmt-action-btn__icon" aria-hidden="true">
                 <i class="bi bi-file-earmark-pdf-fill"></i>
             </span>
             <span class="mgmt-action-btn__label">PDF</span>
-        </a>
+        </a> -->
 
         <button
             type="button"

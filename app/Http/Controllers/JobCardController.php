@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ExportsManagementList;
 use App\Models\Customer;
 use App\Models\JobCard;
+use App\Models\JobCardService;
+use App\Models\PaymentType;
 use App\Models\Service;
 use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class JobCardController extends Controller
@@ -35,6 +38,7 @@ class JobCardController extends Controller
             ->get();
 
         $staff = Staff::where('status', 'active')->orderBy('name')->get();
+        $paymentTypes = PaymentType::where('is_active', true)->orderBy('name')->get();
 
         $filterCustomers = $customers;
         $filterServices = $services;
@@ -49,6 +53,7 @@ class JobCardController extends Controller
             'customers',
             'services',
             'staff',
+            'paymentTypes',
             'filterCustomers',
             'filterServices',
             'filterSubcategories',
@@ -59,7 +64,7 @@ class JobCardController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Job Card', 'Customers', 'Staff Assigned', 'Service', 'Sub Category', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(JobCard $jobCard) => [
@@ -67,11 +72,13 @@ class JobCardController extends Controller
                 $jobCard->customers->isNotEmpty()
                 ? $jobCard->customers->pluck('name')->join(', ')
                 : ($jobCard->customer->name ?? '—'),
-                $jobCard->staff->isNotEmpty()
-                ? $jobCard->staff->pluck('name')->join(', ')
-                : '—',
-                $jobCard->service->service_name ?? '—',
-                $jobCard->subcategory ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->service?->service_name)->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
+                $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
+                '₹' . number_format($jobCard->getSubtotalAmount(), 2),
+                '₹' . number_format($jobCard->getDiscountAmount(), 2),
+                '₹' . number_format($jobCard->getFinalAmount(), 2),
                 ucfirst(str_replace('_', ' ', $jobCard->status)),
                 $jobCard->created_at?->format('d M Y') ?? '—',
             ]
@@ -82,7 +89,7 @@ class JobCardController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Job Card', 'Customers', 'Staff Assigned', 'Service', 'Sub Category', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(JobCard $jobCard) => [
@@ -90,11 +97,13 @@ class JobCardController extends Controller
                 $jobCard->customers->isNotEmpty()
                 ? $jobCard->customers->pluck('name')->join(', ')
                 : ($jobCard->customer->name ?? '—'),
-                $jobCard->staff->isNotEmpty()
-                ? $jobCard->staff->pluck('name')->join(', ')
-                : '—',
-                $jobCard->service->service_name ?? '—',
-                $jobCard->subcategory ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->service?->service_name)->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
+                $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
+                '₹' . number_format($jobCard->getSubtotalAmount(), 2),
+                '₹' . number_format($jobCard->getDiscountAmount(), 2),
+                '₹' . number_format($jobCard->getFinalAmount(), 2),
                 ucfirst(str_replace('_', ' ', $jobCard->status)),
                 $jobCard->created_at?->format('d M Y') ?? '—',
             ]
@@ -110,27 +119,16 @@ class JobCardController extends Controller
     }
 
     /**
-     * Store job card.
+     * Store job card with service items.
      */
     public function store(Request $request)
     {
-        if ($request->has('customer_id') && !$request->has('customer_ids')) {
-            $customerVal = $request->input('customer_id');
-            $request->merge(['customer_ids' => is_array($customerVal) ? $customerVal : array_filter([$customerVal])]);
-        }
-
-        if ($request->has('staff_id') && !$request->has('staff_ids')) {
-            $staffVal = $request->input('staff_id');
-            $request->merge(['staff_ids' => is_array($staffVal) ? $staffVal : array_filter([$staffVal])]);
-        }
-
         $validated = $request->validate([
             'job_card_name' => [
                 'required',
                 'string',
                 'max:150',
             ],
-
             'customer_ids' => [
                 'required',
                 'array',
@@ -139,93 +137,105 @@ class JobCardController extends Controller
             'customer_ids.*' => [
                 'exists:customers,id',
             ],
-
-            'service_id' => [
+            'service_items' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'service_items.*.service_id' => [
                 'required',
                 'exists:services,id',
             ],
-
-            'staff_ids' => ['nullable', 'array'],
-            'staff_ids.*' => ['exists:staff,id'],
-
-            'subcategory' => [
+            'service_items.*.subcategory' => [
                 'required',
                 'string',
                 'max:100',
             ],
-
+            'service_items.*.staff_ids' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'service_items.*.staff_ids.*' => [
+                'exists:staff,id',
+            ],
+            'service_items.*.amount' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+            'discount_amount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'payment_type_id' => ['required', 'exists:payment_types,id'],
             'status' => [
                 'nullable',
-                Rule::in([
-                    'pending',
-                    'in_progress',
-                    'completed',
-                    'cancelled',
-                ]),
+                Rule::in(['pending', 'in_progress', 'completed', 'cancelled']),
             ],
         ]);
 
-        $service = Service::where('id', $validated['service_id'])
-            ->where('status', 'active')
-            ->firstOrFail();
+        $subtotal = collect($validated['service_items'])->sum('amount');
+        $discount = $validated['discount_amount'] ?? 0;
 
-        if (
-            !$service->subcategory ||
-            $service->subcategory !== $validated['subcategory']
-        ) {
+        if ($discount > $subtotal) {
             return back()
-                ->withErrors([
-                    'subcategory' =>
-                        'Selected subcategory does not belong to the selected service.',
-                ])
+                ->withErrors(['discount_amount' => 'Discount cannot be greater than the subtotal amount.'])
                 ->withInput();
         }
 
-        $customerIds = $validated['customer_ids'];
-        $staffIds = $validated['staff_ids'] ?? [];
+        return DB::transaction(function () use ($validated, $discount) {
+            // Create the job card
+            $jobCard = JobCard::create([
+                'job_card_name' => $validated['job_card_name'],
+                'customer_id' => $validated['customer_ids'][0],
+                'status' => $validated['status'] ?? 'pending',
+                'discount_amount' => $discount,
+                'payment_type_id' => $validated['payment_type_id'],
+            ]);
 
-        $jobCard = JobCard::create([
-            'job_card_name' => $validated['job_card_name'],
-            'customer_id' => $customerIds[0] ?? null,
-            'staff_id' => $staffIds[0] ?? null,
-            'service_id' => $validated['service_id'],
-            'subcategory' => $validated['subcategory'],
-            'status' => $validated['status'] ?? 'pending',
-        ]);
+            // Sync customers
+            $jobCard->customers()->sync($validated['customer_ids']);
 
-        $jobCard->customers()->sync($customerIds);
-        $jobCard->staff()->sync($staffIds);
+            // Create service items and assign staff
+            foreach ($validated['service_items'] as $item) {
+                $service = Service::findOrFail($item['service_id']);
 
-        return redirect()
-            ->route('job-cards.index')
-            ->with(
-                'success',
-                'Job card created successfully.'
-            );
+                // Validate that subcategory belongs to this service
+                if ($service->subcategory !== $item['subcategory']) {
+                    throw new \Exception('Selected subcategory does not belong to the selected service.');
+                }
+
+                // Create service item
+                $serviceItem = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $item['service_id'],
+                    'subcategory' => $item['subcategory'],
+                    'amount' => $item['amount'],
+                ]);
+
+                // Assign staff to service item
+                $serviceItem->staff()->sync($item['staff_ids']);
+            }
+
+            return redirect()
+                ->route('job-cards.index')
+                ->with('success', 'Job card created successfully.');
+        });
     }
 
     /**
-     * Update job card.
+     * Update job card with service items.
      */
     public function update(Request $request, JobCard $jobCard)
     {
-        if ($request->has('customer_id') && !$request->has('customer_ids')) {
-            $customerVal = $request->input('customer_id');
-            $request->merge(['customer_ids' => is_array($customerVal) ? $customerVal : array_filter([$customerVal])]);
-        }
-
-        if ($request->has('staff_id') && !$request->has('staff_ids')) {
-            $staffVal = $request->input('staff_id');
-            $request->merge(['staff_ids' => is_array($staffVal) ? $staffVal : array_filter([$staffVal])]);
-        }
-
         $validated = $request->validate([
             'job_card_name' => [
                 'required',
                 'string',
                 'max:150',
             ],
-
             'customer_ids' => [
                 'required',
                 'array',
@@ -234,76 +244,103 @@ class JobCardController extends Controller
             'customer_ids.*' => [
                 'exists:customers,id',
             ],
-
-            'service_id' => [
+            'service_items' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'service_items.*.service_id' => [
                 'required',
                 'exists:services,id',
             ],
-
-            'staff_ids' => ['nullable', 'array'],
-            'staff_ids.*' => ['exists:staff,id'],
-
-            'subcategory' => [
+            'service_items.*.subcategory' => [
                 'required',
                 'string',
                 'max:100',
             ],
-
+            'service_items.*.staff_ids' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'service_items.*.staff_ids.*' => [
+                'exists:staff,id',
+            ],
+            'service_items.*.amount' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+            'discount_amount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'payment_type_id' => ['required', 'exists:payment_types,id'],
             'status' => [
                 'nullable',
-                Rule::in([
-                    'pending',
-                    'in_progress',
-                    'completed',
-                    'cancelled',
-                ]),
+                Rule::in(['pending', 'in_progress', 'completed', 'cancelled']),
             ],
         ]);
 
-        $service = Service::where('id', $validated['service_id'])
-            ->where('status', 'active')
-            ->firstOrFail();
+        $subtotal = collect($validated['service_items'])->sum('amount');
+        $discount = $validated['discount_amount'] ?? 0;
 
-        if (
-            !$service->subcategory ||
-            $service->subcategory !== $validated['subcategory']
-        ) {
+        if ($discount > $subtotal) {
             return back()
-                ->withErrors([
-                    'subcategory' =>
-                        'Selected subcategory does not belong to the selected service.',
-                ])
+                ->withErrors(['discount_amount' => 'Discount cannot be greater than the subtotal amount.'])
                 ->withInput();
         }
 
-        $customerIds = $validated['customer_ids'];
-        $staffIds = $validated['staff_ids'] ?? [];
+        return DB::transaction(function () use ($jobCard, $validated, $discount) {
+            // Update job card
+            $jobCard->update([
+                'job_card_name' => $validated['job_card_name'],
+                'customer_id' => $validated['customer_ids'][0],
+                'status' => $validated['status'] ?? $jobCard->status ?? 'pending',
+                'discount_amount' => $discount,
+                'payment_type_id' => $validated['payment_type_id'],
+            ]);
 
-        $jobCard->update([
-            'job_card_name' => $validated['job_card_name'],
-            'customer_id' => $customerIds[0] ?? null,
-            'staff_id' => $staffIds[0] ?? null,
-            'service_id' => $validated['service_id'],
-            'subcategory' => $validated['subcategory'],
-            'status' => $validated['status'] ?? $jobCard->status ?? 'pending',
-        ]);
+            // Sync customers
+            $jobCard->customers()->sync($validated['customer_ids']);
 
-        $jobCard->customers()->sync($customerIds);
-        $jobCard->staff()->sync($staffIds);
+            // Delete existing service items (cascade will delete staff associations)
+            $jobCard->serviceItems()->delete();
 
-        return redirect()
-            ->route('job-cards.index')
-            ->with(
-                'success',
-                'Job card updated successfully.'
-            );
+            // Create new service items and assign staff
+            foreach ($validated['service_items'] as $item) {
+                $service = Service::findOrFail($item['service_id']);
+
+                // Validate that subcategory belongs to this service
+                if ($service->subcategory !== $item['subcategory']) {
+                    throw new \Exception('Selected subcategory does not belong to the selected service.');
+                }
+
+                // Create service item
+                $serviceItem = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $item['service_id'],
+                    'subcategory' => $item['subcategory'],
+                    'amount' => $item['amount'],
+                ]);
+
+                // Assign staff to service item
+                $serviceItem->staff()->sync($item['staff_ids']);
+            }
+
+            return redirect()
+                ->route('job-cards.index')
+                ->with('success', 'Job card updated successfully.');
+        });
     }
 
     /**
      * Delete job card.
      */
-    public function destroy(JobCard $jobCard)
+    public function destroy($id)
     {
+        $jobCard = JobCard::findOrFail($id);
         $jobCard->delete();
 
         return response()->json([
@@ -325,8 +362,9 @@ class JobCardController extends Controller
         return JobCard::with([
             'customer',
             'customers',
-            'service',
-            'staff',
+            'serviceItems.service',
+            'serviceItems.staff',
+            'paymentType',
         ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -335,11 +373,6 @@ class JobCardController extends Controller
                         'like',
                         "%{$search}%"
                     )
-                        ->orWhere(
-                            'subcategory',
-                            'like',
-                            "%{$search}%"
-                        )
                         ->orWhereHas('customers', function ($customer) use ($search) {
                             $customer->where(
                                 'name',
@@ -351,19 +384,22 @@ class JobCardController extends Controller
                                     "%{$search}%"
                                 );
                         })
-                        ->orWhereHas('staff', function ($staff) use ($search) {
+                        ->orWhereHas('serviceItems.staff', function ($staff) use ($search) {
                             $staff->where(
                                 'name',
                                 'like',
                                 "%{$search}%"
                             );
                         })
-                        ->orWhereHas('service', function ($service) use ($search) {
+                        ->orWhereHas('serviceItems.service', function ($service) use ($search) {
                             $service->where(
                                 'service_name',
                                 'like',
                                 "%{$search}%"
                             );
+                        })
+                        ->orWhereHas('serviceItems', function ($item) use ($search) {
+                            $item->where('subcategory', 'like', "%{$search}%");
                         });
                 });
             })
@@ -383,26 +419,23 @@ class JobCardController extends Controller
                 });
             })
             ->when(!empty($serviceId), function ($query) use ($serviceId) {
-                $query->where('service_id', $serviceId);
+                $query->whereHas('serviceItems', fn ($item) => $item->where('service_id', $serviceId));
             })
             ->when($subcategory !== '', function ($query) use ($subcategory) {
-                $query->where('subcategory', $subcategory);
+                $query->whereHas('serviceItems', fn ($item) => $item->where('subcategory', $subcategory));
             })
             ->when(!empty($amountRange) && $amountRange !== 'all', function ($query) use ($amountRange) {
-                $query->whereHas('service', function ($serviceQuery) use ($amountRange) {
+                $query->whereHas('serviceItems', function ($item) use ($amountRange) {
                     match ($amountRange) {
-                        'under_500' => $serviceQuery->where('price', '<', 500),
-                        '500_1000' => $serviceQuery->whereBetween('price', [500, 1000]),
-                        '1001_2500' => $serviceQuery->whereBetween('price', [1001, 2500]),
-                        '2501_5000' => $serviceQuery->whereBetween('price', [2501, 5000]),
-                        'above_5000' => $serviceQuery->where('price', '>', 5000),
+                        'under_500' => $item->where('amount', '<', 500),
+                        '500_1000' => $item->whereBetween('amount', [500, 1000]),
+                        '1001_2500' => $item->whereBetween('amount', [1001, 2500]),
+                        '2501_5000' => $item->whereBetween('amount', [2501, 5000]),
+                        'above_5000' => $item->where('amount', '>', 5000),
                         default => null,
                     };
                 });
             })
-            ->when(in_array($filter, ['pending', 'in_progress', 'completed', 'cancelled'], true), function ($query) use ($filter) {
-                $query->where('status', $filter);
-            })
-            ->latest();
+            ->orderBy('created_at', 'desc');
     }
 }

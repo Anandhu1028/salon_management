@@ -7,6 +7,11 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\JobCardController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ComplaintsController;
+use App\Http\Controllers\MarketingActivityController;
+use App\Http\Controllers\ReportController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,6 +47,40 @@ Route::middleware('auth')->group(function () {
         Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
         Route::put('/staff/{staff}', [StaffController::class, 'update']) ->name('staff.update');
         Route::patch('/staff/{staff}/status', [StaffController::class, 'toggleStatus']) ->name('staff.toggle-status');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attendance
+    |--------------------------------------------------------------------------
+    | Administrator + Manager
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:administrator,manager')->group(function () {
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::put('/attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update');
+        Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
+        Route::get('/attendance/{attendance}', [AttendanceController::class, 'show'])->name('attendance.show');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Complaints
+    |--------------------------------------------------------------------------
+    | Administrator + Manager
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:administrator,manager')->group(function () {
+        Route::get('/complaints', [ComplaintsController::class, 'index'])->name('complaints.index');
+        Route::post('/complaints', [ComplaintsController::class, 'store'])->name('complaints.store');
+        Route::get('/complaints/{complaint}', [ComplaintsController::class, 'show'])->name('complaints.show');
+        Route::delete('/complaints/{complaint}', [ComplaintsController::class, 'destroy'])->name('complaints.destroy');
+        Route::patch('/complaints/{complaint}/close', [ComplaintsController::class, 'close'])->name('complaints.close');
     });
 
 
@@ -100,6 +139,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [ProductController::class, 'toggleStatus']) ->name('products.toggle-status');
         Route::delete('/products/{product}', [ProductController::class, 'destroy']) ->name('products.destroy');
+
+        Route::post('/products/{product}/purchases', [ProductController::class, 'storePurchase']) ->name('products.purchases.store');
+        Route::get('/products/{product}/purchases', [ProductController::class, 'purchaseHistory'])->name('products.purchases.history');
     });
 
 
@@ -118,6 +160,36 @@ Route::middleware('auth')->group(function () {
         Route::post('/job-cards', [JobCardController::class, 'store'])->name('job-cards.store');
         Route::put('/job-cards/{jobCard}', [JobCardController::class, 'update']) ->name('job-cards.update');
         Route::delete('/job-cards/{jobCard}', [JobCardController::class, 'destroy']) ->name('job-cards.destroy');
+    });
+ /*
+    |--------------------------------------------------------------------------
+    | Report
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('reports') ->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index']) ->name('index');
+        Route::get('/sales', [ReportController::class, 'sales']) ->name('sales');
+        Route::get('/expenses', [ReportController::class, 'expenses'])  ->name('expenses');
+        Route::get('/staff-daily-target', [ReportController::class, 'staffDailyTarget']) ->name('staff.daily-target');
+        Route::get('/purchases', [ReportController::class, 'purchases'])->name('purchases');
+    });
+
+
+    /*
+|--------------------------------------------------------------------------
+| Daily Marketing Activities
+|--------------------------------------------------------------------------
+| Administrator + Manager + Staff
+|--------------------------------------------------------------------------
+*/
+
+    Route::middleware('role:administrator,manager,staff')->group(function () {
+        Route::get('/marketing', [ MarketingActivityController::class, 'index' ])->name('marketing.index');
+        Route::post('/marketing', [ MarketingActivityController::class, 'store' ])->name('marketing.store');
+        Route::get('/marketing/{marketing}', [MarketingActivityController::class,'show' ])->name('marketing.show');
+        Route::put('/marketing/{marketing}', [ MarketingActivityController::class, 'update'])->name('marketing.update');
+        Route::delete('/marketing/{marketing}', [  MarketingActivityController::class,  'destroy' ])->name('marketing.destroy');
     });
 
 

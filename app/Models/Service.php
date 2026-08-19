@@ -14,7 +14,6 @@ class Service extends Model
         'icon',
         'category',
         'subcategory',
-        'price',
         'status',
     ];
 

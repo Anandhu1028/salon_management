@@ -125,7 +125,6 @@
                         <span class="pli-head-cell col-left">Name</span>
                         <span class="pli-head-cell col-center">Category</span>
                         <span class="pli-head-cell col-center">Sub Category</span>
-                        <span class="pli-head-cell col-center">Price</span>
                         <span class="pli-head-cell col-center">Status</span>
                         <span class="pli-head-cell col-center">Actions</span>
                     </div>
@@ -155,9 +154,7 @@
                                 <span class="pli-col-text">{{ $service->subcategory ?: '—' }}</span>
                             </div>
 
-                            <div class="pli-col col-center price-cell pli-col-amount">
-                                <span class="pli-col-text pli-col-price">₹{{ number_format($service->price, 2) }}</span>
-                            </div>
+                            
 
                             <div class="pli-col col-center status-cell">
                                 <span id="status-badge-{{ $service->id }}"
@@ -320,19 +317,6 @@
                                 </div>
                             </div>
 
-                            {{-- Price --}}
-                            <div class="col-md-6">
-                                <div class="form-field mb-0">
-                                    <label for="service_price" class="form-label">
-                                        Price (₹) <span>*</span>
-                                    </label>
-                                    <div class="field-control-wrap">
-                                        <span class="form-field-icon"><i class="bi bi-currency-rupee"></i></span>
-                                        <input type="number" name="price" id="service_price" class="form-control"
-                                            placeholder="0.00" min="0" step="0.01" required>
-                                    </div>
-                                </div>
-                            </div>
 
                             {{-- Status --}}
                             <div class="col-md-6">
@@ -426,7 +410,7 @@
                 form.action = "{{ route('services.store') }}";
                 document.getElementById('serviceFormMethod').value = 'POST';
                 document.getElementById('serviceModalTitle').textContent = 'Add Service';
-                document.getElementById('serviceModalSubtitle').textContent = 'Add a new salon service and pricing.';
+               document.getElementById('serviceModalSubtitle').textContent = 'Add a new salon service.';
                 document.getElementById('serviceSubmitButton').innerHTML = '<i class="bi bi-scissors"></i> Create Service';
                 document.getElementById('service_status').value = 'active';
 
@@ -437,17 +421,31 @@
 
             function openEditServiceModal(service) {
                 const form = document.getElementById('serviceForm');
-                form.action = `/services/${service.id}`;
-                document.getElementById('serviceFormMethod').value = 'PUT';
-                document.getElementById('serviceModalTitle').textContent = 'Edit Service';
-                document.getElementById('serviceModalSubtitle').textContent = 'Update service information.';
-                document.getElementById('serviceSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Service';
 
-                document.getElementById('service_name').value = service.service_name ?? '';
-                document.getElementById('service_category').value = service.category ?? '';
-                document.getElementById('service_subcategory').value = service.subcategory ?? '';
-                document.getElementById('service_price').value = service.price ?? '';
-                document.getElementById('service_status').value = service.status ?? 'active';
+                form.action = `/services/${service.id}`;
+
+                document.getElementById('serviceFormMethod').value = 'PUT';
+
+                document.getElementById('serviceModalTitle').textContent =
+                    'Edit Service';
+
+                document.getElementById('serviceModalSubtitle').textContent =
+                    'Update service information.';
+
+                document.getElementById('serviceSubmitButton').innerHTML =
+                    '<i class="bi bi-check2-circle"></i> Update Service';
+
+                document.getElementById('service_name').value =
+                    service.service_name ?? '';
+
+                document.getElementById('service_category').value =
+                    service.category ?? '';
+
+                document.getElementById('service_subcategory').value =
+                    service.subcategory ?? '';
+
+                document.getElementById('service_status').value =
+                    service.status ?? 'active';
 
                 if (window.ServiceIconPicker) {
                     window.ServiceIconPicker.initEdit(service);

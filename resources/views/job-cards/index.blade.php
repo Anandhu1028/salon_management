@@ -1,5 +1,79 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/job-card/job-card.css') }}?v={{ time() }}">
+    <style>
+        /* Compact Payment Method field */
+        .job-card-payment-field {
+            max-width: 220px;
+        }
+
+        .job-card-payment-select-wrap {
+            height: 40px;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            background: #F8FAFC;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+        }
+
+        .job-card-payment-select-wrap:hover {
+            border-color: #CBD5E1;
+        }
+
+        .job-card-payment-select-wrap:focus-within {
+            border-color: #6366F1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+            background: #fff;
+        }
+
+        .job-card-payment-select-wrap .form-field-icon {
+            color: #6366F1;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #payment_type_id.no-nice-select {
+            border: 0 !important;
+            outline: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            height: 100% !important;
+            padding: 0 20px 0 2px !important;
+            color: #1E293B !important;
+            font-size: 0.82rem !important;
+            font-weight: 500 !important;
+            width: 100% !important;
+            cursor: pointer;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+        }
+
+        .job-card-payment-select-arrow {
+            pointer-events: none;
+            font-size: 11px;
+            color: #94A3B8;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 576px) {
+            .job-card-payment-field {
+                max-width: 100%;
+            }
+        }
+    </style>
+@endpush
+
 @section('title', 'Job Cards')
 @section('page-title', 'Job Cards')
 
@@ -154,7 +228,7 @@
                                     </div>
                                     <div class="pli-name-stack">
                                         <span class="pli-title job-card-name">{{ $jobCard->job_card_name }}</span>
-                                        <span class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                        <!-- <span class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span> -->
                                     </div>
                                 </div>
                             </div>
@@ -179,15 +253,63 @@
                             </div>
 
                             <div class="pli-col pli-col-service col-center">
-                                <span class="pli-col-text">{{ $jobCard->service->service_name ?? '—' }}</span>
+                                @php
+                                    $servicesList = $jobCard->serviceItems->isNotEmpty()
+                                        ? $jobCard->serviceItems->map(fn($item) => $item->service?->service_name)->filter()->values()
+                                        : collect([$jobCard->service?->service_name])->filter()->values();
+                                    $firstService = $servicesList->first() ?? '—';
+                                    $extraServices = $servicesList->count() - 1;
+                                @endphp
+                                @if($servicesList->isNotEmpty())
+                                    <div class="d-flex align-items-center justify-content-center gap-1 flex-wrap">
+                                        <span class="pli-col-text">{{ $firstService }}</span>
+                                        @if($extraServices > 0)
+                                            <span class="badge rounded-pill bg-light text-primary border" title="{{ $servicesList->join(', ') }}" style="font-size: 0.72rem; font-weight: 600; cursor: help;">
+                                                +{{ $extraServices }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="pli-col-text">—</span>
+                                @endif
                             </div>
 
                             <div class="pli-col pli-col-subcategory col-center">
-                                <span class="pli-col-text">{{ $jobCard->subcategory ?: '—' }}</span>
+                                @php
+                                    $subcategoriesList = $jobCard->serviceItems->isNotEmpty()
+                                        ? $jobCard->serviceItems->pluck('subcategory')->filter()->values()
+                                        : collect([$jobCard->subcategory])->filter()->values();
+                                    $firstSubcategory = $subcategoriesList->first() ?? '—';
+                                    $extraSubcategories = $subcategoriesList->count() - 1;
+                                @endphp
+                                @if($subcategoriesList->isNotEmpty())
+                                    <div class="d-flex align-items-center justify-content-center gap-1 flex-wrap">
+                                        <span class="pli-col-text">{{ $firstSubcategory }}</span>
+                                        @if($extraSubcategories > 0)
+                                            <span class="badge rounded-pill bg-light text-secondary border" title="{{ $subcategoriesList->join(', ') }}" style="font-size: 0.72rem; font-weight: 600; cursor: help;">
+                                                +{{ $extraSubcategories }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="pli-col-text">—</span>
+                                @endif
                             </div>
 
                             <div class="pli-col pli-col-amount col-center">
-                                <span class="pli-col-text">₹{{ number_format($jobCard->service?->price ?? 0, 0) }}</span>
+                                @php
+                                    $subtotalAmount = $jobCard->serviceItems->isNotEmpty()
+                                        ? $jobCard->serviceItems->sum('amount')
+                                        : 0;
+                                    $discountAmount = (float) ($jobCard->discount_amount ?? 0);
+                                    $finalAmount = max(0, $subtotalAmount - $discountAmount);
+                                @endphp
+                                <span class="pli-col-text font-bold" style="font-weight: 700; color: #1E293B;">₹{{ number_format($finalAmount, 0) }}</span>
+                                @if($discountAmount > 0)
+                                    <div class="pli-amount-discount-tag" title="Subtotal ₹{{ number_format($subtotalAmount, 2) }} minus ₹{{ number_format($discountAmount, 2) }} discount">
+                                        -₹{{ number_format($discountAmount, 0) }} off
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="pli-col pli-col-actions col-actions actions-cell col-center">
@@ -271,100 +393,135 @@
     {{-- ADD / EDIT JOB CARD MODAL --}}
     {{-- ========================================================= --}}
 
-    <div class="modal fade premium-modal premium-modal--lg" id="jobCardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+    <div class="modal fade premium-modal job-card-builder-modal" id="jobCardModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
         data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 960px;">
             <div class="modal-content">
                 <form id="jobCardForm" method="POST" action="{{ route('job-cards.store') }}">
                     @csrf
                     <input type="hidden" name="_method" id="jobCardFormMethod" value="POST">
+                    <input type="hidden" name="discount_amount" id="jobCardDiscountHidden" value="0">
 
                     {{-- Header --}}
                     <div class="modal-header">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="modal-icon-box warning">
+                            <div class="modal-icon-box" style="background: #EDE9FE; color: #6366F1; border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                                 <i class="bi bi-clipboard2-check"></i>
                             </div>
                             <div class="modal-header-content">
                                 <h5 class="modal-title" id="jobCardModalTitle">Create Job Card</h5>
-                                <p class="modal-subtitle" id="jobCardModalSubtitle">Create a new customer service job card.
-                                </p>
+                                <p class="modal-subtitle" id="jobCardModalSubtitle">Create a new customer service job card.</p>
                             </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     {{-- Body --}}
-                    <div class="modal-body job-card-form-grid">
+                    <div class="modal-body job-card-builder-body">
 
-                        {{-- Job Card Name --}}
-                        <div class="form-field job-card-form-grid__full">
-                            <label for="job_card_name" class="form-label">
-                                Job Card Name <span>*</span>
-                            </label>
-                            <div class="field-control-wrap">
-                                <span class="form-field-icon"><i class="bi bi-fonts"></i></span>
-                                <input type="text" name="job_card_name" id="job_card_name" class="form-control"
-                                    placeholder="e.g. Bridal Hair Styling" required>
+                        {{-- Top Section: Job Card Name and Customer (2-column) --}}
+                        <div class="job-card-builder-section">
+                            <div class="job-card-builder-top-row">
+                                <div class="form-field">
+                                    <label for="job_card_name" class="form-label">
+                                        JOB CARD NAME <span>*</span>
+                                    </label>
+                                    <div class="field-control-wrap">
+                                        <span class="form-field-icon"><i class="bi bi-fonts"></i></span>
+                                        <input type="text" name="job_card_name" id="job_card_name" class="form-control"
+                                            placeholder="e.g. Bridal Package" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="customer_ids" class="form-label">
+                                        CUSTOMER <span>*</span>
+                                    </label>
+                                    <div class="field-control-wrap">
+                                        <span class="form-field-icon"><i class="bi bi-person"></i></span>
+                                        <select name="customer_ids[]" id="customer_ids" class="no-nice-select" required style="border: 0 !important; outline: none !important; background: transparent !important; box-shadow: none !important; height: 100% !important; padding: 0 24px 0 4px !important; color: #1E293B !important; font-size: 0.88rem !important; font-weight: 500 !important; width: 100% !important; cursor: pointer; -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important;">
+                                            <option value="">Select customer</option>
+                                            @foreach($customers as $customer)
+                                                <option value="{{ $customer->id }}">
+                                                    {{ $customer->name }}
+                                                    @if($customer->mobile_number)
+                                                        — {{ $customer->mobile_number }}
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="bi bi-chevron-down ms-auto text-muted" style="pointer-events: none; font-size: 12px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- Customers (Multi-select) --}}
-                        <div class="form-field">
-                            <label for="customer_ids" class="form-label">
-                                Customer(s) <span>*</span>
-                            </label>
-                            <select name="customer_ids[]" id="customer_ids" class="form-select" multiple data-placeholder="Select customer(s)" data-icon="bi-people" required>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}">
-                                        {{ $customer->name }}
-                                        @if($customer->mobile_number)
-                                            — {{ $customer->mobile_number }}
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                        
+
+                        {{-- Service Items Section --}}
+                        <div class="job-card-builder-section">
+                            <div class="job-card-builder-section-header">
+                                <div>
+                                    <h6 class="job-card-builder-section-title">SERVICE ITEMS</h6>
+                                </div>
+                                <button type="button" class="btn-add-service-pill" id="addServiceItemBtn">
+                                    <i class="bi bi-plus-lg"></i> Add Service
+                                </button>
+                            </div>
+
+                            <div id="serviceItemsContainer" class="job-card-service-items-card">
+                                {{-- Service items will be dynamically rendered here --}}
+                            </div>
                         </div>
 
-                        {{-- Staff Member(s) (Multi-select) --}}
-                        <div class="form-field">
-                            <label for="staff_ids" class="form-label">Staff Member(s)</label>
-                            <select name="staff_ids[]" id="staff_ids" class="form-select" multiple data-placeholder="Select staff member(s)" data-icon="bi-person-badge">
-                                @foreach($staff as $member)
-                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        {{-- Total Amount Summary Card --}}
+                        <div class="job-card-summary-card">
+                            {{-- LEFT: calc icon + total amount + services badge --}}
+                            <div class="job-card-summary-left">
+                                <div class="job-card-summary-calc-icon">
+                                    <i class="bi bi-calculator"></i>
+                                </div>
+                                <div class="job-card-summary-total-info">
+                                    <span class="job-card-summary-total-label">TOTAL AMOUNT</span>
+                                    <span class="job-card-summary-total-val" id="jobCardTotalAmount">₹ 0</span>
+                                </div>
+                                <div class="job-card-services-badge">
+                                    <i class="bi bi-people"></i>
+                                    <span id="jobCardServiceCount">0</span> Services
+                                </div>
+                            </div>
 
-                        {{-- Service --}}
-                        <div class="form-field">
-                            <label for="service_id" class="form-label">
-                                Service <span>*</span>
-                            </label>
-                            <select name="service_id" id="service_id" class="form-select" data-icon="bi-scissors" required>
-                                <option value="">Select service</option>
-                                @foreach($services as $service)
-                                    <option value="{{ $service->id }}" data-subcategory="{{ $service->subcategory }}"
-                                        data-category="{{ $service->category }}" data-icon="{{ $service->icon }}">
-                                        {{ $service->service_name }}
-                                        @if($service->category)
-                                            — {{ $service->category }}
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            {{-- MIDDLE: Subtotal / Discount / Total breakdown --}}
+                            <div class="job-card-summary-middle">
+                                <div class="job-card-summary-row">
+                                    <span class="job-card-summary-row-label">Subtotal</span>
+                                    <span class="job-card-summary-row-val" id="jobCardSubtotal">₹ 0.00</span>
+                                </div>
 
-                        {{-- Subcategory / Service Category --}}
-                        <div class="form-field">
-                            <label for="subcategory" class="form-label">
-                                Service Category
-                            </label>
-                            <select name="subcategory" id="subcategory" class="form-select" data-icon="bi-grid" required
-                                disabled>
-                                <option value="">Select service category (optional)</option>
-                            </select>
-                            <div class="field-help">Subcategory is automatically loaded from selected service.</div>
+                                {{-- Discount row: click the amount to edit it inline --}}
+                                <div class="job-card-summary-row job-card-discount-row">
+                                    <span class="job-card-summary-row-label">Discount</span>
+
+                                    <button type="button" class="job-card-discount-display" id="jobCardDiscountDisplay" title="Click to edit discount">
+                                        <span class="job-card-summary-row-val" style="color:#EF4444;" id="jobCardDiscount">- ₹ 0.00</span>
+                                    </button>
+
+                                    <div class="job-card-discount-edit-wrap" id="jobCardDiscountEditWrap">
+                                        <span class="job-card-discount-input-prefix">₹</span>
+                                        <input type="number" id="jobCardDiscountInput" class="job-card-discount-input"
+                                            min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+                                        <button type="button" class="job-card-discount-confirm-btn" id="jobCardDiscountConfirmBtn" title="Save discount">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="job-card-summary-divider"></div>
+                                <div class="job-card-summary-row job-card-summary-row-final">
+                                    <span class="job-card-summary-row-label">Total</span>
+                                    <span class="job-card-summary-row-val" id="jobCardFinalTotal">₹ 0.00</span>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -372,7 +529,7 @@
                     {{-- Footer --}}
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                            <i class="bi bi-x"></i> Cancel
+                            <i class="bi bi-x-lg"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-primary" id="jobCardSubmitButton">
                             <i class="bi bi-clipboard2-plus"></i> Create Job Card
@@ -420,33 +577,34 @@
                                 class="job-card-details-row-label">Customer(s)</span><strong id="jobCardDetailsCustomer">—</strong>
                         </div>
                         <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-person-badge"></i></span><span
-                                class="job-card-details-row-label">Staff Assigned</span><strong id="jobCardDetailsStaff">—</strong>
-                        </div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
                                     class="bi bi-scissors"></i></span><span
-                                class="job-card-details-row-label">Service</span><strong
-                                id="jobCardDetailsService">—</strong></div>
+                                class="job-card-details-row-label">Services</span><strong
+                                id="jobCardDetailsServices">—</strong></div>
                         <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-layers"></i></span><span class="job-card-details-row-label">Sub
-                                Category</span><strong id="jobCardDetailsSubcategory">—</strong></div>
+                                    class="bi bi-person-badge"></i></span><span class="job-card-details-row-label">Staff Assigned</span><strong id="jobCardDetailsStaff">—</strong></div>
+                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
+                                    class="bi bi-currency-rupee"></i></span><span
+                                class="job-card-details-row-label">Total Amount</span><strong id="jobCardDetailsTotalAmount">—</strong></div>
                         <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
                                     class="bi bi-calendar3"></i></span><span class="job-card-details-row-label">Created
                                 On</span><strong id="jobCardDetailsCreated">—</strong></div>
                     </div>
                     <div class="job-card-details-invoice">
                         <div class="job-card-details-invoice-head">
-                            <span>#</span><span>Description</span><span>Qty</span><span>Rate (₹)</span><span>Amount
-                                (₹)</span></div>
-                        <div class="job-card-details-invoice-line"><span>1</span><span><strong
-                                    id="jobCardDetailsInvoiceService">—</strong><small
-                                    id="jobCardDetailsCategory"></small></span><span>1</span><span
-                                    id="jobCardDetailsRate">₹0</span><span id="jobCardDetailsAmount">₹0</span></div>
-                        <div class="job-card-details-totals"><span>Subtotal</span><strong
-                                id="jobCardDetailsSubtotal">₹0</strong><span>Discount</span><strong>₹0.00</strong><span>Tax
-                                (0%)</span><strong>₹0.00</strong><span
-                                class="job-card-details-total-label">Total</span><strong class="job-card-details-total"
-                                id="jobCardDetailsTotal">₹0</strong></div>
+                            <span>#</span><span>Service</span><span>Staff</span><span>Amount (₹)</span></div>
+                        <div id="jobCardDetailsInvoiceItems">
+                            {{-- Service items will be populated dynamically --}}
+                        </div>
+                        <div class="job-card-details-totals-block">
+                            <div class="job-card-details-totals job-card-details-totals--sub">
+                                <span>Subtotal</span><strong id="jobCardDetailsSubtotal">₹0</strong>
+                            </div>
+                            <div class="job-card-details-totals job-card-details-totals--discount" id="jobCardDetailsDiscountRow">
+                                <span>Discount</span><strong id="jobCardDetailsDiscountVal">-₹0</strong>
+                            </div>
+                            <div class="job-card-details-totals"><span>Total Amount</span><strong class="job-card-details-total"
+                                    id="jobCardDetailsTotal">₹0</strong></div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer job-card-details-footer">
@@ -485,161 +643,6 @@
         <script>
             let deleteJobCardId = null;
 
-            const serviceSelect = document.getElementById('service_id');
-            const subcategorySelect = document.getElementById('subcategory');
-
-            function loadSubcategory(serviceId, selectedSubcategory = null) {
-                subcategorySelect.innerHTML = '';
-
-                if (!serviceId) {
-                    subcategorySelect.disabled = true;
-                    subcategorySelect.innerHTML = '<option value="">Select a service first</option>';
-                    return;
-                }
-
-                const selectedOption = serviceSelect.querySelector(`option[value="${serviceId}"]`);
-                if (!selectedOption) {
-                    subcategorySelect.disabled = true;
-                    return;
-                }
-
-                const subcategory = selectedOption.dataset.subcategory;
-                if (!subcategory) {
-                    subcategorySelect.disabled = true;
-                    subcategorySelect.innerHTML = '<option value="">No subcategory available</option>';
-                    return;
-                }
-
-                subcategorySelect.disabled = false;
-                const subcategoryOption = new Option(subcategory, subcategory, true, true);
-                subcategorySelect.replaceChildren(subcategoryOption);
-
-                if (selectedSubcategory) {
-                    subcategorySelect.value = selectedSubcategory;
-                }
-
-                window.refreshNiceSelect?.(subcategorySelect);
-            }
-
-            serviceSelect.addEventListener('change', function () {
-                loadSubcategory(this.value);
-            });
-
-            function initialiseServicePicker(select) {
-                const iconMap = {
-                    haircut: 'bi-scissors', scissors: 'bi-scissors', 'hair-color': 'bi-palette-fill', keratin: 'bi-stars',
-                    spa: 'bi-flower1', facial: 'bi-stars', sparkle: 'bi-stars', sparkles: 'bi-stars', makeup: 'bi-brush',
-                    brush: 'bi-brush', nails: 'bi-hand-index-thumb', nail: 'bi-hand-index-thumb', beard: 'bi-person',
-                    user: 'bi-person', massage: 'bi-flower1', waxing: 'bi-droplet', droplet: 'bi-droplet', threading: 'bi-bezier2',
-                    default: 'bi-scissors',
-                };
-                const services = [...select.options].filter(option => option.value).map(option => ({
-                    id: option.value,
-                    name: option.textContent.trim().split(' — ')[0],
-                    category: option.dataset.category || '',
-                    subcategory: option.dataset.subcategory || '',
-                    icon: option.dataset.icon || 'default',
-                }));
-                const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char]));
-                const icon = (key) => `<i class="bi ${iconMap[key] || iconMap.default}" aria-hidden="true"></i>`;
-                const details = (service) => [service.category, service.subcategory].filter(Boolean).map(escapeHtml).join(' <span>·</span> ');
-
-                const picker = document.createElement('div');
-                picker.className = 'job-service-picker';
-                picker.innerHTML = `
-                <button type="button" class="job-service-picker__trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="jobServiceOptions">
-                    <span class="job-service-picker__trigger-content"></span><i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </button>
-                <div class="job-service-picker__panel" id="jobServicePanel">
-                    <div class="job-service-picker__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Search service..." aria-label="Search service"></div>
-                    <div class="job-service-picker__filter-wrap"><div class="job-service-picker__filters" aria-label="Filter services by category"></div><button type="button" class="job-service-picker__filter-next" aria-label="Show more categories"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
-                    <div class="job-service-picker__options" id="jobServiceOptions" role="listbox"></div>
-                </div>`;
-                select.classList.add('job-service-picker__native');
-                select.after(picker);
-
-                const trigger = picker.querySelector('.job-service-picker__trigger');
-                const triggerContent = picker.querySelector('.job-service-picker__trigger-content');
-                const panel = picker.querySelector('.job-service-picker__panel');
-                const search = picker.querySelector('input');
-                const filters = picker.querySelector('.job-service-picker__filters');
-                const filterNext = picker.querySelector('.job-service-picker__filter-next');
-                const list = picker.querySelector('.job-service-picker__options');
-                let activeCategory = '';
-                let activeIndex = -1;
-
-                const updateFilterArrow = () => {
-                    filterNext.hidden = filters.scrollWidth <= filters.clientWidth + 2;
-                };
-                filterNext.addEventListener('click', () => filters.scrollBy({ left: 140, behavior: 'smooth' }));
-                filters.addEventListener('scroll', updateFilterArrow);
-
-                const close = () => { picker.classList.remove('is-open', 'opens-up'); trigger.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
-                const visibleServices = () => {
-                    const query = search.value.toLowerCase().trim();
-                    return services.filter(service => !activeCategory || service.category === activeCategory).filter(service =>
-                        [service.name, service.category, service.subcategory].join(' ').toLowerCase().includes(query)
-                    );
-                };
-                const render = () => {
-                    const selected = services.find(service => service.id === select.value);
-                    const iconHtml = `<span class="form-field-icon"><i class="bi bi-scissors" aria-hidden="true"></i></span>`;
-                    triggerContent.innerHTML = selected
-                        ? `${iconHtml}<span><strong>${escapeHtml(selected.name)}</strong><small>${details(selected)}</small></span>`
-                        : `${iconHtml}<span><strong>Select service</strong></span>`;
-
-                    const categories = [...new Set(services.map(service => service.category).filter(Boolean))];
-                    filters.innerHTML = `<button type="button" class="${!activeCategory ? 'is-active' : ''}" data-category="">All</button>` + categories.map(category =>
-                        `<button type="button" class="${activeCategory === category ? 'is-active' : ''}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`
-                    ).join('');
-                    filters.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { activeCategory = button.dataset.category; render(); }));
-                    requestAnimationFrame(updateFilterArrow);
-
-                    const matches = visibleServices();
-                    list.innerHTML = matches.length ? matches.map((service, index) => {
-                        const selectedState = service.id === select.value;
-                        const palette = escapeHtml(service.category.toLowerCase().replace(/\s+/g, '-'));
-                        return `<button type="button" class="job-service-picker__option ${selectedState ? 'is-selected' : ''}" data-value="${escapeHtml(service.id)}" role="option" aria-selected="${selectedState}" tabindex="-1">
-                        <span class="job-service-picker__icon category-${palette}">${icon(service.icon)}</span>
-                        <span class="job-service-picker__copy"><strong>${escapeHtml(service.name)}</strong><small>${details(service)}</small></span>
-                        ${selectedState ? '<i class="bi bi-check-circle-fill job-service-picker__check" aria-hidden="true"></i>' : ''}
-                    </button>`;
-                    }).join('') : '<div class="job-service-picker__empty"><i class="bi bi-scissors" aria-hidden="true"></i><strong>No services found</strong><span>Try another search term</span></div>';
-                    list.querySelectorAll('.job-service-picker__option').forEach(option => option.addEventListener('click', () => choose(option.dataset.value)));
-                };
-                const choose = (id) => {
-                    select.value = id;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                    render();
-                    close();
-                    trigger.focus();
-                };
-                const open = () => {
-                    picker.classList.add('is-open');
-                    const rect = trigger.getBoundingClientRect();
-                    picker.classList.toggle('opens-up', window.innerHeight - rect.bottom < 375 && rect.top > 375);
-                    trigger.setAttribute('aria-expanded', 'true');
-                    render();
-                    search.focus();
-                };
-                trigger.addEventListener('click', () => picker.classList.contains('is-open') ? close() : open());
-                search.addEventListener('input', render);
-                picker.addEventListener('keydown', event => {
-                    const options = [...list.querySelectorAll('.job-service-picker__option')];
-                    if (event.key === 'Escape') { event.preventDefault(); close(); trigger.focus(); }
-                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                        event.preventDefault(); activeIndex = Math.max(0, Math.min(options.length - 1, activeIndex + (event.key === 'ArrowDown' ? 1 : -1))); options[activeIndex]?.focus();
-                    }
-                    if (event.key === 'Enter' && document.activeElement.classList.contains('job-service-picker__option')) { event.preventDefault(); choose(document.activeElement.dataset.value); }
-                });
-                document.addEventListener('click', event => { if (!picker.contains(event.target)) close(); });
-                select.addEventListener('change', render);
-                window.refreshJobServicePicker = render;
-                render();
-            }
-
-            initialiseServicePicker(serviceSelect);
-
             function openAddJobCardModal() {
                 const form = document.getElementById('jobCardForm');
                 form.reset();
@@ -648,19 +651,15 @@
                 document.getElementById('jobCardModalTitle').textContent = 'Create Job Card';
                 document.getElementById('jobCardModalSubtitle').textContent = 'Create a new customer service job card.';
                 document.getElementById('jobCardSubmitButton').innerHTML = '<i class="bi bi-clipboard2-plus"></i> Create Job Card';
-                
-                const statusSelect = document.getElementById('job_card_status');
-                if (statusSelect) {
-                    statusSelect.value = 'pending';
-                    window.refreshNiceSelect?.(statusSelect);
-                }
 
-                loadSubcategory(null);
-                window.setMultiSelectValues?.(document.getElementById('customer_ids'), []);
-                window.setMultiSelectValues?.(document.getElementById('staff_ids'), []);
-                window.refreshNiceSelect?.(document.getElementById('customer_ids'));
-                window.refreshNiceSelect?.(document.getElementById('staff_ids'));
-                window.refreshJobServicePicker?.();
+                document.getElementById('customer_ids').value = '';
+
+                // Reset discount
+                setDiscountValue(0);
+                closeDiscountEditor();
+
+                // Initialize with one empty service item
+                initializeServiceItemBuilder([]);
             }
 
             function openEditJobCardModal(jobCard) {
@@ -668,73 +667,606 @@
                 form.action = `/job-cards/${jobCard.id}`;
                 document.getElementById('jobCardFormMethod').value = 'PUT';
                 document.getElementById('jobCardModalTitle').textContent = 'Edit Job Card';
-                document.getElementById('jobCardModalSubtitle').textContent = 'Update job card information.';
+                document.getElementById('jobCardModalSubtitle').textContent = 'Update customer service job card.';
                 document.getElementById('jobCardSubmitButton').innerHTML = '<i class="bi bi-check2-circle"></i> Update Job Card';
 
                 document.getElementById('job_card_name').value = jobCard.job_card_name ?? '';
-                document.getElementById('service_id').value = jobCard.service_id ?? '';
-                
-                const statusSelect = document.getElementById('job_card_status');
-                if (statusSelect) {
-                    statusSelect.value = jobCard.status ?? 'pending';
-                    window.refreshNiceSelect?.(statusSelect);
-                }
 
                 const customerIds = (jobCard.customers && jobCard.customers.length)
-                    ? jobCard.customers.map(c => c.id)
-                    : (jobCard.customer_id ? [jobCard.customer_id] : []);
+                    ? jobCard.customers.map(c => String(c.id))
+                    : (jobCard.customer_id ? [String(jobCard.customer_id)] : []);
 
-                const staffIds = (jobCard.staff && jobCard.staff.length)
-                    ? jobCard.staff.map(s => s.id)
-                    : (jobCard.staff_id ? [jobCard.staff_id] : []);
+                document.getElementById('customer_ids').value = customerIds[0] || '';
+ 
+                // Populate discount
+                setDiscountValue(parseFloat(jobCard.discount_amount) || 0);
+                closeDiscountEditor();
 
-                window.setMultiSelectValues?.(document.getElementById('customer_ids'), customerIds);
-                window.setMultiSelectValues?.(document.getElementById('staff_ids'), staffIds);
-                window.refreshNiceSelect?.(document.getElementById('customer_ids'));
-                window.refreshNiceSelect?.(document.getElementById('staff_ids'));
-
-                loadSubcategory(jobCard.service_id, jobCard.subcategory);
-                window.refreshJobServicePicker?.();
+                // Populate service items
+                const serviceItems = jobCard.service_items || [];
+                initializeServiceItemBuilder(serviceItems);
             }
 
+            function initializeServiceItemBuilder(serviceItems) {
+                const container = document.getElementById('serviceItemsContainer');
+                container.innerHTML = '';
+
+                // Add existing service items or create an empty one
+                if (serviceItems && serviceItems.length > 0) {
+                    serviceItems.forEach((item, index) => {
+                        addServiceItemRow(container, item);
+                    });
+                } else {
+                    addServiceItemRow(container);
+                }
+
+                updateTotalAmount();
+                attachServiceItemHandlers();
+            }
+
+            function addServiceItemRow(container, itemData = null) {
+                const itemIndex = container.querySelectorAll('.job-card-service-item').length;
+                const itemId = 'service-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const itemNumber = String(itemIndex + 1).padStart(2, '0');
+
+                const itemHTML = `
+                    <div class="job-card-service-item" data-item-id="${itemId}">
+                        {{-- Number badge 
+                        <div class="job-card-item-num-col">
+                            <div class="job-card-item-num-badge">${itemNumber}</div>
+                        </div>--}}
+
+                        {{-- Service Select --}}
+                        <div class="job-card-item-field-col">
+                            <label class="job-card-item-label">SERVICE</label>
+                            <div class="job-card-input-box">
+                                <select name="service_items[${itemIndex}][service_id]" class="service-select" data-item-id="${itemId}" required>
+                                    <option value="">Select service</option>
+                                    @foreach($services as $service)
+                                        <option value="{{ $service->id }}" data-subcategory="{{ $service->subcategory }}" data-category="{{ $service->category }}">
+                                            {{ $service->service_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <i class="bi bi-chevron-down job-card-select-arrow"></i>
+                            </div>
+                        </div>
+
+                        {{-- Subcategory Select --}}
+                        <div class="job-card-item-field-col">
+                            <label class="job-card-item-label">SUBCATEGORY</label>
+                            <div class="job-card-input-box">
+                                <select name="service_items[${itemIndex}][subcategory]" class="subcategory-select" data-item-id="${itemId}" required disabled>
+                                    <option value="">Select subcategory</option>
+                                </select>
+                                <i class="bi bi-chevron-down job-card-select-arrow"></i>
+                            </div>
+                        </div>
+
+                        {{-- Staff Multi-Select Picker --}}
+                        <div class="job-card-item-field-col job-card-item-field-col--staff">
+                            <label class="job-card-item-label">STAFF</label>
+                            <div class="job-card-staff-picker-wrap" data-item-id="${itemId}">
+                                <div class="job-card-input-box job-card-staff-trigger" data-item-id="${itemId}">
+                                    <div class="job-card-staff-avatar-stack" id="staff-avatars-${itemId}">
+                                        <span class="job-card-staff-placeholder">Select staff</span>
+                                    </div>
+                                    <i class="bi bi-chevron-down job-card-select-arrow"></i>
+                                </div>
+                                <div class="job-card-staff-subtext" id="staff-subtext-${itemId}"></div>
+
+                                {{-- Staff Dropdown Checklist --}}
+                                <div class="job-card-staff-dropdown-panel" id="staff-panel-${itemId}">
+                                    <div class="job-card-staff-dropdown-header">Select Staff Members</div>
+                                    <div class="job-card-staff-dropdown-list">
+                                        @foreach($staff as $member)
+                                            <label class="job-card-staff-option">
+                                                <input type="checkbox" name="service_items[${itemIndex}][staff_ids][]" value="{{ $member->id }}" data-name="{{ $member->name }}" class="staff-checkbox" data-item-id="${itemId}">
+                                                <span class="staff-option-avatar">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+                                                <span class="staff-option-name">{{ $member->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Amount --}}
+                            <div class="job-card-item-field-col job-card-item-field-col--amount">
+                                <label class="job-card-item-label">AMOUNT (₹)</label>
+
+                                <div class="job-card-input-box job-card-amount-box">
+                                    <span class="job-card-currency-symbol">₹</span>
+
+                                    <input
+                                        type="number"
+                                        name="service_items[${itemIndex}][amount]"
+                                        class="amount-input"
+                                        data-item-id="${itemId}"
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            {{-- Payment Type --}}
+                            <div class="job-card-item-field-col job-card-item-field-col--payment">
+                                <label class="job-card-item-label">PAYMENT</label>
+
+                                <div class="job-card-input-box job-card-payment-box">
+
+                                   
+
+                                    <select
+                                        name="service_items[${itemIndex}][payment_type_id]"
+                                        class="service-payment-select"
+                                        data-item-id="${itemId}"
+                                        required
+                                    >
+                                        <option value="">Payment</option>
+
+                                        @foreach($paymentTypes as $paymentType)
+                                            <option
+                                                value="{{ $paymentType->id }}"
+                                                data-payment-name="{{ strtolower($paymentType->name) }}"
+                                            >
+                                                {{ $paymentType->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <i class="bi bi-chevron-down job-card-select-arrow"></i>
+
+                                </div>
+                            </div>
+
+                            {{-- Delete --}}
+                            <button
+                                type="button"
+                                class="job-card-item-delete-btn"
+                                data-item-id="${itemId}"
+                                title="Remove service item"
+                                aria-label="Remove service item"
+                            >
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                `;
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = itemHTML.trim();
+                const itemElement = wrapper.firstElementChild;
+                container.appendChild(itemElement);
+
+                // Populate with existing data if editing
+                if (itemData) {
+                    const serviceSelect = itemElement.querySelector('.service-select');
+                    const subcategorySelect = itemElement.querySelector('.subcategory-select');
+                    const amountInput = itemElement.querySelector('.amount-input');
+
+                    serviceSelect.value = itemData.service_id || '';
+                    amountInput.value = itemData.amount || '';
+
+                    // Load and select subcategory
+                    const selectedOption = serviceSelect.querySelector(`option[value="${itemData.service_id}"]`);
+                    if (selectedOption && selectedOption.dataset.subcategory) {
+                        subcategorySelect.disabled = false;
+                        subcategorySelect.innerHTML = `<option value="${selectedOption.dataset.subcategory}">${selectedOption.dataset.subcategory}</option>`;
+                        subcategorySelect.value = itemData.subcategory || selectedOption.dataset.subcategory;
+                    }
+
+                    // Select staff members
+                    if (itemData.staff && itemData.staff.length) {
+                        const staffIds = itemData.staff.map(s => String(s.id));
+                        const checkboxes = itemElement.querySelectorAll('.staff-checkbox');
+                        checkboxes.forEach(cb => {
+                            if (staffIds.includes(String(cb.value))) {
+                                cb.checked = true;
+                            }
+                        });
+                        updateStaffDisplay(itemId);
+                    }
+                }
+            }
+
+            function setupServiceItemEvents() {
+                const container = document.getElementById('serviceItemsContainer');
+                if (!container || container._eventsInitialized) return;
+                container._eventsInitialized = true;
+
+                // 1. Service select change & Amount change
+                container.addEventListener('change', function(e) {
+                    // Service select changed
+                    if (e.target.classList.contains('service-select')) {
+                        const item = e.target.closest('.job-card-service-item');
+                        const selectedOption = e.target.options[e.target.selectedIndex];
+                        const subcategorySelect = item.querySelector('.subcategory-select');
+
+                        if (selectedOption && selectedOption.dataset.subcategory) {
+                            subcategorySelect.disabled = false;
+                            subcategorySelect.innerHTML = `<option value="${selectedOption.dataset.subcategory}">${selectedOption.dataset.subcategory}</option>`;
+                            subcategorySelect.value = selectedOption.dataset.subcategory;
+                        } else {
+                            subcategorySelect.disabled = true;
+                            subcategorySelect.innerHTML = '<option value="">Select subcategory</option>';
+                        }
+                    }
+
+                    // Staff checkbox changed
+                    if (e.target.classList.contains('staff-checkbox')) {
+                        const item = e.target.closest('.job-card-service-item');
+                        if (item) {
+                            updateStaffDisplay(item.dataset.itemId);
+                        }
+                    }
+
+                    // Amount input changed
+                    if (e.target.classList.contains('amount-input')) {
+                        updateTotalAmount();
+                    }
+                });
+
+                // 2. Amount live input
+                container.addEventListener('input', function(e) {
+                    if (e.target.classList.contains('amount-input')) {
+                        updateTotalAmount();
+                    }
+                });
+
+                // 3. Click handler for Staff trigger & Delete button
+                container.addEventListener('click', function(e) {
+                    // Staff Picker Trigger
+                    const staffTrigger = e.target.closest('.job-card-staff-trigger');
+                    if (staffTrigger) {
+                        e.stopPropagation();
+                        const item = staffTrigger.closest('.job-card-service-item');
+                        const itemId = item.dataset.itemId;
+                        const panel = document.getElementById(`staff-panel-${itemId}`);
+
+                        // Close any other open panels
+                        document.querySelectorAll('.job-card-staff-dropdown-panel').forEach(p => {
+                            if (p !== panel) p.classList.remove('is-open');
+                        });
+
+                        if (panel) {
+                            panel.classList.toggle('is-open');
+                        }
+                        return;
+                    }
+
+                    // Delete Item Button
+                    const deleteBtn = e.target.closest('.job-card-item-delete-btn');
+                    if (deleteBtn) {
+                        e.preventDefault();
+                        const item = deleteBtn.closest('.job-card-service-item');
+                        if (!item) return;
+
+                        const allItems = container.querySelectorAll('.job-card-service-item');
+                        if (allItems.length > 1) {
+                            item.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+                            item.style.opacity = '0';
+                            item.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                item.remove();
+                                renumberServiceItems();
+                                updateTotalAmount();
+                            }, 180);
+                        } else {
+                            // Reset the single item fields
+                            const serv = item.querySelector('.service-select');
+                            if (serv) serv.value = '';
+                            const subcat = item.querySelector('.subcategory-select');
+                            if (subcat) {
+                                subcat.disabled = true;
+                                subcat.innerHTML = '<option value="">Select subcategory</option>';
+                            }
+                            item.querySelectorAll('.staff-checkbox').forEach(c => c.checked = false);
+                            const amt = item.querySelector('.amount-input');
+                            if (amt) amt.value = '';
+                            updateStaffDisplay(item.dataset.itemId);
+                            updateTotalAmount();
+                        }
+                        return;
+                    }
+                });
+
+                // Close staff dropdowns when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.job-card-staff-picker-wrap')) {
+                        document.querySelectorAll('.job-card-staff-dropdown-panel').forEach(p => p.classList.remove('is-open'));
+                    }
+                });
+
+                // Add Service button click
+                const addBtn = document.getElementById('addServiceItemBtn');
+                if (addBtn) {
+                    addBtn.onclick = function(e) {
+                        e.preventDefault();
+                        addServiceItemRow(container);
+                        renumberServiceItems();
+                        updateTotalAmount();
+                    };
+                }
+            }
+
+            function attachServiceItemHandlers() {
+                setupServiceItemEvents();
+                setupDiscountEditorEvents();
+            }
+
+            function updateStaffDisplay(itemId) {
+                const item = document.querySelector(`.job-card-service-item[data-item-id="${itemId}"]`);
+                if (!item) return;
+
+                const avatarStack = document.getElementById(`staff-avatars-${itemId}`);
+                const subtext = document.getElementById(`staff-subtext-${itemId}`);
+                const checkedBoxes = Array.from(item.querySelectorAll('.staff-checkbox:checked'));
+
+                if (checkedBoxes.length === 0) {
+                    avatarStack.innerHTML = '<span class="job-card-staff-placeholder">Select staff</span>';
+                    subtext.textContent = '';
+                    return;
+                }
+
+                const names = checkedBoxes.map(cb => cb.dataset.name || cb.parentElement.textContent.trim());
+                const maxVisible = 2;
+                const visibleNames = names.slice(0, maxVisible);
+                const extraCount = names.length - maxVisible;
+
+                let avatarsHtml = '';
+                visibleNames.forEach(name => {
+                    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    avatarsHtml += `<div class="job-card-staff-avatar-bubble" title="${name}">${initials}</div>`;
+                });
+
+                if (extraCount > 0) {
+                    avatarsHtml += `<div class="job-card-staff-avatar-more">+${extraCount}</div>`;
+                }
+
+                avatarStack.innerHTML = avatarsHtml;
+
+                if (names.length === 1) {
+                    subtext.textContent = names[0];
+                } else if (extraCount > 0) {
+                    subtext.textContent = `${visibleNames.join(', ')} +${extraCount}`;
+                } else {
+                    subtext.textContent = visibleNames.join(', ');
+                }
+            }
+
+            function renumberServiceItems() {
+                const container = document.getElementById('serviceItemsContainer');
+                const items = container.querySelectorAll('.job-card-service-item');
+
+                items.forEach((item, index) => {
+                    const itemNumber = String(index + 1).padStart(2, '0');
+                    const numberDisplay = item.querySelector('.job-card-item-num-badge');
+                    if (numberDisplay) {
+                        numberDisplay.textContent = itemNumber;
+                    }
+
+                    // Update field names to maintain 0, 1, 2 array indexing
+                    item.querySelectorAll('input, select').forEach(field => {
+                        const nameAttr = field.getAttribute('name');
+                        if (nameAttr) {
+                            field.setAttribute('name', nameAttr.replace(/\[\d+\]/, `[${index}]`));
+                        }
+                    });
+                });
+            }
+
+            // ---------------------------------------------------------------
+            // DISCOUNT — click-to-edit amount, saved into a hidden field
+            // that is submitted with the form and persisted to the DB.
+            // ---------------------------------------------------------------
+
+            function formatCurrency(value) {
+                return `₹ ${Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+
+            function getSubtotal() {
+                const container = document.getElementById('serviceItemsContainer');
+                if (!container) return 0;
+                let total = 0;
+                container.querySelectorAll('.amount-input').forEach(input => {
+                    total += parseFloat(input.value) || 0;
+                });
+                return total;
+            }
+
+            function getDiscountValue() {
+                const hidden = document.getElementById('jobCardDiscountHidden');
+                return hidden ? (parseFloat(hidden.value) || 0) : 0;
+            }
+
+            function setDiscountValue(value) {
+                const subtotal = getSubtotal();
+                let clamped = Math.max(0, parseFloat(value) || 0);
+                if (clamped > subtotal) clamped = subtotal;
+
+                const hidden = document.getElementById('jobCardDiscountHidden');
+                const display = document.getElementById('jobCardDiscount');
+                const input = document.getElementById('jobCardDiscountInput');
+
+                if (hidden) hidden.value = clamped.toFixed(2);
+                if (display) display.textContent = clamped > 0
+                    ? `- ${formatCurrency(clamped)}`
+                    : `- ₹ 0.00`;
+                if (input) input.value = clamped > 0 ? clamped.toFixed(2) : '';
+
+                return clamped;
+            }
+
+            function openDiscountEditor() {
+                const displayBtn = document.getElementById('jobCardDiscountDisplay');
+                const editWrap = document.getElementById('jobCardDiscountEditWrap');
+                const input = document.getElementById('jobCardDiscountInput');
+                if (!displayBtn || !editWrap || !input) return;
+
+                displayBtn.style.display = 'none';
+                editWrap.classList.add('is-open');
+                input.value = getDiscountValue() > 0 ? getDiscountValue().toFixed(2) : '';
+                input.focus();
+                input.select();
+            }
+
+            function closeDiscountEditor() {
+                const displayBtn = document.getElementById('jobCardDiscountDisplay');
+                const editWrap = document.getElementById('jobCardDiscountEditWrap');
+                if (!displayBtn || !editWrap) return;
+
+                displayBtn.style.display = '';
+                editWrap.classList.remove('is-open');
+            }
+
+            function commitDiscountEditor() {
+                const input = document.getElementById('jobCardDiscountInput');
+                const raw = input ? input.value : 0;
+                setDiscountValue(raw);
+                closeDiscountEditor();
+                updateTotalAmount();
+            }
+
+            function setupDiscountEditorEvents() {
+                const displayBtn = document.getElementById('jobCardDiscountDisplay');
+                const input = document.getElementById('jobCardDiscountInput');
+                const confirmBtn = document.getElementById('jobCardDiscountConfirmBtn');
+                const editWrap = document.getElementById('jobCardDiscountEditWrap');
+
+                if (displayBtn && !displayBtn._bound) {
+                    displayBtn._bound = true;
+                    displayBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        openDiscountEditor();
+                    });
+                }
+
+                if (confirmBtn && !confirmBtn._bound) {
+                    confirmBtn._bound = true;
+                    confirmBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        commitDiscountEditor();
+                    });
+                }
+
+                if (input && !input._bound) {
+                    input._bound = true;
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commitDiscountEditor();
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            closeDiscountEditor();
+                        }
+                    });
+                    input.addEventListener('blur', function () {
+                        // Small delay so a click on the confirm button still registers
+                        setTimeout(() => {
+                            if (editWrap && editWrap.classList.contains('is-open')) {
+                                commitDiscountEditor();
+                            }
+                        }, 120);
+                    });
+                }
+            }
+
+            function updateTotalAmount() {
+                const subtotal = getSubtotal();
+                let discount = getDiscountValue();
+
+                // Keep discount from exceeding the current subtotal (e.g. if a service was removed)
+                if (discount > subtotal) {
+                    discount = setDiscountValue(subtotal);
+                }
+
+                const finalTotal = Math.max(0, subtotal - discount);
+
+                document.getElementById('jobCardTotalAmount').textContent = formatCurrency(finalTotal);
+                document.getElementById('jobCardSubtotal').textContent = formatCurrency(subtotal);
+                document.getElementById('jobCardDiscount').textContent = discount > 0
+                    ? `- ${formatCurrency(discount)}`
+                    : `- ₹ 0.00`;
+                document.getElementById('jobCardFinalTotal').textContent = formatCurrency(finalTotal);
+
+                // Update count badge
+                const serviceCount = document.querySelectorAll('#serviceItemsContainer .amount-input').length;
+                document.getElementById('jobCardServiceCount').textContent = serviceCount;
+            }
+
+
             function openJobCardDetailsModal(jobCard) {
-                const service = jobCard.service || {};
                 const customers = (jobCard.customers && jobCard.customers.length)
                     ? jobCard.customers
                     : (jobCard.customer ? [jobCard.customer] : []);
-                const staffList = (jobCard.staff && jobCard.staff.length)
-                    ? jobCard.staff
-                    : (jobCard.primary_staff ? [jobCard.primary_staff] : []);
 
                 const customerText = customers.map(c => {
                     return c.mobile_number ? `${c.name} (${c.mobile_number})` : c.name;
                 }).join(', ') || '—';
 
-                const staffText = staffList.map(s => s.name).join(', ') || '—';
+                // Extract unique services and staff from service items
+                const serviceItems = jobCard.service_items || [];
+                const uniqueServices = [...new Set(serviceItems.map(item => item.service?.service_name).filter(Boolean))].join(', ') || '—';
+                const allStaff = serviceItems.flatMap(item => item.staff?.map(s => s.name) || []);
+                const uniqueStaff = [...new Set(allStaff)].join(', ') || '—';
 
-                const amount = Number(service.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
-                const created = jobCard.created_at ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+                // Calculate totals
+                const subtotal = serviceItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+                const discount = Math.min(parseFloat(jobCard.discount_amount) || 0, subtotal);
+                const total = Math.max(0, subtotal - discount);
+
+                const formattedSubtotal = subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const formattedDiscount = discount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const formattedTotal = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                // Generate invoice items
+                let invoiceItemsHTML = '';
+                serviceItems.forEach((item, index) => {
+                    const serviceName = item.service?.service_name || '—';
+                    const staffNames = item.staff?.map(s => s.name).join(', ') || 'No staff assigned';
+                    const amount = parseFloat(item.amount) || 0;
+                    const formattedAmount = amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    invoiceItemsHTML += `
+                        <div class="job-card-details-invoice-line">
+                            <span>${index + 1}</span>
+                            <span>
+                                <strong>${serviceName}</strong><br>
+                                <small>${item.subcategory || '—'}</small>
+                            </span>
+                            <span>${staffNames}</span>
+                            <span>₹${formattedAmount}</span>
+                        </div>
+                    `;
+                });
 
                 document.getElementById('jobCardDetailsNumber').textContent = `#JC-${String(jobCard.id).padStart(5, '0')}`;
-                document.getElementById('jobCardDetailsAmount').textContent = `₹${amount}.00`;
                 document.getElementById('jobCardDetailsName').textContent = jobCard.job_card_name || '—';
-                document.getElementById('jobCardDetailsCreated').textContent = created;
+                document.getElementById('jobCardDetailsCreated').textContent = jobCard.created_at
+                    ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '—';
                 document.getElementById('jobCardDetailsCustomer').textContent = customerText;
-                document.getElementById('jobCardDetailsStaff').textContent = staffText;
-                document.getElementById('jobCardDetailsService').textContent = service.service_name || '—';
-                document.getElementById('jobCardDetailsInvoiceService').textContent = service.service_name || '—';
-                document.getElementById('jobCardDetailsCategory').textContent = [service.category, service.subcategory].filter(Boolean).join(' · ');
-                document.getElementById('jobCardDetailsSubcategory').textContent = jobCard.subcategory || '—';
-                document.getElementById('jobCardDetailsRate').textContent = `₹${amount}.00`;
-                document.getElementById('jobCardDetailsSubtotal').textContent = `₹${amount}.00`;
-                document.getElementById('jobCardDetailsTotal').textContent = `₹${amount}.00`;
+                document.getElementById('jobCardDetailsServices').textContent = uniqueServices;
+                document.getElementById('jobCardDetailsStaff').textContent = uniqueStaff;
+                document.getElementById('jobCardDetailsTotalAmount').textContent = `₹${formattedTotal}`;
+                document.getElementById('jobCardDetailsInvoiceItems').innerHTML = invoiceItemsHTML;
+                document.getElementById('jobCardDetailsSubtotal').textContent = `₹${formattedSubtotal}`;
+                document.getElementById('jobCardDetailsDiscountVal').textContent = `-₹${formattedDiscount}`;
+                document.getElementById('jobCardDetailsTotal').textContent = `₹${formattedTotal}`;
+
+                const discountRow = document.getElementById('jobCardDetailsDiscountRow');
+                if (discountRow) {
+                    discountRow.style.display = discount > 0 ? '' : 'none';
+                }
 
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('jobCardDetailsModal')).show();
             }
 
             function openDeleteJobCardModal(jobCardId, jobCardName) {
                 deleteJobCardId = jobCardId;
-                document.getElementById('deleteJobCardMessage').textContent = `Are you sure you want to delete ${jobCardName}?`;
+                const msg = document.getElementById('deleteJobCardMessage');
+                if (msg) msg.textContent = `Are you sure you want to delete ${jobCardName}?`;
                 const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteJobCardModal'));
                 modal.show();
             }
@@ -747,13 +1279,15 @@
                 button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Deleting...';
 
                 const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}';
 
                 try {
                     const response = await fetch(`/job-cards/${deleteJobCardId}`, {
                         method: 'DELETE',
                         headers: {
+                            'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrfMeta.getAttribute('content')
+                            'X-CSRF-TOKEN': csrfToken
                         }
                     });
 
@@ -764,30 +1298,88 @@
                     }
 
                     const modalElement = document.getElementById('deleteJobCardModal');
-                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    const modal = bootstrap.Modal.getInstance(modalElement) || bootstrap.Modal.getOrCreateInstance(modalElement);
                     if (modal) modal.hide();
 
                     const row = document.getElementById(`job-card-row-${deleteJobCardId}`);
                     if (row) {
-                        row.style.transition = 'opacity .25s ease';
+                        row.style.transition = 'opacity .25s ease, transform .25s ease';
                         row.style.opacity = '0';
+                        row.style.transform = 'scale(0.95)';
                         setTimeout(() => {
                             row.remove();
-                            if (document.querySelector('.premium-list .premium-list-item') === null) {
+                            if (document.querySelectorAll('.premium-list .premium-list-item').length === 0) {
                                 window.location.reload();
                             }
                         }, 250);
                     }
 
-                    showToast(data.message, 'success');
+                    if (window.showToast) {
+                        window.showToast(data.message || 'Job card deleted successfully.', 'success');
+                    }
 
                 } catch (error) {
-                    showToast(error.message, 'danger');
+                    if (window.showToast) {
+                        window.showToast(error.message || 'Error deleting job card', 'danger');
+                    } else {
+                        alert(error.message || 'Error deleting job card');
+                    }
                 } finally {
                     deleteJobCardId = null;
                     button.disabled = false;
                     button.textContent = 'Delete';
                 }
+            });
+
+            // Form submission handler
+            document.getElementById('jobCardForm').addEventListener('submit', function(e) {
+                // Validate that at least one service item exists
+                const serviceItems = document.querySelectorAll('.job-card-service-item');
+                if (serviceItems.length === 0) {
+                    e.preventDefault();
+                    if (window.showToast) window.showToast('Please add at least one service item', 'danger');
+                    return false;
+                }
+
+                // Make sure any open discount edit is committed before submit
+                const editWrap = document.getElementById('jobCardDiscountEditWrap');
+                if (editWrap && editWrap.classList.contains('is-open')) {
+                    commitDiscountEditor();
+                }
+
+                // Validate all service items
+                let isValid = true;
+                serviceItems.forEach((item, index) => {
+                    const serviceSelect = item.querySelector('.service-select');
+                    const subcategorySelect = item.querySelector('.subcategory-select');
+                    const checkedStaff = item.querySelectorAll('.staff-checkbox:checked');
+                    const amountInput = item.querySelector('.amount-input');
+
+                    if (!serviceSelect || !serviceSelect.value) {
+                        if (window.showToast) window.showToast(`Service item ${index + 1}: Service is required`, 'danger');
+                        isValid = false;
+                    }
+                    if (!subcategorySelect || !subcategorySelect.value) {
+                        if (window.showToast) window.showToast(`Service item ${index + 1}: Subcategory is required`, 'danger');
+                        isValid = false;
+                    }
+                    if (!checkedStaff || checkedStaff.length === 0) {
+                        if (window.showToast) window.showToast(`Service item ${index + 1}: At least one staff member is required`, 'danger');
+                        isValid = false;
+                    }
+                    if (!amountInput || !amountInput.value || parseFloat(amountInput.value) < 0) {
+                        if (window.showToast) window.showToast(`Service item ${index + 1}: Valid amount is required`, 'danger');
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Renumber items before submission to ensure correct indexing
+                renumberServiceItems();
             });
         </script>
     @endpush

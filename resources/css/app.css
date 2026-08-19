@@ -2,6 +2,7 @@
  * from public/css.  Keep one Vite-owned entry point so every authenticated
  * management page receives the same shared design system. */
 @import "../../public/css/app.css";
+
 @import "../../public/css/management/management.css";
 @import "../../public/css/management/mgmt-stats.css";
 @import "../../public/css/management/premium-list.css";
@@ -729,7 +730,6 @@
     width: 46px;
     height: 46px;
     border-radius: 14px;
-    box-shadow: 0 8px 18px rgba(245, 158, 11, .18);
 }
 
 #jobCardModal .btn-close {

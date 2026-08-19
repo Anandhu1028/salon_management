@@ -21,4 +21,22 @@ class Staff extends Model
     {
         return $this->belongsToMany(JobCard::class, 'job_card_staff')->withTimestamps();
     }
+
+    /**
+     * Relationship to JobCardServices (new structure)
+     */
+    public function jobCardServices()
+    {
+        return $this->belongsToMany(
+            JobCardService::class,
+            'job_card_service_staff',
+            'staff_id',
+            'job_card_service_id'
+        )->withTimestamps();
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(StaffAttendance::class);
+    }
 }

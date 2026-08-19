@@ -357,9 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         alert.remove();
     });
 
-    document.querySelectorAll('.premium-modal .form-select:not(#service_id)').forEach(createNiceSelect);
+    document.querySelectorAll('.premium-modal:not(.job-card-builder-modal) .form-select:not(#service_id):not(.no-nice-select):not(.service-select):not(.subcategory-select)').forEach(createNiceSelect);
     document.addEventListener('shown.bs.modal', (event) => {
-        event.target.querySelectorAll('.form-select:not(#service_id)').forEach(select => window.refreshNiceSelect(select));
+        if (!event.target.classList.contains('job-card-builder-modal')) {
+            event.target.querySelectorAll('.form-select:not(#service_id):not(.no-nice-select):not(.service-select):not(.subcategory-select)').forEach(select => window.refreshNiceSelect(select));
+        }
     });
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.nice-select')) {
@@ -399,6 +401,26 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.addEventListener('click', closeMobileSidebar);
     window.addEventListener('resize', () => {
         if (window.innerWidth > 1024) closeMobileSidebar();
+    });
+
+    /* Handle Sidebar Submenu Toggles */
+    const submenuToggles = document.querySelectorAll('.sidebar-submenu-toggle');
+    submenuToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            const parentLi = toggle.closest('.sidebar-has-submenu');
+            const submenu = parentLi.querySelector('.sidebar-submenu');
+            
+            if (parentLi.classList.contains('submenu-open')) {
+                parentLi.classList.remove('submenu-open');
+                submenu.classList.remove('show');
+                toggle.setAttribute('aria-expanded', 'false');
+            } else {
+                parentLi.classList.add('submenu-open');
+                submenu.classList.add('show');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        });
     });
 });
 
