@@ -1580,27 +1580,135 @@
 
 
 
-             function toggleJobCardActions(button) {
-        const wrapper = button.closest('.pli-action-menu-wrap');
+           function toggleJobCardActions(button) {
+    const wrapper = button.closest('.pli-action-menu-wrap');
+    const currentRow = button.closest('.premium-list-item');
 
-        // Close all other action menus
-        document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(menu => {
-            if (menu !== wrapper) {
-                menu.classList.remove('is-open');
+    // Close all other open menus
+    document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(menu => {
+        if (menu !== wrapper) {
+            menu.classList.remove('is-open');
 
-                const menuButton = menu.querySelector('.pli-action-dots');
-                if (menuButton) {
-                    menuButton.setAttribute('aria-expanded', 'false');
-                }
+            const menuButton = menu.querySelector('.pli-action-dots');
+
+            if (menuButton) {
+                menuButton.classList.remove('is-open');
+                menuButton.setAttribute('aria-expanded', 'false');
             }
-        });
 
-        const isOpen = wrapper.classList.toggle('is-open');
+            const row = menu.closest('.premium-list-item');
 
-        button.classList.toggle('is-open', isOpen);
-        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (row) {
+                row.classList.remove('action-menu-row-open');
+            }
+        }
+    });
+
+    const isOpen = wrapper.classList.toggle('is-open');
+
+    button.classList.toggle('is-open', isOpen);
+    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+    // Bring the current row above all other rows
+    if (currentRow) {
+        currentRow.classList.toggle('action-menu-row-open', isOpen);
+    }
+}
+
+
+function closeJobCardActions(element) {
+    const wrapper = element.closest('.pli-action-menu-wrap');
+
+    if (!wrapper) {
+        return;
     }
 
+    wrapper.classList.remove('is-open');
+
+    const button = wrapper.querySelector('.pli-action-dots');
+
+    if (button) {
+        button.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+    }
+
+    const row = wrapper.closest('.premium-list-item');
+
+    if (row) {
+        row.classList.remove('action-menu-row-open');
+    }
+}
+
+
+// Close when clicking outside
+document.addEventListener('click', function (event) {
+
+    if (!event.target.closest('.pli-action-menu-wrap')) {
+
+        document
+            .querySelectorAll('.pli-action-menu-wrap.is-open')
+            .forEach(wrapper => {
+
+                wrapper.classList.remove('is-open');
+
+                const button =
+                    wrapper.querySelector('.pli-action-dots');
+
+                if (button) {
+                    button.classList.remove('is-open');
+                    button.setAttribute(
+                        'aria-expanded',
+                        'false'
+                    );
+                }
+
+                const row =
+                    wrapper.closest('.premium-list-item');
+
+                if (row) {
+                    row.classList.remove(
+                        'action-menu-row-open'
+                    );
+                }
+            });
+    }
+});
+
+
+// Escape key
+document.addEventListener('keydown', function (event) {
+
+    if (event.key !== 'Escape') {
+        return;
+    }
+
+    document
+        .querySelectorAll('.pli-action-menu-wrap.is-open')
+        .forEach(wrapper => {
+
+            wrapper.classList.remove('is-open');
+
+            const button =
+                wrapper.querySelector('.pli-action-dots');
+
+            if (button) {
+                button.classList.remove('is-open');
+                button.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+            }
+
+            const row =
+                wrapper.closest('.premium-list-item');
+
+            if (row) {
+                row.classList.remove(
+                    'action-menu-row-open'
+                );
+            }
+        });
+});
 
     function closeJobCardActions(element) {
         const wrapper = element.closest('.pli-action-menu-wrap');

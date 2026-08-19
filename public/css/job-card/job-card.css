@@ -1698,3 +1698,65 @@
         height: 34px;
     }
 }
+
+/* ============================================================
+   ACTION POPOVER — FIX ROW STACKING
+   ============================================================ */
+
+/* Every row gets its own stacking context */
+.job-card-page .premium-list--jobs .premium-list-item {
+    position: relative;
+    z-index: 1;
+}
+
+/* The row whose menu is open must be above every other row */
+.job-card-page .premium-list--jobs .premium-list-item.action-menu-row-open {
+    z-index: 9999 !important;
+}
+
+
+/* Actions column must also allow the popover to escape */
+.job-card-page .premium-list--jobs .pli-col-actions {
+    position: relative;
+    z-index: 10000;
+    overflow: visible !important;
+}
+
+
+/* Action wrapper */
+.job-card-page .pli-action-menu-wrap {
+    position: relative;
+    z-index: 10001;
+}
+
+
+/* Popover sits above everything inside the row */
+.job-card-page .pli-action-popover {
+    position: absolute;
+    z-index: 100000 !important;
+
+    top: calc(100% + 7px);
+    right: 0;
+}
+
+
+/* Open popover */
+.job-card-page
+.premium-list--jobs
+.premium-list-item.action-menu-row-open
+.pli-action-popover {
+    z-index: 100000 !important;
+}
+
+
+/* Keep action button itself below its popup */
+.job-card-page .pli-action-dots {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* Popup content always above trigger */
+.job-card-page .pli-action-popover {
+    isolation: isolate;
+}
