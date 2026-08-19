@@ -3,6 +3,127 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/job-card/job-card.css') }}?v={{ time() }}">
     <style>
+
+        /* ============================================================
+   PAYMENT TYPE COLUMN
+   ============================================================ */
+
+.job-card-page .premium-list--jobs .pli-col-payment-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.payment-type-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.payment-type-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    min-height: 30px;
+    padding: 5px 10px;
+
+    border-radius: 9px;
+    border: 1px solid transparent;
+
+    font-size: 0.70rem;
+    font-weight: 700;
+    line-height: 1;
+
+    white-space: nowrap;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.payment-type-pill:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 4px 10px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.payment-type-pill i {
+    font-size: 0.78rem;
+    line-height: 1;
+}
+
+/* UPI */
+.payment-type-upi {
+    color: #6366F1;
+    background: linear-gradient(
+        135deg,
+        #F5F3FF 0%,
+        #EDE9FE 100%
+    );
+    border-color: #DDD6FE;
+}
+
+/* Cash */
+.payment-type-cash {
+    color: #16A34A;
+    background: linear-gradient(
+        135deg,
+        #F0FDF4 0%,
+        #DCFCE7 100%
+    );
+    border-color: #BBF7D0;
+}
+
+/* Card */
+.payment-type-card {
+    color: #7C3AED;
+    background: linear-gradient(
+        135deg,
+        #FAF5FF 0%,
+        #F3E8FF 100%
+    );
+    border-color: #E9D5FF;
+}
+
+/* Bank */
+.payment-type-bank {
+    color: #2563EB;
+    background: linear-gradient(
+        135deg,
+        #EFF6FF 0%,
+        #DBEAFE 100%
+    );
+    border-color: #BFDBFE;
+}
+
+/* Net Banking */
+.payment-type-net-banking {
+    color: #0891B2;
+    background: linear-gradient(
+        135deg,
+        #ECFEFF 0%,
+        #CFFAFE 100%
+    );
+    border-color: #A5F3FC;
+}
+
+/* Fallback */
+.payment-type-default {
+    color: #64748B;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+}
         /* Compact Payment Method field */
         .job-card-payment-field {
             max-width: 220px;
@@ -213,6 +334,7 @@
                         <span class="pli-head-cell col-center">Customer</span>
                         <span class="pli-head-cell col-center">Service</span>
                         <span class="pli-head-cell col-center">Sub Category</span>
+                        <span class="pli-head-cell col-center">Payment Type</span>
                         <span class="pli-head-cell col-center">Amount</span>
                         <span class="pli-head-cell col-center">Actions</span>
                     </div>
@@ -295,6 +417,44 @@
                                     <span class="pli-col-text">—</span>
                                 @endif
                             </div>
+
+                            {{-- Payment Type --}}
+<div class="pli-col pli-col-payment-type col-center">
+    @if($jobCard->serviceItems->isNotEmpty())
+        <div class="payment-type-list">
+            @foreach($jobCard->serviceItems as $serviceItem)
+                @php
+                    $paymentType = $serviceItem->paymentType?->name;
+
+                    $paymentTypeKey = strtolower(trim($paymentType ?? ''));
+
+                    $paymentIcon = match (true) {
+                        str_contains($paymentTypeKey, 'upi') => 'bi-phone',
+                        str_contains($paymentTypeKey, 'cash') => 'bi-cash',
+                        str_contains($paymentTypeKey, 'card') => 'bi-credit-card',
+                        str_contains($paymentTypeKey, 'bank') => 'bi-bank',
+                        str_contains($paymentTypeKey, 'net') => 'bi-globe2',
+                        default => 'bi-wallet2',
+                    };
+                @endphp
+
+                @if($paymentType)
+                    <span class="payment-type-pill payment-type-{{ str_replace(' ', '-', $paymentTypeKey) }}">
+                        <i class="bi {{ $paymentIcon }}"></i>
+                        <span>{{ $paymentType }}</span>
+                    </span>
+                @else
+                    <span class="payment-type-pill payment-type-default">
+                        <i class="bi bi-wallet2"></i>
+                        <span>—</span>
+                    </span>
+                @endif
+            @endforeach
+        </div>
+    @else
+        <span class="pli-col-text">—</span>
+    @endif
+</div>
 
                             <div class="pli-col pli-col-amount col-center">
                                 @php
@@ -455,8 +615,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        
 
                         {{-- Service Items Section --}}
                         <div class="job-card-builder-section">
@@ -677,7 +835,7 @@
                     : (jobCard.customer_id ? [String(jobCard.customer_id)] : []);
 
                 document.getElementById('customer_ids').value = customerIds[0] || '';
- 
+
                 // Populate discount
                 setDiscountValue(parseFloat(jobCard.discount_amount) || 0);
                 closeDiscountEditor();

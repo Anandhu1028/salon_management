@@ -70,8 +70,24 @@
    ============================================================ */
 
 .job-card-page .premium-list--jobs {
-    --pli-grid: 44px 52px minmax(180px, 1.35fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 0.9fr) 100px 108px 152px;
-    gap: 8px;
+    /*
+     * 8 columns:
+     * # | Job Card | Customer | Service | Sub Category |
+     * Payment Type | Amount | Actions
+     */
+    --pli-grid:
+        44px
+        minmax(190px, 1.15fr)
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        minmax(130px, 0.9fr)
+        120px
+        105px
+        120px;
+
+    column-gap: 12px;
+    row-gap: 8px;
+
     padding: 0 16px 18px;
 }
 
@@ -231,7 +247,21 @@
 }
 
 .job-card-page .premium-list--jobs .pli-col-actions {
-    gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.job-card-page .premium-list--jobs .pli-action-buttons-desktop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .job-card-page .premium-list--jobs .pli-btn-icon {

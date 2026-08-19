@@ -13,6 +13,7 @@ class JobCardService extends Model
         'service_id',
         'subcategory',
         'amount',
+        'payment_type_id',
     ];
 
     protected $casts = [
@@ -46,5 +47,10 @@ class JobCardService extends Model
             'job_card_service_id',
             'staff_id'
         )->withTimestamps();
+    }
+
+    public function paymentType()
+    {
+        return $this->belongsTo(PaymentType::class);
     }
 }

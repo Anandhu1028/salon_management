@@ -64,7 +64,7 @@ class JobCardController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Payment Type', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(JobCard $jobCard) => [
@@ -76,6 +76,7 @@ class JobCardController extends Controller
                 $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
                 $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
                 $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->join(', ') ?: '—',
                 '₹' . number_format($jobCard->getSubtotalAmount(), 2),
                 '₹' . number_format($jobCard->getDiscountAmount(), 2),
                 '₹' . number_format($jobCard->getFinalAmount(), 2),
@@ -89,7 +90,7 @@ class JobCardController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
+        $headers = ['Job Card', 'Customers', 'Service', 'Subcategory', 'Staff Assigned', 'Amount', 'Payment Type', 'Subtotal', 'Discount', 'Total Amount', 'Status', 'Created'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(JobCard $jobCard) => [
@@ -101,6 +102,7 @@ class JobCardController extends Controller
                 $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
                 $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
                 $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
+                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->join(', ') ?: '—',
                 '₹' . number_format($jobCard->getSubtotalAmount(), 2),
                 '₹' . number_format($jobCard->getDiscountAmount(), 2),
                 '₹' . number_format($jobCard->getFinalAmount(), 2),
@@ -164,12 +166,15 @@ class JobCardController extends Controller
                 'numeric',
                 'min:0',
             ],
+            'service_items.*.payment_type_id' => [
+                'required',
+                'exists:payment_types,id',
+            ],
             'discount_amount' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-            'payment_type_id' => ['required', 'exists:payment_types,id'],
             'status' => [
                 'nullable',
                 Rule::in(['pending', 'in_progress', 'completed', 'cancelled']),
@@ -192,7 +197,6 @@ class JobCardController extends Controller
                 'customer_id' => $validated['customer_ids'][0],
                 'status' => $validated['status'] ?? 'pending',
                 'discount_amount' => $discount,
-                'payment_type_id' => $validated['payment_type_id'],
             ]);
 
             // Sync customers
@@ -207,12 +211,13 @@ class JobCardController extends Controller
                     throw new \Exception('Selected subcategory does not belong to the selected service.');
                 }
 
-                // Create service item
+                // Create service item (each item carries its own payment type)
                 $serviceItem = JobCardService::create([
                     'job_card_id' => $jobCard->id,
                     'service_id' => $item['service_id'],
                     'subcategory' => $item['subcategory'],
                     'amount' => $item['amount'],
+                    'payment_type_id' => $item['payment_type_id'],
                 ]);
 
                 // Assign staff to service item
@@ -271,12 +276,15 @@ class JobCardController extends Controller
                 'numeric',
                 'min:0',
             ],
+            'service_items.*.payment_type_id' => [
+                'required',
+                'exists:payment_types,id',
+            ],
             'discount_amount' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-            'payment_type_id' => ['required', 'exists:payment_types,id'],
             'status' => [
                 'nullable',
                 Rule::in(['pending', 'in_progress', 'completed', 'cancelled']),
@@ -299,7 +307,6 @@ class JobCardController extends Controller
                 'customer_id' => $validated['customer_ids'][0],
                 'status' => $validated['status'] ?? $jobCard->status ?? 'pending',
                 'discount_amount' => $discount,
-                'payment_type_id' => $validated['payment_type_id'],
             ]);
 
             // Sync customers
@@ -308,7 +315,7 @@ class JobCardController extends Controller
             // Delete existing service items (cascade will delete staff associations)
             $jobCard->serviceItems()->delete();
 
-            // Create new service items and assign staff
+            // Create new service items and assign staff, preserving each item's payment type
             foreach ($validated['service_items'] as $item) {
                 $service = Service::findOrFail($item['service_id']);
 
@@ -323,6 +330,7 @@ class JobCardController extends Controller
                     'service_id' => $item['service_id'],
                     'subcategory' => $item['subcategory'],
                     'amount' => $item['amount'],
+                    'payment_type_id' => $item['payment_type_id'],
                 ]);
 
                 // Assign staff to service item
@@ -364,7 +372,7 @@ class JobCardController extends Controller
             'customers',
             'serviceItems.service',
             'serviceItems.staff',
-            'paymentType',
+            'serviceItems.paymentType',
         ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
