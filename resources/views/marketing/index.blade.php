@@ -11,17 +11,15 @@
        ========================================================== */
 
     .premium-list--marketing {
-        --marketing-grid:
-            42px
-            110px
-            minmax(150px, 1fr)
-            minmax(170px, 1.2fr)
-            75px
-            minmax(150px, 1fr)
-            125px;
-
-        overflow-x: auto;
-    }
+    --marketing-grid:
+        42px
+        minmax(170px, 1.2fr)
+        110px
+        minmax(150px, 1fr)
+        75px
+        minmax(150px, 1fr)
+        125px;
+}
 
     .premium-list--marketing .premium-list-head,
     .premium-list--marketing .premium-list-item {
