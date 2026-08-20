@@ -141,7 +141,9 @@
                                     ])
                                     <div class="pli-name-stack">
                                         <span class="pli-title service-name">{{ $service->service_name }}</span>
-                                        <span class="pli-subtext pli-service-cat">{{ $service->category ?: 'General' }}@if($service->subcategory) • {{ $service->subcategory }}@endif</span>
+                                        <span
+                                            class="pli-subtext pli-service-cat">{{ $service->category ?: 'General' }}@if($service->subcategory)
+                                            • {{ $service->subcategory }}@endif</span>
                                     </div>
                                 </div>
                             </div>
@@ -154,7 +156,7 @@
                                 <span class="pli-col-text">{{ $service->subcategory ?: '—' }}</span>
                             </div>
 
-                            
+
 
                             <div class="pli-col col-center status-cell">
                                 <span id="status-badge-{{ $service->id }}"
@@ -169,30 +171,32 @@
                                     <span id="mob-svc-status-badge-{{ $service->id }}"
                                         class="pli-mob-status-dot {{ $service->status === 'active' ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive' }}"
                                         title="{{ ucfirst($service->status) }}"></span>
-                                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                        title="Actions">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
                                         <li>
-                                            <button type="button" class="dropdown-item pli-menu-item"
-                                                data-bs-toggle="modal" data-bs-target="#serviceModal"
-                                                onclick='openEditServiceModal(@json($service))'>
+                                            <button type="button" class="dropdown-item pli-menu-item" data-bs-toggle="modal"
+                                                data-bs-target="#serviceModal" onclick='openEditServiceModal(@json($service))'>
                                                 <span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span>
                                                 <span>Edit Service</span>
                                             </button>
                                         </li>
                                         <li>
                                             <button type="button" class="dropdown-item pli-menu-item pli-menu-status-btn"
-                                                id="mob-status-btn-{{ $service->id }}"
-                                                data-status="{{ $service->status }}"
+                                                id="mob-status-btn-{{ $service->id }}" data-status="{{ $service->status }}"
                                                 onclick="triggerServiceStatusToggle({{ $service->id }}, @js($service->service_name))">
                                                 <span class="pli-menu-status-left">
-                                                    <span class="pli-menu-icon pli-menu-icon--status {{ $service->status === 'active' ? 'pli-status-active' : 'pli-status-inactive' }}">
-                                                        <i class="bi {{ $service->status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
+                                                    <span
+                                                        class="pli-menu-icon pli-menu-icon--status {{ $service->status === 'active' ? 'pli-status-active' : 'pli-status-inactive' }}">
+                                                        <i
+                                                            class="bi {{ $service->status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
                                                     </span>
                                                     <span>Toggle Status</span>
                                                 </span>
-                                                <span class="pli-menu-status-state {{ $service->status === 'active' ? 'active' : 'inactive' }}">
+                                                <span
+                                                    class="pli-menu-status-state {{ $service->status === 'active' ? 'active' : 'inactive' }}">
                                                     {{ ucfirst($service->status) }}
                                                 </span>
                                             </button>
@@ -410,7 +414,7 @@
                 form.action = "{{ route('services.store') }}";
                 document.getElementById('serviceFormMethod').value = 'POST';
                 document.getElementById('serviceModalTitle').textContent = 'Add Service';
-               document.getElementById('serviceModalSubtitle').textContent = 'Add a new salon service.';
+                document.getElementById('serviceModalSubtitle').textContent = 'Add a new salon service.';
                 document.getElementById('serviceSubmitButton').innerHTML = '<i class="bi bi-scissors"></i> Create Service';
                 document.getElementById('service_status').value = 'active';
 
@@ -488,10 +492,8 @@
 
             document.getElementById('confirmServiceStatusButton').addEventListener('click', async function () {
                 if (!currentServiceId || !currentServiceTargetStatus) return;
-
                 const button = this;
                 button.disabled = true;
-
                 try {
                     const response = await fetch(`/services/${currentServiceId}/status`, {
                         method: 'PATCH',
@@ -501,23 +503,17 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     });
-
                     const data = await response.json();
-
                     if (!response.ok || !data.success) {
                         throw new Error(data.message || 'Unable to update service status.');
                     }
-
                     const modalElement = document.getElementById('serviceStatusModal');
                     const modal = bootstrap.Modal.getInstance(modalElement);
                     if (modal) modal.hide();
-
                     updateServiceStatusUI(currentServiceId, data.status);
                     showToast(data.message, 'success');
-
                     currentServiceId = null;
                     currentServiceTargetStatus = null;
-
                 } catch (error) {
                     showToast(error.message, 'danger');
                 } finally {
@@ -530,7 +526,6 @@
                 const toggle = document.getElementById(`status-toggle-${serviceId}`);
                 const mobBtn = document.getElementById(`mob-status-btn-${serviceId}`);
                 const isActive = status === 'active';
-
                 if (toggle) {
                     toggle.checked = isActive;
                     const label = toggle.closest('.mgmt-status-toggle')?.querySelector('.mgmt-status-toggle__text');
@@ -538,7 +533,6 @@
                         label.textContent = isActive ? label.dataset.activeText : label.dataset.inactiveText;
                     }
                 }
-
                 if (badge) {
                     if (isActive) {
                         badge.className = 'status-badge status-active';
@@ -548,7 +542,6 @@
                         badge.innerHTML = '<span></span><span class="status-text">Inactive</span>';
                     }
                 }
-
                 if (mobBtn) {
                     mobBtn.dataset.status = status;
                     const icon = mobBtn.querySelector('.pli-menu-icon');
@@ -562,7 +555,6 @@
                         stateBadge.textContent = isActive ? 'Active' : 'Inactive';
                     }
                 }
-
                 // Update the mobile dot indicator near 3-dots button
                 const mobDot = document.getElementById(`mob-svc-status-badge-${serviceId}`);
                 if (mobDot) {

@@ -40,7 +40,6 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware('role:administrator,manager')->group(function () {
-
         Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
         Route::get('/staff/export/excel', [StaffController::class, 'exportExcel'])->name('staff.export.excel');
         Route::get('/staff/export/pdf', [StaffController::class, 'exportPdf'])->name('staff.export.pdf');
@@ -139,7 +138,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [ProductController::class, 'toggleStatus']) ->name('products.toggle-status');
         Route::delete('/products/{product}', [ProductController::class, 'destroy']) ->name('products.destroy');
-
         Route::post('/products/{product}/purchases', [ProductController::class, 'storePurchase']) ->name('products.purchases.store');
         Route::get('/products/{product}/purchases', [ProductController::class, 'purchaseHistory'])->name('products.purchases.history');
     });
