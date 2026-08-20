@@ -2139,6 +2139,155 @@ ul, ol { list-style: none; }
     .page-header-row h1 { font-size: 1.25rem; }
 }
 
+/* Master submenu — icon colors */
+.nav-icon-master     { color: #F59E0B; box-shadow: 0 0 12px rgba(245, 158, 11, 0.12); }
+.nav-icon-attendance { color: #22D3EE; box-shadow: 0 0 12px rgba(34, 211, 238, 0.12); }
+.nav-icon-reports    { color: #C084FC; box-shadow: 0 0 12px rgba(192, 132, 252, 0.12); }
+
+
+
+/* ============================================================
+   MASTER SIDEBAR — FINAL ALIGNMENT & ACTIVE STATE
+   ============================================================ */
+
+/* Master parent row */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 7px 10px;
+    min-height: 48px;
+}
+
+/* Master icon */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle .sidebar-nav-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    margin: 0;
+}
+
+/* Master text — keep it close to icon */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle .sidebar-nav-text {
+    flex: 0 0 auto;
+    max-width: none;
+    margin-left: 2px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Arrow stays on the far right */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle .sidebar-submenu-arrow {
+    margin-left: auto;
+    margin-right: 2px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Master active/open state */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle.active {
+    background: linear-gradient(
+        90deg,
+        rgba(99, 102, 241, 0.16) 0%,
+        rgba(124, 58, 237, 0.08) 100%
+    );
+    color: #FFFFFF;
+    border: 1px solid rgba(124, 58, 237, 0.22);
+    box-shadow:
+        0 4px 14px rgba(79, 70, 229, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+/* Master icon when active */
+.sidebar-menu-master > li.sidebar-has-submenu > .sidebar-submenu-toggle.active
+.sidebar-nav-icon {
+    background: rgba(124, 58, 237, 0.16);
+    border-color: rgba(139, 92, 246, 0.28);
+    color: #C4B5FD;
+    box-shadow: 0 0 14px rgba(124, 58, 237, 0.18);
+}
+
+/* ============================================================
+   MASTER CHILDREN
+   ============================================================ */
+
+.sidebar-menu-master .sidebar-submenu {
+    padding: 4px 0 5px 32px;
+    gap: 3px;
+}
+
+/* Child item */
+.sidebar-menu-master .sidebar-submenu li a {
+    min-height: 40px;
+    padding: 4px 10px;
+    gap: 10px;
+    border-radius: 11px;
+}
+
+/* Child icon */
+.sidebar-menu-master .sidebar-submenu li .sidebar-nav-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+}
+
+/* Child text */
+.sidebar-menu-master .sidebar-submenu li .sidebar-nav-text {
+    font-size: 0.79rem;
+    font-weight: 500;
+}
+
+/* ============================================================
+   ATTENDANCE ACTIVE — MORE PREMIUM / CLEAR
+   ============================================================ */
+
+.sidebar-menu-master .sidebar-submenu li.active a {
+    background: linear-gradient(
+        90deg,
+        rgba(99, 102, 241, 0.18) 0%,
+        rgba(124, 58, 237, 0.10) 100%
+    );
+    color: #FFFFFF;
+    border: 1px solid rgba(124, 58, 237, 0.20);
+    box-shadow:
+        0 4px 14px rgba(79, 70, 229, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+/* Active child text */
+.sidebar-menu-master .sidebar-submenu li.active a .sidebar-nav-text {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+/* Active child icon */
+.sidebar-menu-master .sidebar-submenu li.active a .sidebar-nav-icon {
+    background: rgba(99, 102, 241, 0.14);
+    border-color: rgba(99, 102, 241, 0.24);
+    color: #67E8F9;
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.12);
+}
+
+/* ============================================================
+   NON-ACTIVE CHILDREN
+   ============================================================ */
+
+.sidebar-menu-master .sidebar-submenu li:not(.active) a {
+    color: #71717A;
+}
+
+.sidebar-menu-master .sidebar-submenu li:not(.active) a:hover {
+    background: rgba(255, 255, 255, 0.045);
+    color: #F4F4F5;
+    transform: translateX(1px);
+}
+
+/* Keep submenu vertically clean */
+.sidebar-menu-master .sidebar-submenu {
+    margin-top: 1px;
+}
 @media (max-width: 480px) {
     .stats-row { grid-template-columns: 1fr; }
     .header-profile-role { display: none; }

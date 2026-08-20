@@ -21,21 +21,7 @@
             'pdfUrl'   => route('products.export.pdf',   request()->query()),
         ])
 
-        {{-- Purchase History quick button (sits inline before Add Product) --}}
-        <div class="product-page-extra-actions">
-            <button
-                type="button"
-                class="mgmt-action-btn mgmt-action-btn--secondary"
-                onclick="openPurchaseHistoryPicker()"
-                id="purchaseHistoryPickerBtn"
-                title="View purchase history for any product"
-            >
-                <span class="mgmt-action-btn__icon" aria-hidden="true">
-                    <i class="bi bi-clock-history"></i>
-                </span>
-                <span class="mgmt-action-btn__label">Purchase History</span>
-            </button>
-        </div>
+        
 
         {{-- Stats Row --}}
         @php

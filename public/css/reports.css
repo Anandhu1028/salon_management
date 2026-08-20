@@ -217,16 +217,19 @@
 
 
 /* ============================================================
-   REPORT TABS
+   REPORT TABS (Compact Pill Style)
    ============================================================ */
 
 .reports-tabs {
     display: flex;
     align-items: center;
+    gap: 6px;
 
-    padding: 0 20px;
+    padding: 8px 14px;
 
+    background: #f8f9fc;
     border-bottom: 1px solid #edf0f4;
+    overflow-x: auto;
 }
 
 .reports-tab {
@@ -234,48 +237,43 @@
 
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 
-    min-height: 57px;
+    padding: 6px 14px;
 
-    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid transparent;
 
-    color: #667085;
+    color: #64748b;
 
     font-size: 12px;
     font-weight: 600;
 
     text-decoration: none;
+    white-space: nowrap;
 
-    transition: color .18s ease;
+    transition: all .15s ease;
 }
 
 .reports-tab:hover {
     color: #5146d8;
+    background: #edf0f8;
 }
 
 .reports-tab.active {
-    color: #5146d8;
+    color: #ffffff;
+    background: #5146d8;
+    font-weight: 700;
+    border-color: #5146d8;
+    box-shadow: 0 3px 10px rgba(81, 70, 216, 0.35);
+}
+
+.reports-tab.active i {
+    color: #ffffff;
 }
 
 .reports-tab.active::after {
-    content: "";
-
-    position: absolute;
-
-    right: 18px;
-    bottom: -1px;
-    left: 18px;
-
-    height: 2px;
-
-    border-radius: 2px;
-
-    background: #5146d8;
-}
-
-.reports-tab i {
-    font-size: 14px;
+    display: none;
 }
 
 
@@ -397,8 +395,7 @@
     display: grid;
 
     grid-template-columns:
-        minmax(0, 1.65fr)
-        minmax(280px, 1fr);
+        minmax(0, 1.65fr) minmax(280px, 1fr);
 
     gap: 14px;
 }
@@ -548,4 +545,661 @@
     .reports-content {
         padding: 14px;
     }
+}
+
+
+/* ============================================================
+   SALES REPORT TABLE (detailed transactions view)
+   ============================================================ */
+
+.report-block--wide {
+    grid-column: 1 / -1;
+}
+
+.sales-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 18px;
+}
+
+.sales-report-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sales-filter-dropdown {
+    position: relative;
+}
+
+.sales-filter-btn {
+    height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 0 14px;
+
+    border: 1px solid #e1e5eb;
+    border-radius: 9px;
+
+    background: #fff;
+
+    color: #344054;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.sales-filter-menu {
+    display: none;
+
+    position: absolute;
+    z-index: 5;
+    top: 44px;
+    right: 0;
+
+    min-width: 180px;
+
+    padding: 12px;
+
+    border: 1px solid #e8eaf0;
+    border-radius: 10px;
+
+    background: #fff;
+
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .1);
+}
+
+.sales-filter-menu.open {
+    display: block;
+}
+
+.sales-filter-menu label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #7b8495;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sales-filter-menu select {
+    width: 100%;
+    height: 36px;
+
+    padding: 0 8px;
+
+    border: 1px solid #e1e5eb;
+    border-radius: 8px;
+
+    font-size: 12px;
+}
+
+.sales-search-box {
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    min-width: 220px;
+    padding: 0 12px;
+
+    border: 1px solid #e1e5eb;
+    border-radius: 9px;
+
+    background: #fff;
+}
+
+.sales-search-box i {
+    color: #98a2b3;
+}
+
+.sales-search-box input {
+    width: 100%;
+
+    border: 0;
+    outline: 0;
+
+    font-size: 12px;
+}
+
+.payment-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 5px 10px;
+
+    border-radius: 99px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.payment-pill--cash {
+    background: #eaf9f1;
+    color: #16a34a;
+}
+
+.payment-pill--upi {
+    background: #f3ecff;
+    color: #7c3aed;
+}
+
+.payment-pill--card {
+    background: #eaf3ff;
+    color: #2563eb;
+}
+
+.payment-pill--other {
+    background: #f1f2f6;
+    color: #667085;
+}
+
+.status-pill {
+    display: inline-flex;
+
+    padding: 5px 10px;
+
+    border-radius: 99px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-pill--completed {
+    background: #eaf9f1;
+    color: #16a34a;
+}
+
+.status-pill--pending {
+    background: #fff3e7;
+    color: #f28a18;
+}
+
+.status-pill--cancelled {
+    background: #fdecec;
+    color: #e02424;
+}
+
+.sales-table-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-top: 16px;
+}
+
+.sales-table-count {
+    color: #7b8495;
+
+    font-size: 12px;
+}
+
+.sales-table-pagination {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.per-page-select {
+    height: 36px;
+
+    padding: 0 10px;
+
+    border: 1px solid #e1e5eb;
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #344054;
+
+    font-size: 12px;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    color: #667085;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.page-btn:hover {
+    background: #f5f6f9;
+}
+
+.page-btn.active {
+    background: #5146d8;
+    color: #fff;
+}
+
+.page-btn.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+
+@media (max-width: 700px) {
+
+    .sales-report-header {
+        flex-direction: column;
+    }
+
+    .sales-report-actions {
+        width: 100%;
+    }
+
+    .sales-search-box {
+        flex: 1;
+    }
+
+    .sales-table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+
+/* ============================================================
+   SALES TABLE – simplified all-records layout
+   ============================================================ */
+
+.sales-col-date {
+    white-space: nowrap;
+}
+
+.sales-date-day {
+    display: block;
+    color: #172033;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sales-date-time {
+    display: block;
+    margin-top: 2px;
+    color: #98a2b3;
+    font-size: 10px;
+}
+
+.sales-jobcard-link {
+    color: #5146d8;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.sales-jobcard-link:hover {
+    text-decoration: underline;
+}
+
+.sales-customer-name {
+    display: block;
+    color: #172033;
+    font-weight: 600;
+}
+
+.sales-customer-phone {
+    display: block;
+    margin-top: 2px;
+    color: #98a2b3;
+    font-size: 10px;
+}
+
+.sales-totals-row td {
+    background: #f8f9fc;
+    border-top: 2px solid #e8eaf0;
+    border-bottom: 0;
+    padding: 12px;
+}
+
+
+/* ============================================================
+   REPORT SUMMARY CHIPS (header right side)
+   ============================================================ */
+
+.report-summary-chips {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.report-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    padding: 9px 16px;
+
+    border: 1px solid #e8eaf0;
+    border-radius: 11px;
+
+    background: #f8f9fc;
+
+    text-align: right;
+}
+
+.report-chip span {
+    color: #8993a5;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.report-chip strong {
+    color: #172033;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.report-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 60px 24px;
+
+    color: #b0b9c9;
+
+    text-align: center;
+}
+
+.report-empty-state i {
+    font-size: 38px;
+    color: #d0d5e0;
+}
+
+.report-empty-state p {
+    margin: 0;
+    color: #697386;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.report-empty-state small {
+    color: #aab2c0;
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   ACTION BUTTON (three dots)
+   ============================================================ */
+
+.tbl-action-btn {
+    width: 30px;
+    height: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e1e5eb;
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #697386;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: background .15s, border-color .15s;
+}
+
+.tbl-action-btn:hover {
+    background: #f5f6f9;
+    border-color: #c7ccd6;
+}
+
+
+/* ============================================================
+   CATEGORY PILLS
+   ============================================================ */
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 10px;
+
+    border-radius: 99px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.category-pill--supplies {
+    background: #eaf3ff;
+    color: #2563eb;
+}
+
+.category-pill--meals {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.category-pill--utilities {
+    background: #f0edff;
+    color: #5b4be8;
+}
+
+.category-pill--products {
+    background: #eaf9f1;
+    color: #16a34a;
+}
+
+.category-pill--maintenance {
+    background: #fff9eb;
+    color: #d97706;
+}
+
+.category-pill--marketing {
+    background: #fdf2fb;
+    color: #c026d3;
+}
+
+.category-pill--other {
+    background: #f1f2f6;
+    color: #667085;
+}
+
+
+/* ============================================================
+   STAFF TABLE CELLS & CLEAN AVATAR
+   ============================================================ */
+
+.staff-member-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.staff-avatar {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #fff;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+    user-select: none;
+}
+
+.staff-avatar--indigo {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+}
+
+.staff-avatar--violet {
+    background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+}
+
+.staff-avatar--blue {
+    background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+}
+
+.staff-avatar--green {
+    background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+}
+
+.staff-avatar--orange {
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+}
+
+.staff-avatar--pink {
+    background: linear-gradient(135deg, #EC4899 0%, #F472B6 100%);
+}
+
+.staff-member-name {
+    display: block;
+    color: #101828;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.staff-member-code {
+    display: block;
+    margin-top: 2px;
+    color: #98a2b3;
+    font-size: 10px;
+}
+
+/* Contact phone cell with icon */
+.report-contact-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #475467;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.report-contact-icon {
+    flex-shrink: 0;
+    color: #64748B;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.staff-th-info {
+    margin-left: 4px;
+    color: #b0b9c9;
+    font-size: 11px;
+    cursor: help;
+}
+
+.staff-pct-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.staff-pct-value {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.staff-progress-track {
+    height: 6px;
+
+    border-radius: 99px;
+
+    background: #ecebff;
+
+    overflow: hidden;
+}
+
+.staff-progress-bar {
+    height: 100%;
+    border-radius: inherit;
+    transition: width .4s ease;
+}
+
+.staff-status-pill {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 11px;
+
+    border-radius: 99px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.staff-status--excellent {
+    background: #eaf9f1;
+    color: #16a34a;
+}
+
+.staff-status--good {
+    background: #eaf3ff;
+    color: #2563eb;
+}
+
+.staff-status--average {
+    background: #fff7ed;
+    color: #d97706;
+}
+
+.staff-status--below {
+    background: #fdecec;
+    color: #e02424;
+}
+
+.staff-status--na {
+    background: #f1f2f6;
+    color: #667085;
 }

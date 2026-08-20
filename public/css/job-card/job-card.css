@@ -1159,6 +1159,76 @@
     box-shadow: 0 1px 3px rgba(22, 163, 74, 0.15);
 }
 
+
+/* ============================================================
+   JOB CARD DETAILS — INVOICE TABLE (5 COLUMNS: # / Service / Staff / Payment / Amount)
+   ============================================================ */
+
+.job-card-page .job-card-details-invoice-head,
+.job-card-page .job-card-details-invoice-line {
+    display: grid !important;
+    grid-template-columns: 30px 2fr 1fr 1fr 1fr !important;
+    column-gap: 14px;
+    align-items: center;
+}
+
+/* Header cell alignment */
+.job-card-page .job-card-details-invoice-head span:nth-child(1) { text-align: left; }
+.job-card-page .job-card-details-invoice-head span:nth-child(2) { text-align: left; }
+.job-card-page .job-card-details-invoice-head span:nth-child(3) { text-align: center; }
+.job-card-page .job-card-details-invoice-head span:nth-child(4) { text-align: center; }
+.job-card-page .job-card-details-invoice-head span:nth-child(5) { text-align: right; }
+
+
+/* Row cell alignment — must match header */
+.job-card-page .job-card-details-invoice-line span:nth-child(1) {
+    text-align: left;
+    color: #94A3B8;
+    font-weight: 700;
+}
+
+.job-card-page .job-card-details-invoice-line span:nth-child(2) {
+    text-align: left;
+}
+
+.job-card-page .job-card-details-invoice-line span:nth-child(3) {
+    text-align: center;
+    color: #475569;
+    font-size: 0.82rem;
+}
+
+.job-card-page .job-card-details-invoice-line span:nth-child(4) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.job-card-page .job-card-details-invoice-line span:nth-child(5) {
+    text-align: right;
+    font-weight: 700;
+    color: #1E293B;
+}
+
+.job-card-page .job-card-details-invoice-line .payment-type-pill {
+    font-size: 0.65rem;
+    padding: 4px 9px;
+    min-height: auto;
+}
+
+.job-card-page .job-card-details-invoice-line span:nth-child(4) {
+    display: flex;
+    align-items: center;
+}
+
+.job-card-page .job-card-details-invoice-line .payment-type-pill {
+    font-size: 0.65rem;
+    padding: 4px 9px;
+    min-height: auto;
+}
+
+.job-card-page .job-card-details-invoice-head span:nth-child(4) {
+    text-align: left;
+}
 /* ============================================================
    JOB CARD DETAILS — SUBTOTAL / DISCOUNT / TOTAL BREAKDOWN
    ============================================================ */
@@ -1179,6 +1249,19 @@
     padding: 4px 2px;
     font-size: 0.8rem;
     color: #64748B;
+}
+
+/* Label spans columns 1–4 (up through Payment), right-aligned so it
+   sits directly above/beside the Amount column */
+.job-card-details-totals-block .job-card-details-totals span:first-child {
+    grid-column: 1 / 5;
+    text-align: right;
+}
+
+/* Value sits in the Amount column, right-aligned to match the rows above */
+.job-card-details-totals-block .job-card-details-totals strong {
+    grid-column: 5 / 6;
+    text-align: right;
 }
 
 .job-card-details-totals-block .job-card-details-totals--sub strong {
@@ -1483,7 +1566,7 @@
 
     backdrop-filter: blur(10px);
 
-    z-index: 100;
+    z-index: 5;
 
     opacity: 0;
     visibility: hidden;
@@ -1701,6 +1784,16 @@
 
 /* ============================================================
    ACTION POPOVER — FIX ROW STACKING
+   ============================================================
+
+   NOTE: These values are deliberately kept LOW (single digits).
+   Each .premium-list-item is its own stacking context
+   (position: relative + z-index), so the popover only needs to
+   beat its own row's siblings — it must NEVER be allowed to
+   out-rank Bootstrap's modal backdrop/dialog (which sit around
+   z-index: 1050+). Using huge values here (e.g. 9999/100000)
+   is what caused an open action-menu row to visually float on
+   top of the Job Card Details / Edit modal.
    ============================================================ */
 
 /* Every row gets its own stacking context */
@@ -1709,16 +1802,17 @@
     z-index: 1;
 }
 
-/* The row whose menu is open must be above every other row */
+/* The row whose menu is open must be above every other row —
+   but still far below any modal. */
 .job-card-page .premium-list--jobs .premium-list-item.action-menu-row-open {
-    z-index: 9999 !important;
+    z-index: 2;
 }
 
 
 /* Actions column must also allow the popover to escape */
 .job-card-page .premium-list--jobs .pli-col-actions {
     position: relative;
-    z-index: 10000;
+    z-index: 3;
     overflow: visible !important;
 }
 
@@ -1726,14 +1820,14 @@
 /* Action wrapper */
 .job-card-page .pli-action-menu-wrap {
     position: relative;
-    z-index: 10001;
+    z-index: 4;
 }
 
 
 /* Popover sits above everything inside the row */
 .job-card-page .pli-action-popover {
     position: absolute;
-    z-index: 100000 !important;
+    z-index: 5;
 
     top: calc(100% + 7px);
     right: 0;
@@ -1745,7 +1839,7 @@
 .premium-list--jobs
 .premium-list-item.action-menu-row-open
 .pli-action-popover {
-    z-index: 100000 !important;
+    z-index: 5;
 }
 
 

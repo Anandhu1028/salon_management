@@ -1,5 +1,3 @@
-
-
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
@@ -138,7 +136,6 @@ function createMultiSelect(select) {
         trigger.disabled = select.disabled;
         trigger.setAttribute('aria-expanded', wrapper.classList.contains('is-open') ? 'true' : 'false');
 
-        // Update tags
         tagsContainer.innerHTML = '';
         if (count > 0) {
             placeholder.style.display = 'none';
@@ -177,7 +174,6 @@ function createMultiSelect(select) {
 
         infoSpan.textContent = `${count} selected`;
 
-        // Render options list
         optionsList.innerHTML = '';
         [...select.options].forEach(option => {
             if (!option.value) return;
@@ -373,53 +369,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('sidebarToggle');
     const overlay = document.querySelector('.sidebar-overlay');
 
-    if (!sidebar || !toggleButton || !overlay) return;
-    const closeMobileSidebar = () => {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('visible');
-    };
+    if (sidebar && toggleButton && overlay) {
+        const closeMobileSidebar = () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('visible');
+        };
 
-    const mobileNavMoreBtn = document.getElementById('mobileNavMoreBtn');
-    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+        const mobileNavMoreBtn = document.getElementById('mobileNavMoreBtn');
+        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
 
-    toggleButton.addEventListener('click', () => {
-        sidebar.classList.toggle('show');
-        overlay.classList.toggle('visible');
-    });
-
-    if (sidebarCloseBtn) {
-        sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
-    }
-
-    if (mobileNavMoreBtn) {
-        mobileNavMoreBtn.addEventListener('click', () => {
+        toggleButton.addEventListener('click', () => {
             sidebar.classList.toggle('show');
             overlay.classList.toggle('visible');
         });
+
+        if (sidebarCloseBtn) {
+            sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+        }
+
+        if (mobileNavMoreBtn) {
+            mobileNavMoreBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('visible');
+            });
+        }
+
+        overlay.addEventListener('click', closeMobileSidebar);
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 1024) closeMobileSidebar();
+        });
     }
 
-    overlay.addEventListener('click', closeMobileSidebar);
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 1024) closeMobileSidebar();
-    });
-
-    /* Handle Sidebar Submenu Toggles */
-    const submenuToggles = document.querySelectorAll('.sidebar-submenu-toggle');
-    submenuToggles.forEach(toggle => {
+    /* ── Sidebar Submenu Toggle (single source of truth) ──────────
+       Only one handler for the whole app. It never touches the
+       'active' class — that's server-rendered by Blade based on
+       the current route, so Master's highlighted state always
+       matches whichever child page (Staff/Attendance/Customers/
+       Services/Products) is actually active, consistently. ── */
+    document.querySelectorAll('[data-sidebar-submenu-toggle]').forEach((toggle) => {
         toggle.addEventListener('click', (e) => {
             e.preventDefault();
-            const parentLi = toggle.closest('.sidebar-has-submenu');
-            const submenu = parentLi.querySelector('.sidebar-submenu');
-            
-            if (parentLi.classList.contains('submenu-open')) {
-                parentLi.classList.remove('submenu-open');
-                submenu.classList.remove('show');
-                toggle.setAttribute('aria-expanded', 'false');
-            } else {
-                parentLi.classList.add('submenu-open');
-                submenu.classList.add('show');
-                toggle.setAttribute('aria-expanded', 'true');
-            }
+            const li = toggle.closest('.sidebar-has-submenu');
+            const submenu = document.getElementById(toggle.getAttribute('aria-controls'));
+            if (!li || !submenu) return;
+
+            const isOpen = li.classList.toggle('submenu-open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            submenu.classList.toggle('show', isOpen);
         });
     });
 });
@@ -446,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth <= 640) {
             document.body.style.overflow = 'hidden';
         } else {
-            // Keep popover inside viewport
             const rect = trigger.getBoundingClientRect();
             const popW = 360;
             if (rect.right < popW) {
@@ -475,7 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn?.addEventListener('click', closePopover);
     overlay?.addEventListener('click', closePopover);
 
-    // Touch swipe down on drag handle to close
     const dragHandle = popover.querySelector('.mgmt-filter-drag-handle');
     if (dragHandle) {
         let startY = 0;
@@ -505,19 +499,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Close on outside click
     document.addEventListener('click', (e) => {
         if (isOpen && !popover.contains(e.target) && e.target !== trigger) {
             closePopover();
         }
     });
 
-    // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && isOpen) closePopover();
     });
 
-    // Sync segmented radio button active states on click
     popover.querySelectorAll('.filter-segmented-btn').forEach(label => {
         label.addEventListener('click', () => {
             const name = label.querySelector('input')?.name;

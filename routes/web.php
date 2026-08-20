@@ -169,6 +169,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('reports') ->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index']) ->name('index');
+        Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
         Route::get('/sales', [ReportController::class, 'sales']) ->name('sales');
         Route::get('/expenses', [ReportController::class, 'expenses'])  ->name('expenses');
         Route::get('/staff-daily-target', [ReportController::class, 'staffDailyTarget']) ->name('staff.daily-target');

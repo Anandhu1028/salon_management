@@ -786,7 +786,7 @@
                     </div>
                     <div class="job-card-details-invoice">
                         <div class="job-card-details-invoice-head">
-                            <span>#</span><span>Service</span><span>Staff</span><span>Amount (₹)</span></div>
+                          <span>#</span><span>Service</span><span>Staff</span><span>Payment</span><span>Amount (₹)</span></div>
                         <div id="jobCardDetailsInvoiceItems">
                             {{-- Service items will be populated dynamically --}}
                         </div>
@@ -838,7 +838,32 @@
         <script>
             let deleteJobCardId = null;
 
+            // ---------------------------------------------------------------
+            // FIX: close any open row action-menu (3-dot popover) before any
+            // modal is opened. Previously an open menu row kept its elevated
+            // z-index (.action-menu-row-open) even while a modal was shown,
+            // which made that row visually float on top of the modal.
+            // ---------------------------------------------------------------
+            function closeAllJobCardActionMenus() {
+                document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(wrapper => {
+                    wrapper.classList.remove('is-open');
+
+                    const button = wrapper.querySelector('.pli-action-dots');
+                    if (button) {
+                        button.classList.remove('is-open');
+                        button.setAttribute('aria-expanded', 'false');
+                    }
+
+                    const row = wrapper.closest('.premium-list-item');
+                    if (row) {
+                        row.classList.remove('action-menu-row-open');
+                    }
+                });
+            }
+
             function openAddJobCardModal() {
+                closeAllJobCardActionMenus();
+
                 const form = document.getElementById('jobCardForm');
                 form.reset();
                 form.action = "{{ route('job-cards.store') }}";
@@ -858,6 +883,8 @@
             }
 
             function openEditJobCardModal(jobCard) {
+                closeAllJobCardActionMenus();
+
                 const form = document.getElementById('jobCardForm');
                 form.action = `/job-cards/${jobCard.id}`;
                 document.getElementById('jobCardFormMethod').value = 'PUT';
@@ -1392,6 +1419,8 @@
 
 
             function openJobCardDetailsModal(jobCard) {
+                closeAllJobCardActionMenus();
+
                 const customers = (jobCard.customers && jobCard.customers.length)
                     ? jobCard.customers
                     : (jobCard.customer ? [jobCard.customer] : []);
@@ -1423,6 +1452,21 @@
                     const amount = parseFloat(item.amount) || 0;
                     const formattedAmount = amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+                    // Build payment type badge (same style/icon logic as the list view)
+                    const paymentTypeName = item.payment_type?.name || item.paymentType?.name || '';
+                    const paymentKey = paymentTypeName.toLowerCase().trim();
+                    const paymentIcon = paymentKey.includes('upi') ? 'bi-phone'
+                        : paymentKey.includes('cash') ? 'bi-cash'
+                        : paymentKey.includes('card') ? 'bi-credit-card'
+                        : paymentKey.includes('bank') ? 'bi-bank'
+                        : paymentKey.includes('net') ? 'bi-globe2'
+                        : 'bi-wallet2';
+                    const paymentSlug = paymentKey ? paymentKey.replace(/\s+/g, '-') : 'default';
+
+                    const paymentBadgeHTML = paymentTypeName
+                        ? `<span class="payment-type-pill payment-type-${paymentSlug}"><i class="bi ${paymentIcon}"></i><span>${paymentTypeName}</span></span>`
+                        : `<span class="payment-type-pill payment-type-default"><i class="bi bi-wallet2"></i><span>—</span></span>`;
+
                     invoiceItemsHTML += `
                         <div class="job-card-details-invoice-line">
                             <span>${index + 1}</span>
@@ -1431,6 +1475,7 @@
                                 <small>${item.subcategory || '—'}</small>
                             </span>
                             <span>${staffNames}</span>
+                            <span>${paymentBadgeHTML}</span>
                             <span>₹${formattedAmount}</span>
                         </div>
                     `;
@@ -1459,6 +1504,8 @@
             }
 
             function openDeleteJobCardModal(jobCardId, jobCardName) {
+                closeAllJobCardActionMenus();
+
                 deleteJobCardId = jobCardId;
                 const msg = document.getElementById('deleteJobCardMessage');
                 if (msg) msg.textContent = `Are you sure you want to delete ${jobCardName}?`;
@@ -1709,77 +1756,6 @@ document.addEventListener('keydown', function (event) {
             }
         });
 });
-
-    function closeJobCardActions(element) {
-        const wrapper = element.closest('.pli-action-menu-wrap');
-
-        if (!wrapper) {
-            return;
-        }
-
-        wrapper.classList.remove('is-open');
-
-        const button = wrapper.querySelector('.pli-action-dots');
-
-        if (button) {
-            button.classList.remove('is-open');
-            button.setAttribute('aria-expanded', 'false');
-        }
-    }
-
-
-    // Close when clicking outside
-    document.addEventListener('click', function (event) {
-
-        if (!event.target.closest('.pli-action-menu-wrap')) {
-
-            document
-                .querySelectorAll('.pli-action-menu-wrap.is-open')
-                .forEach(wrapper => {
-
-                    wrapper.classList.remove('is-open');
-
-                    const button =
-                        wrapper.querySelector('.pli-action-dots');
-
-                    if (button) {
-                        button.classList.remove('is-open');
-                        button.setAttribute(
-                            'aria-expanded',
-                            'false'
-                        );
-                    }
-                });
-        }
-
-    });
-
-
-    // Close when pressing Escape
-    document.addEventListener('keydown', function (event) {
-
-        if (event.key !== 'Escape') {
-            return;
-        }
-
-        document
-            .querySelectorAll('.pli-action-menu-wrap.is-open')
-            .forEach(wrapper => {
-
-                wrapper.classList.remove('is-open');
-
-                const button =
-                    wrapper.querySelector('.pli-action-dots');
-
-                if (button) {
-                    button.classList.remove('is-open');
-                    button.setAttribute(
-                        'aria-expanded',
-                        'false'
-                    );
-                }
-            });
-    });
         </script>
     @endpush
 
