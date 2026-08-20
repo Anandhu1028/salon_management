@@ -210,21 +210,60 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
-                                    @include('partials.status-toggle', [
-                                        'id' => $customer->id,
-                                        'status' => $customer->status,
-                                        'onChange' => 'onCustomerStatusToggle(' . $customer->id . ', ' . json_encode($customer->name) . ', this)',
-                                    ])
-                                    <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit Customer"
-                                        data-bs-toggle="modal" data-bs-target="#customerModal"
-                                        onclick='openEditCustomerModal(@json($customer))'>
-                                        @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
+                                <div class="pli-action-menu-wrap pli-action-buttons-desktop">
+                                    <button
+                                        type="button"
+                                        class="pli-action-dots"
+                                        aria-label="Customer actions"
+                                        aria-expanded="false"
+                                        onclick="togglePliActions(this)"
+                                    >
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete Customer"
-                                        onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name))">
-                                        @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
-                                    </button>
+
+                                    <div class="pli-action-popover">
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#customerModal"
+                                            onclick='openEditCustomerModal(@json($customer)); closePliActions(this)'
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </span>
+                                            <span>Edit Customer</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action pli-popover-status-btn"
+                                            id="desk-cust-status-btn-{{ $customer->id }}"
+                                            data-status="{{ $customer->status }}"
+                                            onclick="triggerCustomerStatusToggle({{ $customer->id }}, @js($customer->name)); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-status-left">
+                                                <span class="pli-popover-icon pli-popover-icon--status">
+                                                    <i class="bi {{ $customer->status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off' }}"></i>
+                                                </span>
+                                                <span>Toggle Status</span>
+                                            </span>
+                                           
+                                        </button>
+
+                                        <div class="pli-popover-divider"></div>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action pli-popover-action--danger"
+                                            onclick="openDeleteCustomerModal({{ $customer->id }}, @js($customer->name)); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--delete">
+                                                <i class="bi bi-trash3"></i>
+                                            </span>
+                                            <span>Delete Customer</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -419,6 +458,7 @@
 
 
     @push('scripts')
+        <script src="{{ asset('js/pli-action-popover.js') }}"></script>
         <script>
             let deleteCustomerId = null;
             let currentCustomerId = null;
@@ -543,6 +583,20 @@
                     const stateBadge = mobBtn.querySelector('.pli-menu-status-state');
                     if (stateBadge) {
                         stateBadge.className = 'pli-menu-status-state ' + (isActive ? 'active' : 'inactive');
+                        stateBadge.textContent = isActive ? 'Active' : 'Inactive';
+                    }
+                }
+
+                const deskBtn = document.getElementById(`desk-cust-status-btn-${customerId}`);
+                if (deskBtn) {
+                    deskBtn.dataset.status = status;
+                    const icon = deskBtn.querySelector('.pli-popover-icon i');
+                    if (icon) {
+                        icon.className = `bi ${isActive ? 'bi-toggle-on' : 'bi-toggle-off'}`;
+                    }
+                    const stateBadge = deskBtn.querySelector('.pli-popover-status-state');
+                    if (stateBadge) {
+                        stateBadge.className = 'pli-popover-status-state ' + (isActive ? 'active' : 'inactive');
                         stateBadge.textContent = isActive ? 'Active' : 'Inactive';
                     }
                 }

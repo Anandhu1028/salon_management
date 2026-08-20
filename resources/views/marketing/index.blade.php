@@ -582,21 +582,89 @@
                         {{-- ACTIONS --}}
                         <div class="pli-col pli-col-actions col-center">
 
-                            <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View"
-                                    onclick="openViewMarketingModal({{ $activity->id }})">
-                                @include('partials.action-icons', ['type' => 'view', 'size' => 15])
-                            </button>
+                            {{-- Mobile: same dropdown pattern used on other pages --}}
+                            <div class="dropdown pli-dots-dropdown d-md-none">
+                                <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
+                                    <li>
+                                        <button type="button" class="dropdown-item pli-menu-item"
+                                            onclick="openViewMarketingModal({{ $activity->id }})">
+                                            <span class="pli-menu-icon pli-menu-icon--view"><i class="bi bi-eye"></i></span>
+                                            <span>View Marketing  </span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item pli-menu-item"
+                                            data-bs-toggle="modal" data-bs-target="#marketingModal"
+                                            onclick='openEditMarketingModal(@json($activity))'>
+                                            <span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span>
+                                            <span>Edit Marketing</span>
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item pli-menu-item pli-menu-item--danger"
+                                            onclick="openDeleteMarketingModal({{ $activity->id }}, @js($activity->marketing_type), @js($activity->location))">
+                                            <span class="pli-menu-icon pli-menu-icon--delete"><i class="bi bi-trash3"></i></span>
+                                            <span>Delete Marketing</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
 
-                            <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit"
-                                    data-bs-toggle="modal" data-bs-target="#marketingModal"
-                                    onclick='openEditMarketingModal(@json($activity))'>
-                                @include('partials.action-icons', ['type' => 'edit', 'size' => 15])
-                            </button>
+                            {{-- Desktop: 3-dot action popover (same pattern as Job Cards) --}}
+                            <div class="pli-action-menu-wrap pli-action-buttons-desktop">
+                                <button
+                                    type="button"
+                                    class="pli-action-dots"
+                                    aria-label="Marketing actions"
+                                    aria-expanded="false"
+                                    onclick="togglePliActions(this)"
+                                >
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
 
-                            <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete"
-                                    onclick="openDeleteMarketingModal({{ $activity->id }}, @js($activity->marketing_type), @js($activity->location))">
-                                @include('partials.action-icons', ['type' => 'delete', 'size' => 15])
-                            </button>
+                                <div class="pli-action-popover">
+                                    <button
+                                        type="button"
+                                        class="pli-popover-action"
+                                        onclick="openViewMarketingModal({{ $activity->id }}); closePliActions(this)"
+                                    >
+                                        <span class="pli-popover-icon pli-popover-icon--view">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                        <span>View</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="pli-popover-action"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#marketingModal"
+                                        onclick='openEditMarketingModal(@json($activity)); closePliActions(this)'
+                                    >
+                                        <span class="pli-popover-icon pli-popover-icon--edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </span>
+                                        <span>Edit</span>
+                                    </button>
+
+                                    <div class="pli-popover-divider"></div>
+
+                                    <button
+                                        type="button"
+                                        class="pli-popover-action pli-popover-action--danger"
+                                        onclick="openDeleteMarketingModal({{ $activity->id }}, @js($activity->marketing_type), @js($activity->location)); closePliActions(this)"
+                                    >
+                                        <span class="pli-popover-icon pli-popover-icon--delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </span>
+                                        <span>Delete</span>
+                                    </button>
+                                </div>
+                            </div>
 
                         </div>
 
@@ -805,6 +873,7 @@
 
 
 @push('scripts')
+<script src="{{ asset('js/pli-action-popover.js') }}"></script>
 <script>
 
     function openAddMarketingModal()

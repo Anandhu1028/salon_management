@@ -2000,6 +2000,7 @@
 
 /* ── Confirm modals ───────────────────────────────────────────── */
 .premium-modal .confirm-modal-body {
+    border-radius: 15px;
     padding: 36px 28px 28px;
     background: linear-gradient(180deg, #FAFBFF 0%, #FFFFFF 100%);
 }

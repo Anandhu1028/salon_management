@@ -792,21 +792,56 @@
                                 </li>
                             </ul>
                         </div>
-                        {{-- Desktop Buttons --}}
-                        <div class="pli-action-buttons-desktop d-none d-md-inline-flex">
-                            <button type="button" class="pli-btn-icon pli-btn-icon--view" title="View"
-                                onclick="openViewAttendanceModal({{ $record->id }})">
-                                @include('partials.action-icons', ['type' => 'view', 'size' => 16])
+                        {{-- Desktop: 3-dot action popover (same pattern as Job Cards) --}}
+                        <div class="pli-action-menu-wrap pli-action-buttons-desktop">
+                            <button
+                                type="button"
+                                class="pli-action-dots"
+                                aria-label="Attendance actions"
+                                aria-expanded="false"
+                                onclick="togglePliActions(this)"
+                            >
+                                <i class="bi bi-three-dots-vertical"></i>
                             </button>
-                            <button type="button" class="pli-btn-icon pli-btn-icon--edit" title="Edit"
-                                data-bs-toggle="modal" data-bs-target="#attendanceModal"
-                                onclick='openEditAttendanceModal(@json($record))'>
-                                @include('partials.action-icons', ['type' => 'edit', 'size' => 16])
-                            </button>
-                            <button type="button" class="pli-btn-icon pli-btn-icon--danger" title="Delete"
-                                onclick="openDeleteAttendanceModal({{ $record->id }}, '{{ $record->staff->name ?? '' }}')">
-                                @include('partials.action-icons', ['type' => 'delete', 'size' => 16])
-                            </button>
+
+                            <div class="pli-action-popover">
+                                <button
+                                    type="button"
+                                    class="pli-popover-action"
+                                    onclick="openViewAttendanceModal({{ $record->id }}); closePliActions(this)"
+                                >
+                                    <span class="pli-popover-icon pli-popover-icon--view">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                    <span>View Attendance</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="pli-popover-action"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#attendanceModal"
+                                    onclick='openEditAttendanceModal(@json($record)); closePliActions(this)'
+                                >
+                                    <span class="pli-popover-icon pli-popover-icon--edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </span>
+                                    <span>Edit Attendance</span>
+                                </button>
+
+                                <div class="pli-popover-divider"></div>
+
+                                <button
+                                    type="button"
+                                    class="pli-popover-action pli-popover-action--danger"
+                                    onclick="openDeleteAttendanceModal({{ $record->id }}, '{{ $record->staff->name ?? '' }}'); closePliActions(this)"
+                                >
+                                    <span class="pli-popover-icon pli-popover-icon--delete">
+                                        <i class="bi bi-trash3"></i>
+                                    </span>
+                                    <span>Delete Attendance</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>
@@ -1146,6 +1181,7 @@
 
 
 @push('scripts')
+<script src="{{ asset('js/pli-action-popover.js') }}"></script>
 <script>
     let deleteAttId = null;
     let selectedStatusFilter = '';

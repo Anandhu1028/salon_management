@@ -1,0 +1,398 @@
+/* ============================================================
+   SHARED 3-DOT ACTION POPOVER
+   ============================================================
+   Same visual pattern used on the Job Cards page, reused here so
+   Attendance / Customers / Services / Marketing (and any other
+   premium-list page) all share one consistent "three dots ->
+   small popover with action buttons" component.
+   ============================================================ */
+
+/* Wrapper */
+.pli-action-menu-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Desktop-only trigger (mobile keeps the existing Bootstrap
+   dropdown that uses .pli-dots-dropdown / .pli-btn-dots) */
+.pli-action-menu-wrap.pli-action-buttons-desktop {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .pli-action-menu-wrap.pli-action-buttons-desktop {
+        display: inline-flex;
+    }
+}
+
+
+/* ============================================================
+   THREE DOT BUTTON
+   ============================================================ */
+
+.pli-action-dots {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #DCE3ED;
+    border-radius: 9px;
+
+    background: linear-gradient(
+        145deg,
+        #FFFFFF 0%,
+        #F8FAFC 100%
+    );
+
+    color: #64748B;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        inset 0 1px 0 rgba(255,255,255,.8);
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.pli-action-dots i {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.pli-action-dots:hover,
+.pli-action-dots.is-open {
+    background: #F8FAFF;
+    border-color: #C7D2FE;
+    color: #4F46E5;
+
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.12),
+        0 0 0 3px rgba(99, 102, 241, 0.06);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   SMALL ACTION POPOVER
+   ============================================================ */
+
+.pli-action-popover {
+    position: absolute;
+
+    top: calc(100% + 7px);
+    right: 0;
+
+    width: 185px;
+
+    padding: 6px;
+
+    background: rgba(255,255,255,.98);
+
+    border: 1px solid #E2E8F0;
+    border-radius: 13px;
+
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.14),
+        0 5px 12px rgba(15, 23, 42, 0.07);
+
+    backdrop-filter: blur(10px);
+
+    z-index: 5;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform:
+        translateY(-5px)
+        scale(.97);
+
+    transform-origin: top right;
+
+    transition:
+        opacity .16s ease,
+        visibility .16s ease,
+        transform .16s ease;
+}
+
+/* Open state */
+.pli-action-menu-wrap.is-open .pli-action-popover {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* ============================================================
+   POPOVER ACTION
+   ============================================================ */
+
+.pli-popover-action {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 38px;
+
+    padding: 6px 8px;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #334155;
+
+    font-family: inherit;
+    font-size: .75rem;
+    font-weight: 600;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
+}
+
+.pli-popover-action:hover {
+    background: #F8FAFC;
+    color: #1E293B;
+}
+
+
+/* ============================================================
+   ACTION ICON
+   ============================================================ */
+
+.pli-popover-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-size: .75rem;
+
+    transition: transform .15s ease;
+}
+
+.pli-popover-action:hover .pli-popover-icon {
+    transform: scale(1.05);
+}
+
+/* View */
+.pli-popover-icon--view {
+    color: #6366F1;
+
+    background: linear-gradient(
+        135deg,
+        #F5F3FF,
+        #EDE9FE
+    );
+
+    border: 1px solid #DDD6FE;
+}
+
+/* Edit */
+.pli-popover-icon--edit {
+    color: #2563EB;
+
+    background: linear-gradient(
+        135deg,
+        #EFF6FF,
+        #DBEAFE
+    );
+
+    border: 1px solid #BFDBFE;
+}
+
+/* Status toggle */
+.pli-popover-icon--status {
+    color: #0891B2;
+
+    background: linear-gradient(
+        135deg,
+        #ECFEFF,
+        #CFFAFE
+    );
+
+    border: 1px solid #A5F3FC;
+}
+
+/* Delete */
+.pli-popover-icon--delete {
+    color: #EF4444;
+
+    background: linear-gradient(
+        135deg,
+        #FEF2F2,
+        #FEE2E2
+    );
+
+    border: 1px solid #FECACA;
+}
+
+
+/* ============================================================
+   DANGER / DELETE HOVER
+   ============================================================ */
+
+.pli-popover-action--danger {
+    color: #475569;
+}
+
+.pli-popover-action--danger:hover {
+    background: #FFF7F7;
+    color: #DC2626;
+}
+
+
+/* ============================================================
+   STATUS ACTION (Toggle Status inside the popover)
+   ============================================================ */
+
+.pli-popover-status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pli-popover-action.pli-popover-status-btn {
+    justify-content: space-between;
+}
+
+.pli-popover-status-state {
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.pli-popover-status-state.active {
+    color: #047857;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+}
+
+.pli-popover-status-state.inactive {
+    color: #991B1B;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.pli-popover-divider {
+    height: 1px;
+
+    margin: 5px 4px;
+
+    background: #EEF2F7;
+}
+
+
+/* ============================================================
+   MAKE SURE THE ROW DOESN'T CLIP THE MENU
+   ============================================================ */
+
+.premium-list .premium-list-item,
+.premium-list .pli-col-actions {
+    overflow: visible;
+}
+
+
+/* ============================================================
+   LAST ROW(S) — OPEN MENU UPWARD IF NEEDED
+   ============================================================ */
+
+.premium-list-item:last-child .pli-action-popover,
+.premium-list-item.pli-open-upward .pli-action-popover {
+    top: auto;
+    bottom: calc(100% + 7px);
+
+    transform-origin: bottom right;
+    transform: translateY(5px) scale(.97);
+}
+
+.premium-list-item:last-child .pli-action-menu-wrap.is-open .pli-action-popover,
+.premium-list-item.pli-open-upward .pli-action-menu-wrap.is-open .pli-action-popover {
+    transform: translateY(0) scale(1);
+}
+
+
+/* ============================================================
+   ROW STACKING — keep popovers below Bootstrap modals (1050+)
+   ============================================================ */
+
+.premium-list .premium-list-item {
+    position: relative;
+    z-index: 1;
+}
+
+.premium-list .premium-list-item.action-menu-row-open {
+    position: relative;
+    z-index: 2;
+}
+
+.premium-list .pli-col-actions {
+    position: relative;
+    z-index: 3;
+}
+
+.pli-action-menu-wrap {
+    position: relative;
+    z-index: 4;
+}
+
+.pli-action-popover {
+    isolation: isolate;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+    .pli-action-popover {
+        width: 175px;
+    }
+
+    .pli-action-dots {
+        width: 34px;
+        height: 34px;
+    }
+}
