@@ -17,11 +17,13 @@ class Service extends Model
         'status',
     ];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-    ];
     public function jobCards()
     {
         return $this->hasMany(JobCard::class);
+    }
+
+    public function jobCardServices()
+    {
+        return $this->hasMany(JobCardService::class);
     }
 }

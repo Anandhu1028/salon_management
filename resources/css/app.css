@@ -1069,7 +1069,7 @@
 
 .job-card-details-invoice-head span:nth-child(n+3),
 .job-card-details-invoice-line>span:nth-child(n+3) {
-    text-align: right;
+    text-align: left;
 }
 
 .job-card-details-invoice-line {
@@ -1163,6 +1163,84 @@
 /* Bootstrap sets opacity:0.5 on .show — we want opacity:1 so the
    rgba alpha controls transparency, not a second opacity pass.   */
 .modal-backdrop.show { opacity: 1; }
+
+/* Marketing and complaints — numbered table pagination */
+.table-pagination .pagination-wrapper {
+    min-height: 72px;
+    padding: 14px 20px;
+    border-top: 1px solid #edf1f6;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.table-pagination .pagination-summary {
+    margin: 0;
+    color: #536482;
+    font-size: 13px;
+}
+
+.table-pagination .pagination-summary strong { color: #1c2a43; font-weight: 800; }
+.table-pagination .premium-pagination__list { gap: 8px; }
+.table-pagination .page-item .page-link {
+    width: 38px;
+    height: 38px;
+    color: #62718a;
+    border: 1px solid #e1e7f0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.table-pagination .page-item.active .page-link {
+    color: #fff;
+    border-color: #635bff;
+    background: #635bff;
+    box-shadow: 0 5px 12px rgba(99, 91, 255, .25);
+}
+
+.table-pagination .page-item .page-link:hover {
+    color: #5146e5;
+    border-color: #d7d2ff;
+    background: #f5f3ff;
+}
+
+@media (max-width: 576px) {
+    .table-pagination .pagination-wrapper { align-items: flex-start; flex-direction: column; gap: 12px; }
+}
+
+/* Job card detail modal — concise invoice-style presentation */
+.job-card-details-modal .modal-dialog { max-width: 760px; }
+.job-card-details-modal .modal-content { border: 1px solid #e8edf5; border-radius: 16px; box-shadow: 0 24px 60px rgba(15, 23, 42, .16); }
+.job-card-details-modal .modal-header { padding: 18px 26px; }
+.job-card-details-modal .modal-header .modal-title { color: #18233d; font-size: 17px; }
+.job-card-details-modal .modal-subtitle { color: #8491a7; font-size: 12px; }
+.job-card-details-modal .modal-body { padding: 24px 26px 28px; }
+.job-card-details-modal .job-card-details-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px 48px; padding: 22px 4px 24px; }
+.job-card-details-modal .job-card-details-row { display: block; min-height: 0; border: 0; }
+.job-card-details-modal .job-card-details-row-label { display: block; margin-bottom: 7px; color: #516078; font-size: 12px; font-weight: 500; }
+.job-card-details-modal .job-card-details-row strong { display: block; color: #172033; font-size: 14px; font-weight: 700; line-height: 1.35; }
+.job-card-details-modal .job-card-details-invoice { margin-top: 0; overflow: hidden; border: 1px solid #e4eaf3; border-radius: 8px; }
+.job-card-details-modal .job-card-details-invoice-head, .job-card-details-modal .job-card-details-invoice-line { display: grid !important; grid-template-columns: 48px minmax(130px, 1.25fr) minmax(125px, 1.45fr) minmax(120px, .9fr) !important; gap: 12px; min-width: 0; padding-left: 16px; padding-right: 20px; }
+.job-card-details-modal .job-card-details-invoice-head { min-height: 45px; color: #293247; border: 0; border-bottom: 1px solid #dbe3f0; border-radius: 0; background: #f7f9fd; font-size: 10px; }
+.job-card-details-modal .job-card-details-invoice-line { min-height: 54px; border-bottom: 1px solid #edf1f6; font-size: 13px; }
+.job-card-details-modal #jobCardDetailsInvoiceItems .job-card-details-invoice-line:last-child { border-bottom: 0; }
+.job-card-details-modal .job-card-details-invoice-line span:nth-child(1) { color: #39465c; font-weight: 500; }
+.job-card-details-modal .job-card-details-invoice-line span:nth-child(3) { color: #52627a; text-align: left; }
+.job-card-details-modal .job-card-details-invoice-head span:nth-child(4), .job-card-details-modal .job-card-details-invoice-line span:nth-child(4) { text-align: right; }
+.job-card-details-modal .job-card-details-totals-block { width: min(100%, 300px); margin: 22px 28px 0 auto; padding-top: 0; border-top: 0; gap: 6px; }
+.job-card-details-modal .job-card-details-totals-block .job-card-details-totals { display: grid; grid-template-columns: 1fr auto; gap: 12px; width: 100%; min-width: 0; margin: 0; padding: 2px 0; color: #263247; font-size: 13px; }
+.job-card-details-modal .job-card-details-totals--discount, .job-card-details-modal .job-card-details-totals--discount strong { color: #13a250 !important; }
+.job-card-details-modal .job-card-details-totals:last-child { margin-top: 8px; padding-top: 16px; border-top: 0; }
+.job-card-details-modal .job-card-details-totals:last-child span { font-weight: 700; }
+.job-card-details-modal .job-card-details-total { padding-top: 0; border-top: 0; color: #1769e0; font-size: 19px; }
+
+@media (max-width: 576px) {
+    .job-card-details-modal .job-card-details-list { grid-template-columns: 1fr; gap: 18px; }
+    .job-card-details-modal .job-card-details-invoice { overflow-x: auto; }
+    .job-card-details-modal .job-card-details-invoice-head, .job-card-details-modal .job-card-details-invoice-line { min-width: 570px; }
+}
 
 /* ── Modal enter/exit animation — scale + fade ─────────────── */
 .modal.fade .modal-dialog {
@@ -3172,10 +3250,16 @@
    DESKTOP ACTIONS COLUMN & BUTTONS SPACING
    ═══════════════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
-    /* ── Service / Product — 7-column aligned grid ── */
-    .premium-list--catalog.premium-list--feed.premium-list--service,
-    .premium-list--catalog.premium-list--feed.premium-list--product {
+    /* ── Service — 7-column aligned grid ── */
+    .premium-list--catalog.premium-list--feed.premium-list--service {
         --pli-grid: 50px minmax(240px, 1.8fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr) !important;
+    }
+
+    /* ── Product — 8-column aligned grid ── */
+    .premium-list--catalog.premium-list--feed.premium-list--product {
+        --pli-grid: 44px minmax(220px, 1.6fr) minmax(130px, 1fr) minmax(140px, 1fr) 110px 110px 100px 90px !important;
+        gap: 24px !important;
+        padding: 0 20px 18px !important;
     }
 
     /* ── Staff — 6-column aligned grid ── */

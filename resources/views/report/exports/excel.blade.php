@@ -62,15 +62,14 @@
                         $staffList = $card->primaryStaff?->name ?? ($card->staff->pluck('name')->unique()->join(', ') ?: '—');
                     }
 
-                    $paymentName = $card->paymentType?->name 
-                        ?? $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->unique()->first() 
+                    $paymentName = $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->first()
                         ?? 'Cash';
                 @endphp
                 <tr class="{{ $idx % 2 === 1 ? 'zebra' : '' }}">
                     <td class="text-center">{{ $idx + 1 }}</td>
                     <td>{{ $card->created_at->format('d M Y h:i A') }}</td>
                     <td class="text-bold">{{ $card->job_card_name }}</td>
-                    <td>{{ $card->customer?->name ?? '—' }}{{ $card->customer?->phone ? ' (' . $card->customer->phone . ')' : '' }}</td>
+                    <td>{{ $card->customer?->name ?? '—' }}{{ $card->customer?->mobile_number ? ' (' . $card->customer->mobile_number . ')' : '' }}</td>
                     <td>{{ $staffList }}</td>
                     <td>{{ $paymentName }}</td>
                     <td class="text-right">₹{{ number_format($amt, 2) }}</td>

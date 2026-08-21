@@ -427,21 +427,6 @@
                         </div>
                     </div>
 
-                    {{-- Price Range --}}
-                    <div class="filter-group">
-                        <label class="filter-label" for="filter_svc_price">
-                            <i class="bi bi-currency-rupee"></i> Price
-                        </label>
-                        <div class="filter-input-wrap">
-                            <select name="price_range" id="filter_svc_price" class="filter-select">
-                                @foreach($priceRanges as $val => $label)
-                                    <option value="{{ $val }}" {{ request('price_range') === $val ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
 
                     {{-- Status --}}
                     <div class="filter-group">

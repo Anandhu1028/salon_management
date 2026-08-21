@@ -117,15 +117,24 @@
 
 /* ── Attendance Table Alignment ──
    Grid-based columns so header cells and row cells always line up:
-   Staff Name (flexible) | Working Days | Present | Absent | Actions
+   # | Staff Name (flexible) | Working Days | Present | Absent | Actions
 */
 .premium-list--attendance .premium-list-head,
 .premium-list--attendance .premium-list-item {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 40px 2fr 1fr 1fr 1fr 1fr;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
+}
+
+.premium-list--attendance .pli-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .premium-list--attendance .col-center {
@@ -168,7 +177,7 @@
 @media (max-width: 767px) {
     .premium-list--attendance .premium-list-head,
     .premium-list--attendance .premium-list-item {
-        grid-template-columns: 1.6fr 1fr 1fr 1fr 0.8fr;
+        grid-template-columns: 28px 1.6fr 1fr 1fr 1fr 0.8fr;
         gap: 6px;
         padding: 10px 12px;
     }
@@ -701,12 +710,12 @@
             </div>
             <div class="content-card-header-actions">
                 {{-- Search --}}
-                <form method="GET" action="{{ route('attendance.index') }}" class="d-flex align-items-center gap-2">
+                <form method="GET" action="{{ route('attendance.index') }}" class="staff-search">
                     <input type="hidden" name="year" value="{{ $currentYear }}">
                     <input type="hidden" name="month" value="{{ $currentMonth }}">
-                    <div class="search-input-wrap">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="search" name="search" class="form-control search-input"
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="search" name="search"
                                placeholder="Search staff name..." value="{{ $search }}" autocomplete="off">
                     </div>
                 </form>
@@ -718,6 +727,7 @@
         {{-- Table Header --}}
         <div class="premium-list premium-list--attendance premium-list--feed premium-list--compact premium-list--mgmt">
             <div class="premium-list-head">
+                <span class="pli-head-cell col-center">#</span>
                 <span class="pli-head-cell col-left">Staff Name</span>
                 <span class="pli-head-cell col-center">Working Days</span>
                 <span class="pli-head-cell col-center">Present</span>
@@ -725,9 +735,13 @@
                 <span class="pli-head-cell col-center">Actions</span>
             </div>
 
+            @php $listStart = ($attendances->currentPage() - 1) * $attendances->perPage(); @endphp
+
             @foreach($attendances as $record)
 
                 <article class="premium-list-item" id="att-row-{{ $record->id }}">
+                    <div class="pli-rank col-center">{{ $listStart + $loop->iteration }}</div>
+
                     <div class="pli-col col-left">
                         <div class="pli-name-cell">
                             <div class="pli-icon pli-icon--indigo">
@@ -851,7 +865,7 @@
         {{-- Pagination --}}
         @if($attendances->hasPages())
             <div class="content-card-footer">
-                @include('partials.pagination', ['paginator' => $attendances])
+                @include('partials.pagination-bar', ['paginator' => $attendances])
             </div>
         @endif
 

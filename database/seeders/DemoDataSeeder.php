@@ -2,166 +2,469 @@
 
 namespace Database\Seeders;
 
+use App\Models\Complaint;
+use App\Models\ComplaintType;
 use App\Models\Customer;
 use App\Models\JobCard;
+use App\Models\JobCardService;
+use App\Models\MarketingActivity;
+use App\Models\PaymentType;
 use App\Models\Product;
+use App\Models\ProductPurchase;
 use App\Models\Service;
 use App\Models\Staff;
+use App\Models\StaffAttendance;
 use App\Support\ServiceIconResolver;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DemoDataSeeder extends Seeder
 {
+    /**
+     * Seed a realistic, presentation-ready salon dataset.
+     *
+     * The data is intentionally fictional and is safe to use for demos,
+     * screenshots and local development.
+     */
     public function run(): void
     {
         Schema::disableForeignKeyConstraints();
 
+        DB::table('job_card_service_staff')->truncate();
+        DB::table('job_card_staff')->truncate();
+        DB::table('job_card_customer')->truncate();
+        DB::table('job_card_services')->truncate();
         JobCard::truncate();
+        ProductPurchase::truncate();
         Product::truncate();
         Service::truncate();
+        StaffAttendance::truncate();
+        Complaint::truncate();
+        MarketingActivity::truncate();
         Customer::truncate();
         Staff::truncate();
 
         Schema::enableForeignKeyConstraints();
 
-        $staff = [
-            ['name' => 'Anandhu K', 'mobile_country_code' => '+91', 'mobile_number' => '9746327440', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9746327440', 'status' => 'active'],
-            ['name' => 'Priya Sharma', 'mobile_country_code' => '+91', 'mobile_number' => '9876543210', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9876543210', 'status' => 'active'],
-            ['name' => 'Rahul Menon', 'mobile_country_code' => '+91', 'mobile_number' => '9123456780', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9123456780', 'status' => 'active'],
-            ['name' => 'Sneha Patel', 'mobile_country_code' => '+91', 'mobile_number' => '9988776655', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9988776655', 'status' => 'active'],
-            ['name' => 'Arjun Nair', 'mobile_country_code' => '+91', 'mobile_number' => '9012345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9012345678', 'status' => 'inactive'],
-            ['name' => 'Meera Thomas', 'mobile_country_code' => '+91', 'mobile_number' => '8899776655', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8899776655', 'status' => 'active'],
-            ['name' => 'Divya Krishnan', 'mobile_country_code' => '+91', 'mobile_number' => '8765432109', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8765432109', 'status' => 'active'],
-            ['name' => 'Vikram Singh', 'mobile_country_code' => '+91', 'mobile_number' => '8654321098', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8654321098', 'status' => 'active'],
-            ['name' => 'Nisha Gupta', 'mobile_country_code' => '+91', 'mobile_number' => '8543210987', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8543210987', 'status' => 'inactive'],
-            ['name' => 'Karan Desai', 'mobile_country_code' => '+91', 'mobile_number' => '8432109876', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8432109876', 'status' => 'active'],
-            ['name' => 'Pooja Reddy', 'mobile_country_code' => '+91', 'mobile_number' => '8321098765', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '8321098765', 'status' => 'active'],
+        $today = now()->startOfDay();
+
+        // -----------------------------------------------------------------
+        // 1. STAFF
+        // -----------------------------------------------------------------
+        $staffData = [
+            ['name' => 'Meera Nair', 'mobile_country_code' => '+91', 'mobile_number' => '9000001001', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001001', 'status' => 'active'],
+            ['name' => 'Arjun Menon', 'mobile_country_code' => '+91', 'mobile_number' => '9000001002', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001002', 'status' => 'active'],
+            ['name' => 'Ananya Krishnan', 'mobile_country_code' => '+91', 'mobile_number' => '9000001003', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001003', 'status' => 'active'],
+            ['name' => 'Rahul Varma', 'mobile_country_code' => '+91', 'mobile_number' => '9000001004', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001004', 'status' => 'active'],
+            ['name' => 'Diya Thomas', 'mobile_country_code' => '+91', 'mobile_number' => '9000001005', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001005', 'status' => 'active'],
+            ['name' => 'Vishnu Raj', 'mobile_country_code' => '+91', 'mobile_number' => '9000001006', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001006', 'status' => 'active'],
+            ['name' => 'Kavya Suresh', 'mobile_country_code' => '+91', 'mobile_number' => '9000001007', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001007', 'status' => 'active'],
+            ['name' => 'Nikhil Das', 'mobile_country_code' => '+91', 'mobile_number' => '9000001008', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001008', 'status' => 'active'],
+            ['name' => 'Isha Mathew', 'mobile_country_code' => '+91', 'mobile_number' => '9000001009', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001009', 'status' => 'active'],
+            ['name' => 'Adarsh Kumar', 'mobile_country_code' => '+91', 'mobile_number' => '9000001010', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001010', 'status' => 'active'],
+            ['name' => 'Neha Pillai', 'mobile_country_code' => '+91', 'mobile_number' => '9000001011', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001011', 'status' => 'active'],
+            ['name' => 'Sanjay Babu', 'mobile_country_code' => '+91', 'mobile_number' => '9000001012', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9000001012', 'status' => 'inactive'],
         ];
 
-        $staffModels = [];
-        foreach ($staff as $row) {
-            $staffModels[] = Staff::create($row);
-        }
+        $staffModels = collect($staffData)->map(fn (array $row) => Staff::create($row))->values();
+        $activeStaff = $staffModels->where('status', 'active')->values();
 
-        $customers = [
-            ['name' => 'Aisha Khan', 'mobile_country_code' => '+91', 'mobile_number' => '9812345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9812345678'],
-            ['name' => 'David Joseph', 'mobile_country_code' => '+91', 'mobile_number' => '9823456789', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9823456789'],
-            ['name' => 'Fatima Ali', 'mobile_country_code' => '+91', 'mobile_number' => '9834567890', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9834567890'],
-            ['name' => 'George Mathew', 'mobile_country_code' => '+91', 'mobile_number' => '9845678901', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9845678901'],
-            ['name' => 'Hema Reddy', 'mobile_country_code' => '+91', 'mobile_number' => '9856789012', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9856789012'],
-            ['name' => 'Ibrahim Shah', 'mobile_country_code' => '+91', 'mobile_number' => '9867890123', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9867890123'],
-            ['name' => 'Jyoti Verma', 'mobile_country_code' => '+91', 'mobile_number' => '9878901234', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9878901234'],
-            ['name' => 'Kevin D\'Souza', 'mobile_country_code' => '+91', 'mobile_number' => '9889012345', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9889012345'],
-            ['name' => 'Lakshmi Iyer', 'mobile_country_code' => '+91', 'mobile_number' => '9890123456', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9890123456'],
-            ['name' => 'Manoj Pillai', 'mobile_country_code' => '+91', 'mobile_number' => '9901234567', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9901234567'],
-            ['name' => 'Neha Kapoor', 'mobile_country_code' => '+91', 'mobile_number' => '9912345678', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9912345678'],
-            ['name' => 'Rohit Saxena', 'mobile_country_code' => '+91', 'mobile_number' => '9923456789', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9923456789'],
+        // -----------------------------------------------------------------
+        // 2. CUSTOMERS
+        // -----------------------------------------------------------------
+        $customerNames = [
+            'Aarav Kapoor',
+            'Aditi Menon',
+            'Alina Joseph',
+            'Amal Varghese',
+            'Anjali Rao',
+            'Arvind Nair',
+            'Bhavana Iyer',
+            'Catherine Thomas',
+            'Devika Nambiar',
+            'Farhan Ali',
+            'Gauri Krishnan',
+            'Harish Kumar',
+            'Ishita Sharma',
+            'Jithin Mathew',
+            'Karthika Das',
+            'Lakshmi Menon',
+            'Manu George',
+            'Maya Suresh',
+            'Neeraj Pillai',
+            'Nandana Raj',
+            'Pooja Nair',
+            'Rahul Joseph',
+            'Rhea Kapoor',
+            'Rohit Menon',
+            'Sana Fathima',
+            'Shreya Varma',
+            'Siddharth Rao',
+            'Sneha Thomas',
+            'Vivek Nambiar',
+            'Zoya Khan',
         ];
 
-        $customerModels = [];
-        $customerDaysThisMonth = [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14];
-        foreach ($customers as $index => $row) {
-            $createdAt = now()->copy()->startOfMonth()->addDays($customerDaysThisMonth[$index] - 1)->setTime(10 + ($index % 7), 0);
-            $customerModels[] = Customer::create([...$row, 'created_at' => $createdAt, 'updated_at' => $createdAt]);
-        }
+        $customerModels = collect($customerNames)->map(function (string $name, int $index) use ($today) {
+            $createdAt = $today->copy()
+                ->subDays(55 - min($index * 2, 54))
+                ->setTime(9 + ($index % 8), ($index * 7) % 60);
 
-        $services = [
-            ['service_name' => 'Classic Haircut', 'category' => 'Hair', 'subcategory' => 'Cut', 'price' => 350.00, 'status' => 'active'],
-            ['service_name' => 'Hair Coloring', 'category' => 'Hair', 'subcategory' => 'Color', 'price' => 2500.00, 'status' => 'active'],
-            ['service_name' => 'Keratin Treatment', 'category' => 'Hair', 'subcategory' => 'Treatment', 'price' => 4500.00, 'status' => 'active'],
-            ['service_name' => 'Deep Cleansing Facial', 'category' => 'Skin', 'subcategory' => 'Facial', 'price' => 1200.00, 'status' => 'active'],
-            ['service_name' => 'Bridal Makeup', 'category' => 'Makeup', 'subcategory' => 'Bridal', 'price' => 8000.00, 'status' => 'active'],
-            ['service_name' => 'Manicure & Pedicure', 'category' => 'Nails', 'subcategory' => 'Combo', 'price' => 900.00, 'status' => 'active'],
-            ['service_name' => 'Beard Trim & Shape', 'category' => 'Grooming', 'subcategory' => 'Beard', 'price' => 200.00, 'status' => 'active'],
-            ['service_name' => 'Full Body Wax', 'category' => 'Skin', 'subcategory' => 'Waxing', 'price' => 1800.00, 'status' => 'inactive'],
-            ['service_name' => 'Head Massage', 'category' => 'Spa', 'subcategory' => 'Massage', 'price' => 600.00, 'status' => 'active'],
-            ['service_name' => 'Threading — Eyebrows', 'category' => 'Grooming', 'subcategory' => 'Threading', 'price' => 150.00, 'status' => 'active'],
-            ['service_name' => 'Party Makeup', 'category' => 'Makeup', 'subcategory' => 'Party', 'price' => 3500.00, 'status' => 'active'],
-            ['service_name' => 'Gel Manicure', 'category' => 'Nails', 'subcategory' => 'Manicure', 'price' => 1100.00, 'status' => 'active'],
-        ];
-
-        $serviceModels = [];
-        foreach ($services as $row) {
-            $resolved = ServiceIconResolver::resolve(
-                $row['service_name'],
-                $row['category'],
-                $row['subcategory'] ?? null
-            );
-
-            $serviceModels[] = Service::create(array_merge($row, [
-                'icon' => $resolved['primary'],
-            ]));
-        }
-
-        $products = [
-            ['product_name' => 'Argan Oil Shampoo', 'category' => 'Hair Care', 'subcategory' => 'Shampoo', 'price' => 649.00, 'status' => 'active'],
-            ['product_name' => 'Hydrating Conditioner', 'category' => 'Hair Care', 'subcategory' => 'Conditioner', 'price' => 599.00, 'status' => 'active'],
-            ['product_name' => 'Heat Protection Spray', 'category' => 'Hair Care', 'subcategory' => 'Styling', 'price' => 799.00, 'status' => 'active'],
-            ['product_name' => 'Vitamin C Serum', 'category' => 'Skin Care', 'subcategory' => 'Serum', 'price' => 1299.00, 'status' => 'active'],
-            ['product_name' => 'Sunscreen SPF 50', 'category' => 'Skin Care', 'subcategory' => 'Sun Care', 'price' => 549.00, 'status' => 'active'],
-            ['product_name' => 'Matte Lipstick — Rose', 'category' => 'Makeup', 'subcategory' => 'Lips', 'price' => 499.00, 'status' => 'active'],
-            ['product_name' => 'Nail Polish Remover', 'category' => 'Nails', 'subcategory' => 'Remover', 'price' => 149.00, 'status' => 'active'],
-            ['product_name' => 'Beard Growth Oil', 'category' => 'Grooming', 'subcategory' => 'Beard Care', 'price' => 399.00, 'status' => 'active'],
-            ['product_name' => 'Dry Shampoo', 'category' => 'Hair Care', 'subcategory' => 'Shampoo', 'price' => 449.00, 'status' => 'inactive'],
-            ['product_name' => 'Face Mask Pack', 'category' => 'Skin Care', 'subcategory' => 'Mask', 'price' => 299.00, 'status' => 'active'],
-            ['product_name' => 'Hair Serum', 'category' => 'Hair Care', 'subcategory' => 'Serum', 'price' => 899.00, 'status' => 'active'],
-            ['product_name' => 'Cuticle Oil', 'category' => 'Nails', 'subcategory' => 'Care', 'price' => 249.00, 'status' => 'active'],
-        ];
-
-        foreach ($products as $row) {
-            Product::create($row);
-        }
-
-        $activeStaff = collect($staffModels)->where('status', 'active')->values();
-
-        $jobCards = [
-            ['job_card_name' => 'Haircut — Aisha', 'customer_index' => 0, 'service_index' => 0, 'subcategory' => 'Cut', 'status' => 'completed'],
-            ['job_card_name' => 'Bridal Trial — Hema', 'customer_index' => 4, 'service_index' => 4, 'subcategory' => 'Bridal', 'status' => 'in_progress'],
-            ['job_card_name' => 'Keratin — David', 'customer_index' => 1, 'service_index' => 2, 'subcategory' => 'Treatment', 'status' => 'pending'],
-            ['job_card_name' => 'Facial — Fatima', 'customer_index' => 2, 'service_index' => 3, 'subcategory' => 'Facial', 'status' => 'completed'],
-            ['job_card_name' => 'Color — Jyoti', 'customer_index' => 6, 'service_index' => 1, 'subcategory' => 'Color', 'status' => 'in_progress'],
-            ['job_card_name' => 'Mani-Pedi — Lakshmi', 'customer_index' => 8, 'service_index' => 5, 'subcategory' => 'Combo', 'status' => 'pending'],
-            ['job_card_name' => 'Beard Groom — Manoj', 'customer_index' => 9, 'service_index' => 6, 'subcategory' => 'Beard', 'status' => 'completed'],
-            ['job_card_name' => 'Waxing — Kevin', 'customer_index' => 7, 'service_index' => 7, 'subcategory' => 'Waxing', 'status' => 'cancelled'],
-            ['job_card_name' => 'Massage — Neha', 'customer_index' => 10, 'service_index' => 8, 'subcategory' => 'Massage', 'status' => 'pending'],
-            ['job_card_name' => 'Threading — Rohit', 'customer_index' => 11, 'service_index' => 9, 'subcategory' => 'Threading', 'status' => 'completed'],
-            ['job_card_name' => 'Party Makeup — Aisha', 'customer_index' => 0, 'service_index' => 10, 'subcategory' => 'Party', 'status' => 'in_progress'],
-            ['job_card_name' => 'Gel Manicure — David', 'customer_index' => 1, 'service_index' => 11, 'subcategory' => 'Manicure', 'status' => 'pending'],
-        ];
-
-        foreach ($jobCards as $index => $row) {
-            $createdAt = now()->copy()->subDays($index % 7)->setTime(9 + ($index % 8), 0);
-
-            JobCard::create([
-                'job_card_name' => $row['job_card_name'],
-                'customer_id' => $customerModels[$row['customer_index']]->id,
-                'service_id' => $serviceModels[$row['service_index']]->id,
-                'staff_id' => $activeStaff[$index % $activeStaff->count()]->id,
-                'subcategory' => $row['subcategory'],
-                'status' => $row['status'],
+            return Customer::create([
+                'name' => $name,
+                'mobile_country_code' => '+91',
+                'mobile_number' => '900000' . str_pad((string) (2001 + $index), 4, '0', STR_PAD_LEFT),
+                'whatsapp_country_code' => '+91',
+                'whatsapp_number' => '900000' . str_pad((string) (2001 + $index), 4, '0', STR_PAD_LEFT),
+                'status' => $index % 13 === 0 ? 'inactive' : 'active',
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt,
             ]);
+        })->values();
+
+        // -----------------------------------------------------------------
+        // 3. SERVICES
+        // -----------------------------------------------------------------
+        $serviceData = [
+            ['service_name' => 'Signature Haircut', 'category' => 'Hair', 'subcategory' => 'Haircut', 'amount' => 450],
+            ['service_name' => 'Hair Wash & Blow Dry', 'category' => 'Hair', 'subcategory' => 'Styling', 'amount' => 550],
+            ['service_name' => 'Hair Colour - Global', 'category' => 'Hair', 'subcategory' => 'Colour', 'amount' => 2800],
+            ['service_name' => 'Balayage Highlights', 'category' => 'Hair', 'subcategory' => 'Highlights', 'amount' => 4500],
+            ['service_name' => 'Keratin Smoothing', 'category' => 'Hair', 'subcategory' => 'Treatment', 'amount' => 5200],
+            ['service_name' => 'Hair Spa - Nourishing', 'category' => 'Hair', 'subcategory' => 'Hair Spa', 'amount' => 1600],
+            ['service_name' => 'Classic Cleanup', 'category' => 'Skin', 'subcategory' => 'Cleanup', 'amount' => 650],
+            ['service_name' => 'Hydra Glow Facial', 'category' => 'Skin', 'subcategory' => 'Facial', 'amount' => 1800],
+            ['service_name' => 'Brightening Facial', 'category' => 'Skin', 'subcategory' => 'Facial', 'amount' => 1500],
+            ['service_name' => 'Full Face Threading', 'category' => 'Grooming', 'subcategory' => 'Threading', 'amount' => 300],
+            ['service_name' => 'Beard Trim & Styling', 'category' => 'Grooming', 'subcategory' => 'Beard', 'amount' => 300],
+            ['service_name' => 'Premium Manicure', 'category' => 'Nails', 'subcategory' => 'Manicure', 'amount' => 900],
+            ['service_name' => 'Classic Pedicure', 'category' => 'Nails', 'subcategory' => 'Pedicure', 'amount' => 1000],
+            ['service_name' => 'Gel Nail Extension', 'category' => 'Nails', 'subcategory' => 'Nail Extension', 'amount' => 2200],
+            ['service_name' => 'Head & Shoulder Massage', 'category' => 'Spa', 'subcategory' => 'Massage', 'amount' => 900],
+            ['service_name' => 'Relaxing Back Massage', 'category' => 'Spa', 'subcategory' => 'Massage', 'amount' => 1500],
+            ['service_name' => 'Party Makeup', 'category' => 'Makeup', 'subcategory' => 'Party Makeup', 'amount' => 3500],
+            ['service_name' => 'Bridal Makeup', 'category' => 'Makeup', 'subcategory' => 'Bridal', 'amount' => 9500],
+            ['service_name' => 'Full Body Waxing', 'category' => 'Skin', 'subcategory' => 'Waxing', 'amount' => 2200],
+            ['service_name' => 'Bridal Hair & Makeup Package', 'category' => 'Packages', 'subcategory' => 'Bridal Package', 'amount' => 14500],
+        ];
+
+        $serviceModels = collect();
+        $serviceAmounts = [];
+
+        foreach ($serviceData as $row) {
+            $amount = $row['amount'];
+            unset($row['amount']);
+
+            $resolved = ServiceIconResolver::resolve(
+                $row['service_name'],
+                $row['category'],
+                $row['subcategory']
+            );
+
+            $service = Service::create([
+                ...$row,
+                'icon' => $resolved['primary'],
+                'status' => 'active',
+            ]);
+
+            $serviceModels->push($service);
+            $serviceAmounts[$service->id] = $amount;
         }
 
-        // A balanced 30-day schedule gives the dashboard meaningful, linked staff metrics.
-        $statuses = ['completed', 'completed', 'completed', 'completed', 'in_progress', 'pending', 'cancelled'];
-        foreach (range(0, 89) as $index) {
-            $service = $serviceModels[$index % count($serviceModels)];
-            $createdAt = now()->copy()
-                ->subDays(29 - intdiv($index, 3))
-                ->setTime(9 + ($index % 9), ($index * 10) % 60);
+        // -----------------------------------------------------------------
+        // 4. PRODUCTS
+        // -----------------------------------------------------------------
+        $productData = [
+            ['product_name' => 'L’Oréal Professionnel Absolut Repair Shampoo', 'category' => 'Hair Care', 'subcategory' => 'Shampoo', 'price' => 1250],
+            ['product_name' => 'L’Oréal Professionnel Absolut Repair Conditioner', 'category' => 'Hair Care', 'subcategory' => 'Conditioner', 'price' => 1350],
+            ['product_name' => 'Moroccanoil Treatment', 'category' => 'Hair Care', 'subcategory' => 'Serum', 'price' => 2800],
+            ['product_name' => 'Schwarzkopf Heat Protection Spray', 'category' => 'Hair Care', 'subcategory' => 'Styling', 'price' => 1100],
+            ['product_name' => 'Wella Professionals Hair Mask', 'category' => 'Hair Care', 'subcategory' => 'Hair Mask', 'price' => 1450],
+            ['product_name' => 'Olaplex No.3 Hair Perfector', 'category' => 'Hair Care', 'subcategory' => 'Treatment', 'price' => 3200],
+            ['product_name' => 'Vitamin C Brightening Serum', 'category' => 'Skin Care', 'subcategory' => 'Serum', 'price' => 1499],
+            ['product_name' => 'Hydrating Face Cleanser', 'category' => 'Skin Care', 'subcategory' => 'Cleanser', 'price' => 699],
+            ['product_name' => 'SPF 50 PA+++ Sunscreen', 'category' => 'Skin Care', 'subcategory' => 'Sun Care', 'price' => 899],
+            ['product_name' => 'Hyaluronic Acid Moisturizer', 'category' => 'Skin Care', 'subcategory' => 'Moisturizer', 'price' => 1099],
+            ['product_name' => 'Clay Purifying Face Mask', 'category' => 'Skin Care', 'subcategory' => 'Mask', 'price' => 599],
+            ['product_name' => 'Professional Matte Lipstick - Nude', 'category' => 'Makeup', 'subcategory' => 'Lips', 'price' => 799],
+            ['product_name' => 'Makeup Setting Spray', 'category' => 'Makeup', 'subcategory' => 'Setting', 'price' => 999],
+            ['product_name' => 'Cuticle Care Oil', 'category' => 'Nails', 'subcategory' => 'Nail Care', 'price' => 349],
+            ['product_name' => 'Gel Nail Polish - Classic Red', 'category' => 'Nails', 'subcategory' => 'Nail Polish', 'price' => 499],
+            ['product_name' => 'Beard Care Oil', 'category' => 'Grooming', 'subcategory' => 'Beard Care', 'price' => 449],
+            ['product_name' => 'Beard Softening Balm', 'category' => 'Grooming', 'subcategory' => 'Beard Care', 'price' => 549],
+            ['product_name' => 'Spa Aroma Massage Oil', 'category' => 'Spa', 'subcategory' => 'Massage Oil', 'price' => 799],
+            ['product_name' => 'Disposable Facial Headband Pack', 'category' => 'Salon Supplies', 'subcategory' => 'Consumables', 'price' => 299],
+            ['product_name' => 'Professional Hair Styling Wax', 'category' => 'Hair Care', 'subcategory' => 'Styling', 'price' => 699],
+        ];
 
-            JobCard::create([
-                'job_card_name' => sprintf('%s Appointment %03d', $service->service_name, $index + 1),
-                'customer_id' => $customerModels[$index % count($customerModels)]->id,
-                'service_id' => $service->id,
-                'staff_id' => $activeStaff[$index % $activeStaff->count()]->id,
-                'subcategory' => $service->subcategory,
-                'status' => $statuses[$index % count($statuses)],
+        $productModels = collect($productData)->map(function (array $row, int $index) use ($today) {
+            return Product::create([
+                ...$row,
+                'status' => $index === 19 ? 'inactive' : 'active',
+                'created_at' => $today->copy()->subDays(70 - min($index * 2, 65)),
+                'updated_at' => $today->copy()->subDays(70 - min($index * 2, 65)),
+            ]);
+        })->values();
+
+        // -----------------------------------------------------------------
+        // 5. PRODUCT PURCHASE / STOCK HISTORY
+        // -----------------------------------------------------------------
+        foreach ($productModels as $index => $product) {
+            $purchaseBatches = ($index % 4 === 0) ? 2 : 1;
+
+            for ($batch = 0; $batch < $purchaseBatches; $batch++) {
+                ProductPurchase::create([
+                    'product_id' => $product->id,
+                    'purchase_date' => $today->copy()
+                        ->subDays(7 + ($index * 2) + ($batch * 18))
+                        ->format('Y-m-d'),
+                    'quantity' => 8 + (($index * 3 + $batch * 5) % 25),
+                ]);
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 6. PAYMENT TYPES
+        // -----------------------------------------------------------------
+        $paymentTypes = PaymentType::where('is_active', true)
+            ->orderBy('id')
+            ->get();
+
+        if ($paymentTypes->isEmpty()) {
+            foreach (['Cash', 'UPI', 'Card', 'EC'] as $name) {
+                PaymentType::create([
+                    'name' => $name,
+                    'is_active' => true,
+                ]);
+            }
+
+            $paymentTypes = PaymentType::where('is_active', true)
+                ->orderBy('id')
+                ->get();
+        }
+
+        // -----------------------------------------------------------------
+        // 7. JOB CARDS / SALES HISTORY
+        // -----------------------------------------------------------------
+        $statusPattern = [
+            'completed', 'completed', 'completed', 'completed',
+            'completed', 'completed', 'in_progress', 'pending',
+            'completed', 'completed', 'cancelled', 'completed',
+        ];
+
+        $jobCardCount = 75;
+
+        for ($index = 0; $index < $jobCardCount; $index++) {
+            $customer = $customerModels[$index % $customerModels->count()];
+            $primaryStaff = $activeStaff[$index % $activeStaff->count()];
+            $service1 = $serviceModels[$index % $serviceModels->count()];
+            $status = $statusPattern[$index % count($statusPattern)];
+
+            // Keep a few records on today and most records distributed over
+            // the previous 60 days so dashboard filters have useful data.
+            $daysAgo = $index < 8
+                ? 0
+                : 1 + (($index * 7) % 59);
+
+            $createdAt = $today->copy()
+                ->subDays($daysAgo)
+                ->setTime(9 + ($index % 10), ($index * 11) % 60);
+
+            $discount = match ($index % 7) {
+                0 => 300.00,
+                1 => 150.00,
+                2 => 500.00,
+                default => 0.00,
+            };
+
+            $jobCard = JobCard::create([
+                'job_card_name' => 'JC-' . $createdAt->format('ymd') . '-' . str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT),
+                'customer_id' => $customer->id,
+                'service_id' => $service1->id,
+                'staff_id' => $primaryStaff->id,
+                'subcategory' => $service1->subcategory,
+                'status' => $status,
+                'discount_amount' => $discount,
                 'created_at' => $createdAt,
-                'updated_at' => $createdAt->copy()->addHour(),
+                'updated_at' => $createdAt->copy()->addMinutes(35 + ($index % 45)),
+            ]);
+
+            $jobCard->customers()->sync([$customer->id]);
+            $jobCard->staff()->sync([$primaryStaff->id]);
+
+            $paymentType = $paymentTypes[$index % $paymentTypes->count()];
+
+            $item1 = JobCardService::create([
+                'job_card_id' => $jobCard->id,
+                'service_id' => $service1->id,
+                'subcategory' => $service1->subcategory,
+                'amount' => $serviceAmounts[$service1->id],
+                'payment_type_id' => $paymentType->id,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+
+            $item1->staff()->sync([$primaryStaff->id]);
+
+            // Roughly 40% of appointments contain a second service.
+            if ($index % 5 !== 1 && $index % 5 !== 4) {
+                $service2 = $serviceModels[($index + 5) % $serviceModels->count()];
+                $secondaryStaff = $activeStaff[($index + 2) % $activeStaff->count()];
+                $paymentType2 = $paymentTypes[($index + 1) % $paymentTypes->count()];
+
+                $item2 = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $service2->id,
+                    'subcategory' => $service2->subcategory,
+                    'amount' => $serviceAmounts[$service2->id],
+                    'payment_type_id' => $paymentType2->id,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
+                $item2->staff()->sync([$secondaryStaff->id]);
+                $jobCard->staff()->syncWithoutDetaching([$secondaryStaff->id]);
+            }
+
+            // A few premium appointments include a third service.
+            if ($index % 11 === 0) {
+                $service3 = $serviceModels[($index + 9) % $serviceModels->count()];
+
+                $item3 = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $service3->id,
+                    'subcategory' => $service3->subcategory,
+                    'amount' => $serviceAmounts[$service3->id],
+                    'payment_type_id' => $paymentTypes[($index + 2) % $paymentTypes->count()]->id,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
+                $item3->staff()->sync([$primaryStaff->id]);
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // 8. STAFF ATTENDANCE
+        // -----------------------------------------------------------------
+        $currentYear = (int) $today->format('Y');
+        $currentMonth = (int) $today->format('m');
+
+        $previousMonthDate = $today->copy()->subMonthNoOverflow();
+        $previousYear = (int) $previousMonthDate->format('Y');
+        $previousMonth = (int) $previousMonthDate->format('m');
+
+        foreach ($activeStaff as $index => $member) {
+            StaffAttendance::create([
+                'staff_id' => $member->id,
+                'year' => $previousYear,
+                'month' => $previousMonth,
+                'total_working_days' => 23,
+                'present_days' => 20 + ($index % 4),
+                'absent_days' => 3 - ($index % 2),
+            ]);
+
+            StaffAttendance::create([
+                'staff_id' => $member->id,
+                'year' => $currentYear,
+                'month' => $currentMonth,
+                'total_working_days' => 21,
+                'present_days' => 17 + ($index % 4),
+                'absent_days' => $index % 5 === 0 ? 2 : 1,
+            ]);
+        }
+
+        // -----------------------------------------------------------------
+        // 9. COMPLAINTS
+        // -----------------------------------------------------------------
+        $complaintTypes = ComplaintType::orderBy('id')->get();
+
+        $complaints = [
+            [
+                'type' => 0,
+                'subject' => 'Client waiting time exceeded during evening rush',
+                'description' => 'Two clients waited more than 25 minutes before their scheduled service. Front desk requested additional support during the 5 PM to 7 PM peak period.',
+                'days' => 2,
+                'status' => 'Pending',
+            ],
+            [
+                'type' => 1,
+                'subject' => 'Late arrival for opening shift',
+                'description' => 'Staff member reported 35 minutes after the scheduled opening time on a busy Saturday. Shift coverage was arranged by the floor supervisor.',
+                'days' => 5,
+                'status' => 'Resolved',
+            ],
+            [
+                'type' => 2,
+                'subject' => 'Hair dryer at styling station requires replacement',
+                'description' => 'The dryer at Station 4 is overheating and should be replaced before the next maintenance cycle.',
+                'days' => 8,
+                'status' => 'In Progress',
+            ],
+            [
+                'type' => 3,
+                'subject' => 'Incorrect service handover between stylists',
+                'description' => 'A colour-treatment appointment was handed over without recording the selected shade formula. The client record was corrected after verification.',
+                'days' => 12,
+                'status' => 'Resolved',
+            ],
+            [
+                'type' => 4,
+                'subject' => 'Retail stock count mismatch',
+                'description' => 'Physical count showed a shortage of two professional shampoo units compared with the inventory register. Stock reconciliation is pending.',
+                'days' => 15,
+                'status' => 'Pending',
+            ],
+            [
+                'type' => 5,
+                'subject' => 'Client requested follow-up on service quality',
+                'description' => 'Customer requested a follow-up call after a keratin treatment. The manager has assigned the case for review.',
+                'days' => 18,
+                'status' => 'In Progress',
+            ],
+        ];
+
+        foreach ($complaints as $index => $complaint) {
+            if (!isset($complaintTypes[$complaint['type']])) {
+                continue;
+            }
+
+            Complaint::create([
+                'complainant_staff_id' => $activeStaff[$index % $activeStaff->count()]->id,
+                'complaint_type_id' => $complaintTypes[$complaint['type']]->id,
+                'subject' => $complaint['subject'],
+                'description' => $complaint['description'],
+                'date_of_complaint' => $today->copy()->subDays($complaint['days'])->format('Y-m-d'),
+                'status' => $complaint['status'],
+            ]);
+        }
+
+        // -----------------------------------------------------------------
+        // 10. MARKETING ACTIVITIES
+        // -----------------------------------------------------------------
+        $marketingData = [
+            ['days' => 1, 'type' => 'Instagram Campaign', 'location' => 'Instagram & Facebook', 'count' => 1850, 'staff' => 0, 'notes' => 'Weekend hair spa promotion with before-and-after creative.'],
+            ['days' => 3, 'type' => 'WhatsApp Promotion', 'location' => 'Existing Customer List', 'count' => 420, 'staff' => 2, 'notes' => 'Sent personalised weekday facial offer to returning customers.'],
+            ['days' => 5, 'type' => 'Pamphlet Distribution', 'location' => 'City Centre & Shopping Complex', 'count' => 600, 'staff' => 1, 'notes' => 'Distributed new-customer offer cards during evening footfall.'],
+            ['days' => 8, 'type' => 'Google Business Promotion', 'location' => 'Google Business Profile', 'count' => 310, 'staff' => 4, 'notes' => 'Promoted seasonal bridal and party makeup services.'],
+            ['days' => 12, 'type' => 'Referral Campaign', 'location' => 'Existing Customers', 'count' => 95, 'staff' => 6, 'notes' => 'Referral cards issued to repeat customers with a next-visit benefit.'],
+            ['days' => 16, 'type' => 'Local Partnership', 'location' => 'Nearby Boutique & Wedding Studio', 'count' => 18, 'staff' => 3, 'notes' => 'Partnership leads collected for bridal packages.'],
+            ['days' => 21, 'type' => 'Festival Campaign', 'location' => 'Instagram, WhatsApp & In-Salon', 'count' => 2400, 'staff' => 0, 'notes' => 'Seasonal grooming campaign focused on family appointments.'],
+            ['days' => 27, 'type' => 'Customer Reactivation', 'location' => 'CRM Customer List', 'count' => 160, 'staff' => 8, 'notes' => 'Follow-up campaign for customers without a visit in the last 60 days.'],
+            ['days' => 34, 'type' => 'Influencer Collaboration', 'location' => 'Instagram Reels', 'count' => 5200, 'staff' => 5, 'notes' => 'Local creator collaboration featuring bridal makeup transformation.'],
+            ['days' => 42, 'type' => 'Flyer Campaign', 'location' => 'Residential Community', 'count' => 450, 'staff' => 7, 'notes' => 'New customer introductory offer distributed to nearby households.'],
+        ];
+
+        foreach ($marketingData as $row) {
+            MarketingActivity::create([
+                'activity_date' => $today->copy()->subDays($row['days'])->format('Y-m-d'),
+                'marketing_type' => $row['type'],
+                'location' => $row['location'],
+                'count' => $row['count'],
+                'staff_id' => $activeStaff[$row['staff'] % $activeStaff->count()]->id,
+                'notes' => $row['notes'],
             ]);
         }
     }

@@ -53,21 +53,26 @@ return new class extends Migration
      *
      * Use Cash as the fallback for historical records only.
      */
-    $cashPaymentTypeId = DB::table('payment_types')
-        ->where('name', 'Cash')
-        ->value('id');
+    if (DB::table('job_card_services')->whereNull('payment_type_id')->exists()) {
+        $cashPaymentTypeId = DB::table('payment_types')
+            ->where('name', 'Cash')
+            ->value('id');
 
-    if (!$cashPaymentTypeId) {
-        throw new \RuntimeException(
-            'Cash payment type was not found in payment_types.'
-        );
+        if (!$cashPaymentTypeId) {
+            $cashPaymentTypeId = DB::table('payment_types')->insertGetId([
+                'name' => 'Cash',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('job_card_services')
+            ->whereNull('payment_type_id')
+            ->update([
+                'payment_type_id' => $cashPaymentTypeId,
+            ]);
     }
-
-    DB::table('job_card_services')
-        ->whereNull('payment_type_id')
-        ->update([
-            'payment_type_id' => $cashPaymentTypeId,
-        ]);
 
     /*
      * 4. Now that every existing record has a payment type,

@@ -398,13 +398,79 @@
    JOB CARD SERVICE ITEM BUILDER (EXACT DESIGN MATCH)
    ============================================================ */
 
+/* ------------------------------------------------------------
+   MODAL SHELL — fixed header/footer, only the middle content
+   area scrolls. This replaces the old "whole body scrolls"
+   approach (which used to hide Payment Method / Total / Footer
+   behind the scroll when several services were added).
+   ------------------------------------------------------------ */
+
+.job-card-builder-modal .modal-dialog {
+    max-height: calc(100vh - 30px);
+    display: flex;
+    align-items: center;
+}
+
+.job-card-builder-modal .modal-content {
+    max-height: calc(100vh - 30px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* The <form> wraps header/body/footer and must itself stretch to
+   fill the modal-content and lay its children out in a column so
+   the body can flex/shrink correctly between header and footer. */
+.job-card-builder-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.job-card-builder-modal .modal-header,
+.job-card-builder-modal .modal-footer {
+    flex: 0 0 auto;
+}
+
+/* modal-body is now just a flex container for the scroll area
+   and the fixed bottom block — no scrolling or padding here
+   directly, that's delegated to its children below. */
 .job-card-builder-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+}
+
+/* Only this area scrolls: job card name/customer + service items.
+   Grows to fill available space; shrinks/scrolls once content
+   exceeds it, without ever pushing Payment Method, Total, or the
+   footer out of view. */
+.job-card-builder-scroll-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     gap: 22px;
     padding: 24px;
-    max-height: calc(100vh - 220px);
-    overflow-y: auto;
+}
+
+/* Payment Method + Total Summary — always visible, never scrolled
+   away, sits directly above the footer. */
+.job-card-builder-fixed-bottom {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 24px 24px;
+    background: #FFFFFF;
+    border-top: 1px solid #F1F5F9;
 }
 
 .job-card-builder-section {
@@ -943,7 +1009,7 @@
 }
 
 .job-card-summary-divider {
-    border-top: 1.5px dashed #C7D2FE;
+    border-top: 0;
     margin: 3px 0;
 }
 
@@ -966,10 +1032,18 @@
 
 /* Responsive: Tablet / Mobile */
 @media (max-width: 768px) {
-    .job-card-builder-body {
+    .job-card-builder-modal .modal-dialog,
+    .job-card-builder-modal .modal-content {
+        max-height: calc(100vh - 16px);
+    }
+
+    .job-card-builder-scroll-area {
         padding: 16px;
         gap: 18px;
-        max-height: calc(100vh - 180px);
+    }
+
+    .job-card-builder-fixed-bottom {
+        padding: 12px 16px 16px;
     }
 
     .job-card-builder-top-row {
@@ -1026,8 +1100,9 @@
 
 /* Responsive: Small Mobile */
 @media (max-width: 480px) {
-    .job-card-builder-body {
-        max-height: calc(100vh - 160px);
+    .job-card-builder-modal .modal-dialog,
+    .job-card-builder-modal .modal-content {
+        max-height: calc(100vh - 8px);
     }
 
     .job-card-input-box select,
@@ -1161,13 +1236,15 @@
 
 
 /* ============================================================
-   JOB CARD DETAILS — INVOICE TABLE (5 COLUMNS: # / Service / Staff / Payment / Amount)
+   JOB CARD DETAILS — INVOICE TABLE (4 COLUMNS: # / Service / Staff / Amount)
+   Payment Method is now a single job-card-level field shown in the
+   details summary list above, not a per-line column anymore.
    ============================================================ */
 
 .job-card-page .job-card-details-invoice-head,
 .job-card-page .job-card-details-invoice-line {
     display: grid !important;
-    grid-template-columns: 30px 2fr 1fr 1fr 1fr !important;
+    grid-template-columns: 30px 2.2fr 1.1fr 1fr !important;
     column-gap: 14px;
     align-items: center;
 }
@@ -1175,9 +1252,14 @@
 /* Header cell alignment */
 .job-card-page .job-card-details-invoice-head span:nth-child(1) { text-align: left; }
 .job-card-page .job-card-details-invoice-head span:nth-child(2) { text-align: left; }
-.job-card-page .job-card-details-invoice-head span:nth-child(3) { text-align: center; }
-.job-card-page .job-card-details-invoice-head span:nth-child(4) { text-align: center; }
-.job-card-page .job-card-details-invoice-head span:nth-child(5) { text-align: right; }
+.job-card-page .job-card-details-invoice-head span:nth-child(3) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+.job-card-page .job-card-details-invoice-head span:nth-child(4) { text-align: right; }
 
 
 /* Row cell alignment — must match header */
@@ -1192,43 +1274,21 @@
 }
 
 .job-card-page .job-card-details-invoice-line span:nth-child(3) {
-    text-align: center;
-    color: #475569;
-    font-size: 0.82rem;
-}
-
-.job-card-page .job-card-details-invoice-line span:nth-child(4) {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    color: #475569;
+    font-size: 0.82rem;
+    width: 100%;
 }
 
-.job-card-page .job-card-details-invoice-line span:nth-child(5) {
+.job-card-page .job-card-details-invoice-line span:nth-child(4) {
     text-align: right;
     font-weight: 700;
     color: #1E293B;
 }
 
-.job-card-page .job-card-details-invoice-line .payment-type-pill {
-    font-size: 0.65rem;
-    padding: 4px 9px;
-    min-height: auto;
-}
-
-.job-card-page .job-card-details-invoice-line span:nth-child(4) {
-    display: flex;
-    align-items: center;
-}
-
-.job-card-page .job-card-details-invoice-line .payment-type-pill {
-    font-size: 0.65rem;
-    padding: 4px 9px;
-    min-height: auto;
-}
-
-.job-card-page .job-card-details-invoice-head span:nth-child(4) {
-    text-align: left;
-}
 /* ============================================================
    JOB CARD DETAILS — SUBTOTAL / DISCOUNT / TOTAL BREAKDOWN
    ============================================================ */
@@ -1238,7 +1298,7 @@
     flex-direction: column;
     gap: 2px;
     margin-top: 10px;
-    border-top: 1px dashed #E2E8F0;
+    border-top: 0;
     padding-top: 10px;
 }
 
@@ -1288,7 +1348,6 @@
     border-radius: 22px;
     border: 1px solid #EEF0F5;
     box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.25), 0 10px 20px -8px rgba(15, 23, 42, 0.12);
-    overflow: hidden;
 }
 
 .job-card-builder-modal .modal-header {
@@ -1853,4 +1912,264 @@
 /* Popup content always above trigger */
 .job-card-page .pli-action-popover {
     isolation: isolate;
+}
+
+/* ============================================================
+   JOB CARD DETAILS MODAL — VISUAL REDESIGN
+   (matches the "invoice details" reference layout: 2-col detail
+   grid with icon chips, numbered invoice rows, and a soft
+   totals card)
+   ============================================================ */
+
+.job-card-details-modal .modal-content {
+    border-radius: 20px;
+    border: 1px solid #EEF0F5;
+    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.22), 0 10px 20px -8px rgba(15, 23, 42, 0.1);
+}
+
+.job-card-details-modal .modal-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid #F1F5F9;
+    background: linear-gradient(180deg, #FDFCFF 0%, #FFFFFF 100%);
+}
+
+.job-card-details-modal .modal-icon-box.job-card-details-title-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+    color: #6366F1;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.job-card-details-modal .job-card-details-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job-card-details-modal .job-card-detail-tool {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+    border: 1px solid #DDD6FE;
+    color: #6366F1;
+    transition: all 0.18s ease;
+}
+
+.job-card-details-modal .job-card-detail-tool:hover {
+    background: #EDE9FE;
+    border-color: #C7B9FB;
+    color: #4F46E5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15);
+}
+
+.job-card-details-modal .modal-body {
+    padding: 24px 26px;
+}
+
+.job-card-details-modal .modal-footer {
+    padding: 16px 26px;
+    border-top: 1px solid #F1F5F9;
+    background: #FBFBFE;
+}
+
+/* ---- Two-column detail grid (Job Card Name / Date / Customer /
+   Payment / Staff) with icon chips ---- */
+.job-card-details-modal .jcd-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 18px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.job-card-details-modal .jcd-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.job-card-details-modal .jcd-detail-item--full {
+    grid-column: 1 / -1;
+}
+
+.job-card-details-modal .jcd-detail-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+    color: #6366F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.job-card-details-modal .jcd-detail-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.job-card-details-modal .jcd-detail-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: #94A3B8;
+    text-transform: uppercase;
+}
+
+.job-card-details-modal .jcd-detail-value {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* ---- Invoice table (self-contained, no ancestor dependency) ---- */
+.job-card-details-modal .job-card-details-invoice-head,
+.job-card-details-modal .job-card-details-invoice-line {
+    display: grid;
+    grid-template-columns: 34px 2.2fr 1.3fr 1fr;
+    column-gap: 14px;
+    align-items: center;
+}
+
+.job-card-details-modal .job-card-details-invoice-head {
+    background: linear-gradient(135deg, #F8FAFF 0%, #EEF2FF 100%);
+    border: 1px solid #E0E7FF;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #64748B;
+}
+
+.job-card-details-modal .job-card-details-invoice-head span:last-child,
+.job-card-details-modal .job-card-details-invoice-line span:last-child {
+    text-align: right;
+}
+
+.job-card-details-modal .job-card-details-invoice-line {
+    padding: 12px 14px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.job-card-details-modal .job-card-details-invoice-line:last-child {
+    border-bottom: none;
+}
+
+.job-card-details-modal .job-card-details-invoice-line span:nth-child(2) {
+    font-weight: 700;
+    color: #0F172A;
+    font-size: 0.85rem;
+}
+
+.job-card-details-modal .job-card-details-invoice-line span:nth-child(3) {
+    color: #64748B;
+    font-size: 0.82rem;
+}
+
+.job-card-details-modal .job-card-details-invoice-line span:nth-child(4) {
+    font-weight: 700;
+    color: #1E293B;
+}
+
+.job-card-details-modal .jcd-invoice-num-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+    color: #4F46E5;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+/* ---- Totals summary card ---- */
+.job-card-details-modal .jcd-totals-card {
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.job-card-details-modal .jcd-totals-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: #64748B;
+}
+
+.job-card-details-modal .jcd-totals-row strong {
+    color: #1E293B;
+    font-weight: 700;
+}
+
+.job-card-details-modal .jcd-totals-row--discount span {
+    color: #16A34A;
+}
+
+.job-card-details-modal .jcd-totals-row--discount strong {
+    color: #16A34A;
+}
+
+.job-card-details-modal .jcd-totals-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 4px 0;
+}
+
+.job-card-details-modal .jcd-totals-row--final .jcd-totals-label {
+    font-weight: 700;
+    color: #1E293B;
+    font-size: 0.9rem;
+}
+
+.job-card-details-modal .jcd-totals-row--final strong {
+    color: #4F46E5;
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+@media (max-width: 576px) {
+    .job-card-details-modal .jcd-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .job-card-details-modal .jcd-detail-item--full {
+        grid-column: 1 / -1;
+    }
 }

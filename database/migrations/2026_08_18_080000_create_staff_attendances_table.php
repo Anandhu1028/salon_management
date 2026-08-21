@@ -16,8 +16,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('total_working_days')->default(0);
             $table->unsignedSmallInteger('present_days')->default(0);
             $table->unsignedSmallInteger('absent_days')->default(0);
-            $table->unsignedSmallInteger('leave_days')->default(0);
-            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->unique(['staff_id', 'year', 'month']);

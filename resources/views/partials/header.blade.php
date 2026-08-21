@@ -40,17 +40,17 @@
                     <span class="header-avatar-status" aria-hidden="true"></span>
                 </div>
                 <div class="header-profile-text d-none d-md-block">
-                    <div class="header-profile-name">Administrator</div>
-                    <div class="header-profile-role">Salon Manager</div>
+                    <div class="header-profile-name">{{ auth()->user()?->name ?? 'Administrator' }}</div>
+                    <div class="header-profile-role">{{ ucfirst(auth()->user()?->role?->name ?? 'Staff') }}</div>
                 </div>
                 <i class="bi bi-chevron-down header-profile-chevron d-none d-md-block" aria-hidden="true"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end profile-dropdown">
                 <li class="dropdown-header">
-                    <div class="profile-dropdown-name">Administrator</div>
-                    <div class="profile-dropdown-email">admin@salonpro.com</div>
+                    <div class="profile-dropdown-name">{{ auth()->user()?->name ?? 'Administrator' }}</div>
+                    <div class="profile-dropdown-email">{{ auth()->user()?->email ?? 'admin@salonpro.com' }}</div>
                 </li>
-                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> My Profile</a></li>
+                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> My Profile</a></li>
                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>

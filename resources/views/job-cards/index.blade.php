@@ -5,7 +5,7 @@
     <style>
 
         /* ============================================================
-   PAYMENT TYPE COLUMN
+   PAYMENT TYPE COLUMN (list view — one pill per job card)
    ============================================================ */
 
 .job-card-page .premium-list--jobs .pli-col-payment-type {
@@ -124,20 +124,20 @@
     background: #F8FAFC;
     border-color: #E2E8F0;
 }
-        /* Compact Payment Method field */
+        /* Compact global Payment Method field (single, applies to whole job card) */
         .job-card-payment-field {
-            max-width: 220px;
+            max-width: 280px;
         }
 
         .job-card-payment-select-wrap {
-            height: 40px;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            background: #F8FAFC;
-            padding: 0 10px;
+            height: 48px;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            padding: 0 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             position: relative;
             transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
         }
@@ -147,9 +147,8 @@
         }
 
         .job-card-payment-select-wrap:focus-within {
-            border-color: #6366F1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-            background: #fff;
+            border-color: #8B5CF6;
+            box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
         }
 
         .job-card-payment-select-wrap .form-field-icon {
@@ -168,7 +167,7 @@
             height: 100% !important;
             padding: 0 20px 0 2px !important;
             color: #1E293B !important;
-            font-size: 0.82rem !important;
+            font-size: 0.88rem !important;
             font-weight: 500 !important;
             width: 100% !important;
             cursor: pointer;
@@ -182,7 +181,7 @@
             font-size: 11px;
             color: #94A3B8;
             position: absolute;
-            right: 10px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
         }
@@ -334,7 +333,7 @@
                         <span class="pli-head-cell col-center">Customer</span>
                         <span class="pli-head-cell col-center">Service</span>
                         <span class="pli-head-cell col-center">Sub Category</span>
-                        <span class="pli-head-cell col-center">Payment Type</span>
+                        <span class="pli-head-cell col-center">Payment Method</span>
                         <span class="pli-head-cell col-center">Amount</span>
                         <span class="pli-head-cell col-center">Actions</span>
                     </div>
@@ -418,43 +417,33 @@
                                 @endif
                             </div>
 
-                            {{-- Payment Type --}}
-<div class="pli-col pli-col-payment-type col-center">
-    @if($jobCard->serviceItems->isNotEmpty())
-        <div class="payment-type-list">
-            @foreach($jobCard->serviceItems as $serviceItem)
-                @php
-                    $paymentType = $serviceItem->paymentType?->name;
+                            {{-- Payment Type — one payment method per job card (shared by every service item) --}}
+                            <div class="pli-col pli-col-payment-type col-center">
+                                @php
+                                    $jobCardPaymentType = $jobCard->serviceItems->isNotEmpty()
+                                        ? $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->first()
+                                        : null;
+                                    $paymentTypeKey = strtolower(trim($jobCardPaymentType ?? ''));
 
-                    $paymentTypeKey = strtolower(trim($paymentType ?? ''));
+                                    $paymentIcon = match (true) {
+                                        str_contains($paymentTypeKey, 'upi') => 'bi-phone',
+                                        str_contains($paymentTypeKey, 'cash') => 'bi-cash',
+                                        str_contains($paymentTypeKey, 'card') => 'bi-credit-card',
+                                        str_contains($paymentTypeKey, 'bank') => 'bi-bank',
+                                        str_contains($paymentTypeKey, 'net') => 'bi-globe2',
+                                        default => 'bi-wallet2',
+                                    };
+                                @endphp
 
-                    $paymentIcon = match (true) {
-                        str_contains($paymentTypeKey, 'upi') => 'bi-phone',
-                        str_contains($paymentTypeKey, 'cash') => 'bi-cash',
-                        str_contains($paymentTypeKey, 'card') => 'bi-credit-card',
-                        str_contains($paymentTypeKey, 'bank') => 'bi-bank',
-                        str_contains($paymentTypeKey, 'net') => 'bi-globe2',
-                        default => 'bi-wallet2',
-                    };
-                @endphp
-
-                @if($paymentType)
-                    <span class="payment-type-pill payment-type-{{ str_replace(' ', '-', $paymentTypeKey) }}">
-                        <i class="bi {{ $paymentIcon }}"></i>
-                        <span>{{ $paymentType }}</span>
-                    </span>
-                @else
-                    <span class="payment-type-pill payment-type-default">
-                        <i class="bi bi-wallet2"></i>
-                        <span>—</span>
-                    </span>
-                @endif
-            @endforeach
-        </div>
-    @else
-        <span class="pli-col-text">—</span>
-    @endif
-</div>
+                                @if($jobCardPaymentType)
+                                    <span class="payment-type-pill payment-type-{{ str_replace(' ', '-', $paymentTypeKey) }}">
+                                        <i class="bi {{ $paymentIcon }}"></i>
+                                        <span>{{ $jobCardPaymentType }}</span>
+                                    </span>
+                                @else
+                                    <span class="pli-col-text">—</span>
+                                @endif
+                            </div>
 
                             <div class="pli-col pli-col-amount col-center">
                                 @php
@@ -594,7 +583,7 @@
         data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 960px;">
             <div class="modal-content">
-                <form id="jobCardForm" method="POST" action="{{ route('job-cards.store') }}">
+                <form id="jobCardForm" method="POST" action="{{ route('job-cards.store') }}" class="job-card-builder-form">
                     @csrf
                     <input type="hidden" name="_method" id="jobCardFormMethod" value="POST">
                     <input type="hidden" name="discount_amount" id="jobCardDiscountHidden" value="0">
@@ -616,108 +605,145 @@
                     {{-- Body --}}
                     <div class="modal-body job-card-builder-body">
 
-                        {{-- Top Section: Job Card Name and Customer (2-column) --}}
-                        <div class="job-card-builder-section">
-                            <div class="job-card-builder-top-row">
-                                <div class="form-field">
-                                    <label for="job_card_name" class="form-label">
-                                        JOB CARD NAME <span>*</span>
-                                    </label>
-                                    <div class="field-control-wrap">
-                                        <span class="form-field-icon"><i class="bi bi-fonts"></i></span>
-                                        <input type="text" name="job_card_name" id="job_card_name" class="form-control"
-                                            placeholder="e.g. Bridal Package" required>
+                        {{-- SCROLLABLE AREA: only the name/customer fields and the
+                             service items list scroll. Payment method, total
+                             summary, and the footer stay fixed/visible. --}}
+                        <div class="job-card-builder-scroll-area">
+
+                            {{-- Top Section: Job Card Name and Customer (2-column) --}}
+                            <div class="job-card-builder-section">
+                                <div class="job-card-builder-top-row">
+                                    <div class="form-field">
+                                        <label for="job_card_name" class="form-label">
+                                            JOB CARD NAME <span>*</span>
+                                        </label>
+                                        <div class="field-control-wrap">
+                                            <span class="form-field-icon"><i class="bi bi-fonts"></i></span>
+                                            <input type="text" name="job_card_name" id="job_card_name" class="form-control"
+                                                placeholder="e.g. Bridal Package" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="customer_ids" class="form-label">
+                                            CUSTOMER <span>*</span>
+                                        </label>
+                                        <div class="field-control-wrap">
+                                            <span class="form-field-icon"><i class="bi bi-person"></i></span>
+                                            <select name="customer_ids[]" id="customer_ids" class="no-nice-select" required style="border: 0 !important; outline: none !important; background: transparent !important; box-shadow: none !important; height: 100% !important; padding: 0 24px 0 4px !important; color: #1E293B !important; font-size: 0.88rem !important; font-weight: 500 !important; width: 100% !important; cursor: pointer; -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important;">
+                                                <option value="">Select customer</option>
+                                                @foreach($customers as $customer)
+                                                    <option value="{{ $customer->id }}">
+                                                        {{ $customer->name }}
+                                                        @if($customer->mobile_number)
+                                                            — {{ $customer->mobile_number }}
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <i class="bi bi-chevron-down ms-auto text-muted" style="pointer-events: none; font-size: 12px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-field">
-                                    <label for="customer_ids" class="form-label">
-                                        CUSTOMER <span>*</span>
+                            {{-- Service Items Section --}}
+                            <div class="job-card-builder-section">
+                                <div class="job-card-builder-section-header">
+                                    <div>
+                                        <h6 class="job-card-builder-section-title">SERVICE ITEMS</h6>
+                                    </div>
+                                    <button type="button" class="btn-add-service-pill" id="addServiceItemBtn">
+                                        <i class="bi bi-plus-lg"></i> Add Service
+                                    </button>
+                                </div>
+
+                                <div id="serviceItemsContainer" class="job-card-service-items-card">
+                                    {{-- Service items will be dynamically rendered here --}}
+                                </div>
+                            </div>
+
+                        </div>
+                        {{-- /.job-card-builder-scroll-area --}}
+
+                        {{-- FIXED BOTTOM AREA: Payment Method + Total Summary.
+                             This section always stays visible above the footer,
+                             regardless of how many service items are scrolled
+                             above it. --}}
+                        <div class="job-card-builder-fixed-bottom">
+
+                            {{-- Payment Method — ONE selection that applies to the whole job card
+                                 (every service item shares this single payment method). --}}
+                            <div class="job-card-builder-section">
+                                <div class="form-field job-card-payment-field">
+                                    <label for="payment_type_id" class="form-label">
+                                        PAYMENT METHOD <span>*</span>
                                     </label>
-                                    <div class="field-control-wrap">
-                                        <span class="form-field-icon"><i class="bi bi-person"></i></span>
-                                        <select name="customer_ids[]" id="customer_ids" class="no-nice-select" required style="border: 0 !important; outline: none !important; background: transparent !important; box-shadow: none !important; height: 100% !important; padding: 0 24px 0 4px !important; color: #1E293B !important; font-size: 0.88rem !important; font-weight: 500 !important; width: 100% !important; cursor: pointer; -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important;">
-                                            <option value="">Select customer</option>
-                                            @foreach($customers as $customer)
-                                                <option value="{{ $customer->id }}">
-                                                    {{ $customer->name }}
-                                                    @if($customer->mobile_number)
-                                                        — {{ $customer->mobile_number }}
-                                                    @endif
-                                                </option>
+                                    <div class="job-card-payment-select-wrap">
+                                        <span class="form-field-icon"><i class="bi bi-wallet2"></i></span>
+                                        <select name="payment_type_id" id="payment_type_id" class="no-nice-select" required>
+                                            <option value="">Select payment method</option>
+                                            @foreach($paymentTypes as $paymentType)
+                                                <option value="{{ $paymentType->id }}">{{ $paymentType->name }}</option>
                                             @endforeach
                                         </select>
-                                        <i class="bi bi-chevron-down ms-auto text-muted" style="pointer-events: none; font-size: 12px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                        <i class="bi bi-chevron-down job-card-payment-select-arrow"></i>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Service Items Section --}}
-                        <div class="job-card-builder-section">
-                            <div class="job-card-builder-section-header">
-                                <div>
-                                    <h6 class="job-card-builder-section-title">SERVICE ITEMS</h6>
-                                </div>
-                                <button type="button" class="btn-add-service-pill" id="addServiceItemBtn">
-                                    <i class="bi bi-plus-lg"></i> Add Service
-                                </button>
-                            </div>
-
-                            <div id="serviceItemsContainer" class="job-card-service-items-card">
-                                {{-- Service items will be dynamically rendered here --}}
-                            </div>
-                        </div>
-
-                        {{-- Total Amount Summary Card --}}
-                        <div class="job-card-summary-card">
-                            {{-- LEFT: calc icon + total amount + services badge --}}
-                            <div class="job-card-summary-left">
-                                <div class="job-card-summary-calc-icon">
-                                    <i class="bi bi-calculator"></i>
-                                </div>
-                                <div class="job-card-summary-total-info">
-                                    <span class="job-card-summary-total-label">TOTAL AMOUNT</span>
-                                    <span class="job-card-summary-total-val" id="jobCardTotalAmount">₹ 0</span>
-                                </div>
-                                <div class="job-card-services-badge">
-                                    <i class="bi bi-people"></i>
-                                    <span id="jobCardServiceCount">0</span> Services
-                                </div>
-                            </div>
-
-                            {{-- MIDDLE: Subtotal / Discount / Total breakdown --}}
-                            <div class="job-card-summary-middle">
-                                <div class="job-card-summary-row">
-                                    <span class="job-card-summary-row-label">Subtotal</span>
-                                    <span class="job-card-summary-row-val" id="jobCardSubtotal">₹ 0.00</span>
+                            {{-- Total Amount Summary Card --}}
+                            <div class="job-card-summary-card">
+                                {{-- LEFT: calc icon + total amount + services badge --}}
+                                <div class="job-card-summary-left">
+                                    <div class="job-card-summary-calc-icon">
+                                        <i class="bi bi-calculator"></i>
+                                    </div>
+                                    <div class="job-card-summary-total-info">
+                                        <span class="job-card-summary-total-label">TOTAL AMOUNT</span>
+                                        <span class="job-card-summary-total-val" id="jobCardTotalAmount">₹ 0</span>
+                                    </div>
+                                    <div class="job-card-services-badge">
+                                        <i class="bi bi-people"></i>
+                                        <span id="jobCardServiceCount">0</span> Services
+                                    </div>
                                 </div>
 
-                                {{-- Discount row: click the amount to edit it inline --}}
-                                <div class="job-card-summary-row job-card-discount-row">
-                                    <span class="job-card-summary-row-label">Discount</span>
+                                {{-- MIDDLE: Subtotal / Discount / Total breakdown --}}
+                                <div class="job-card-summary-middle">
+                                    <div class="job-card-summary-row">
+                                        <span class="job-card-summary-row-label">Subtotal</span>
+                                        <span class="job-card-summary-row-val" id="jobCardSubtotal">₹ 0.00</span>
+                                    </div>
 
-                                    <button type="button" class="job-card-discount-display" id="jobCardDiscountDisplay" title="Click to edit discount">
-                                        <span class="job-card-summary-row-val" style="color:#EF4444;" id="jobCardDiscount">- ₹ 0.00</span>
-                                    </button>
+                                    {{-- Discount row: click the amount to edit it inline --}}
+                                    <div class="job-card-summary-row job-card-discount-row">
+                                        <span class="job-card-summary-row-label">Discount</span>
 
-                                    <div class="job-card-discount-edit-wrap" id="jobCardDiscountEditWrap">
-                                        <span class="job-card-discount-input-prefix">₹</span>
-                                        <input type="number" id="jobCardDiscountInput" class="job-card-discount-input"
-                                            min="0" step="0.01" placeholder="0.00" inputmode="decimal">
-                                        <button type="button" class="job-card-discount-confirm-btn" id="jobCardDiscountConfirmBtn" title="Save discount">
-                                            <i class="bi bi-check-lg"></i>
+                                        <button type="button" class="job-card-discount-display" id="jobCardDiscountDisplay" title="Click to edit discount">
+                                            <span class="job-card-summary-row-val" style="color:#EF4444;" id="jobCardDiscount">- ₹ 0.00</span>
                                         </button>
+
+                                        <div class="job-card-discount-edit-wrap" id="jobCardDiscountEditWrap">
+                                            <span class="job-card-discount-input-prefix">₹</span>
+                                            <input type="number" id="jobCardDiscountInput" class="job-card-discount-input"
+                                                min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+                                            <button type="button" class="job-card-discount-confirm-btn" id="jobCardDiscountConfirmBtn" title="Save discount">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="job-card-summary-divider"></div>
+                                    <div class="job-card-summary-row job-card-summary-row-final">
+                                        <span class="job-card-summary-row-label">Total</span>
+                                        <span class="job-card-summary-row-val" id="jobCardFinalTotal">₹ 0.00</span>
                                     </div>
                                 </div>
-
-                                <div class="job-card-summary-divider"></div>
-                                <div class="job-card-summary-row job-card-summary-row-final">
-                                    <span class="job-card-summary-row-label">Total</span>
-                                    <span class="job-card-summary-row-val" id="jobCardFinalTotal">₹ 0.00</span>
-                                </div>
                             </div>
+
                         </div>
+                        {{-- /.job-card-builder-fixed-bottom --}}
 
                     </div>
 
@@ -749,56 +775,67 @@
                     <div class="d-flex align-items-center gap-3">
                         <div class="modal-icon-box job-card-details-title-icon"><i class="bi bi-card-checklist"></i></div>
                         <div class="modal-header-content">
-                            <h5 class="modal-title">Job Card Details</h5>
-                            <p class="modal-subtitle" id="jobCardDetailsNumber">—</p>
+                            <h5 class="modal-title">Job Card</h5>
+                            <p class="modal-subtitle">Job Card details</p>
                         </div>
                     </div>
                     <div class="job-card-details-header-actions">
-                        <button type="button" class="job-card-detail-tool" title="Export PDF" aria-label="Export PDF"><i
-                                class="bi bi-file-earmark-pdf"></i></button>
-                        <button type="button" class="job-card-detail-tool" title="Export Excel" aria-label="Export Excel"><i
-                                class="bi bi-file-earmark-spreadsheet"></i></button>
+                        <button type="button" class="job-card-detail-tool" title="Download" aria-label="Download"><i
+                                class="bi bi-download"></i></button>
+                        <button type="button" class="job-card-detail-tool" title="Print" aria-label="Print"><i
+                                class="bi bi-printer"></i></button>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
                 <div class="modal-body">
-                    <div class="job-card-details-list">
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-person"></i></span><span
-                                class="job-card-details-row-label">Name</span><strong id="jobCardDetailsName">—</strong>
+                    <div class="jcd-details-grid" aria-label="Job card summary">
+                        <div class="jcd-detail-item">
+                            <div class=""></div>
+                            <div class="jcd-detail-text">
+                                <span class="jcd-detail-label">Job Card Name</span>
+                                <strong class="jcd-detail-value" id="jobCardDetailsName">—</strong>
+                            </div>
                         </div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-people"></i></span><span
-                                class="job-card-details-row-label">Customer(s)</span><strong id="jobCardDetailsCustomer">—</strong>
+                        <div class="jcd-detail-item">
+                            <div class=""></div>
+                            <div class="jcd-detail-text">
+                                <span class="jcd-detail-label">Date</span>
+                                <strong class="jcd-detail-value" id="jobCardDetailsCreated">—</strong>
+                            </div>
                         </div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-scissors"></i></span><span
-                                class="job-card-details-row-label">Services</span><strong
-                                id="jobCardDetailsServices">—</strong></div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-person-badge"></i></span><span class="job-card-details-row-label">Staff Assigned</span><strong id="jobCardDetailsStaff">—</strong></div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-currency-rupee"></i></span><span
-                                class="job-card-details-row-label">Total Amount</span><strong id="jobCardDetailsTotalAmount">—</strong></div>
-                        <div class="job-card-details-row"><span class="job-card-details-row-icon"><i
-                                    class="bi bi-calendar3"></i></span><span class="job-card-details-row-label">Created
-                                On</span><strong id="jobCardDetailsCreated">—</strong></div>
+                        <div class="jcd-detail-item">
+                            <div class=""></div>
+                            <div class="jcd-detail-text">
+                                <span class="jcd-detail-label">Customer(s)</span>
+                                <strong class="jcd-detail-value" id="jobCardDetailsCustomer">—</strong>
+                            </div>
+                        </div>
+                        <div class="jcd-detail-item">
+                            <div class=""></div>
+                            <div class="jcd-detail-text">
+                                <span class="jcd-detail-label">Payment Method</span>
+                                <strong class="jcd-detail-value" id="jobCardDetailsPaymentType">—</strong>
+                            </div>
+                        </div>
+                        
                     </div>
                     <div class="job-card-details-invoice">
                         <div class="job-card-details-invoice-head">
-                          <span>#</span><span>Service</span><span>Staff</span><span>Payment</span><span>Amount (₹)</span></div>
+                          <span>#</span><span>Service</span><span>Staff</span><span>Amount (₹)</span></div>
                         <div id="jobCardDetailsInvoiceItems">
                             {{-- Service items will be populated dynamically --}}
                         </div>
-                        <div class="job-card-details-totals-block">
-                            <div class="job-card-details-totals job-card-details-totals--sub">
-                                <span>Subtotal</span><strong id="jobCardDetailsSubtotal">₹0</strong>
-                            </div>
-                            <div class="job-card-details-totals job-card-details-totals--discount" id="jobCardDetailsDiscountRow">
-                                <span>Discount</span><strong id="jobCardDetailsDiscountVal">-₹0</strong>
-                            </div>
-                            <div class="job-card-details-totals"><span>Total Amount</span><strong class="job-card-details-total"
-                                    id="jobCardDetailsTotal">₹0</strong></div>
+                    </div>
+                    <div class="jcd-totals-card">
+                        <div class="jcd-totals-row">
+                            <span>Subtotal</span><strong id="jobCardDetailsSubtotal">₹0</strong>
+                        </div>
+                        <div class="jcd-totals-row jcd-totals-row--discount" id="jobCardDetailsDiscountRow">
+                            <span>Discount</span><strong id="jobCardDetailsDiscountVal">-₹0</strong>
+                        </div>
+                        <div class="jcd-totals-divider"></div>
+                        <div class="jcd-totals-row jcd-totals-row--final">
+                            <span class="jcd-totals-label">Total Amount</span><strong id="jobCardDetailsTotal">₹0</strong>
                         </div>
                     </div>
                 </div>
@@ -874,6 +911,10 @@
 
                 document.getElementById('customer_ids').value = '';
 
+                // Reset the single job-card-level payment method
+                const paymentSelect = document.getElementById('payment_type_id');
+                if (paymentSelect) paymentSelect.value = '';
+
                 // Reset discount
                 setDiscountValue(0);
                 closeDiscountEditor();
@@ -900,13 +941,21 @@
 
                 document.getElementById('customer_ids').value = customerIds[0] || '';
 
+                // Populate the single job-card-level payment method from the
+                // first service item's payment type (all items share one now).
+                const existingServiceItems = jobCard.service_items || [];
+                const existingPaymentTypeId = (existingServiceItems.length && existingServiceItems[0].payment_type_id)
+                    ? String(existingServiceItems[0].payment_type_id)
+                    : '';
+                const paymentSelect = document.getElementById('payment_type_id');
+                if (paymentSelect) paymentSelect.value = existingPaymentTypeId;
+
                 // Populate discount
                 setDiscountValue(parseFloat(jobCard.discount_amount) || 0);
                 closeDiscountEditor();
 
                 // Populate service items
-                const serviceItems = jobCard.service_items || [];
-                initializeServiceItemBuilder(serviceItems);
+                initializeServiceItemBuilder(existingServiceItems);
             }
 
             function initializeServiceItemBuilder(serviceItems) {
@@ -1010,37 +1059,6 @@
                                         placeholder="0.00"
                                         required
                                     >
-                                </div>
-                            </div>
-
-                            {{-- Payment Type --}}
-                            <div class="job-card-item-field-col job-card-item-field-col--payment">
-                                <label class="job-card-item-label">PAYMENT</label>
-
-                                <div class="job-card-input-box job-card-payment-box">
-
-                                   
-
-                                    <select
-                                        name="service_items[${itemIndex}][payment_type_id]"
-                                        class="service-payment-select"
-                                        data-item-id="${itemId}"
-                                        required
-                                    >
-                                        <option value="">Payment</option>
-
-                                        @foreach($paymentTypes as $paymentType)
-                                            <option
-                                                value="{{ $paymentType->id }}"
-                                                data-payment-name="{{ strtolower($paymentType->name) }}"
-                                            >
-                                                {{ $paymentType->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    <i class="bi bi-chevron-down job-card-select-arrow"></i>
-
                                 </div>
                             </div>
 
@@ -1429,11 +1447,16 @@
                     return c.mobile_number ? `${c.name} (${c.mobile_number})` : c.name;
                 }).join(', ') || '—';
 
-                // Extract unique services and staff from service items
+                // Extract staff assigned across service items.
                 const serviceItems = jobCard.service_items || [];
-                const uniqueServices = [...new Set(serviceItems.map(item => item.service?.service_name).filter(Boolean))].join(', ') || '—';
                 const allStaff = serviceItems.flatMap(item => item.staff?.map(s => s.name) || []);
                 const uniqueStaff = [...new Set(allStaff)].join(', ') || '—';
+
+                // Single job-card-level payment method (shared across every service item)
+                const firstItemWithPayment = serviceItems.find(item => item.payment_type?.name || item.paymentType?.name);
+                const jobCardPaymentTypeName = firstItemWithPayment
+                    ? (firstItemWithPayment.payment_type?.name || firstItemWithPayment.paymentType?.name)
+                    : '—';
 
                 // Calculate totals
                 const subtotal = serviceItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
@@ -1444,7 +1467,7 @@
                 const formattedDiscount = discount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const formattedTotal = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-                // Generate invoice items
+                // Generate invoice items (Payment column removed — it's shown once above as a single field)
                 let invoiceItemsHTML = '';
                 serviceItems.forEach((item, index) => {
                     const serviceName = item.service?.service_name || '—';
@@ -1452,53 +1475,26 @@
                     const amount = parseFloat(item.amount) || 0;
                     const formattedAmount = amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-                    // Build payment type badge (same style/icon logic as the list view)
-                    const paymentTypeName = item.payment_type?.name || item.paymentType?.name || '';
-                    const paymentKey = paymentTypeName.toLowerCase().trim();
-                    const paymentIcon = paymentKey.includes('upi') ? 'bi-phone'
-                        : paymentKey.includes('cash') ? 'bi-cash'
-                        : paymentKey.includes('card') ? 'bi-credit-card'
-                        : paymentKey.includes('bank') ? 'bi-bank'
-                        : paymentKey.includes('net') ? 'bi-globe2'
-                        : 'bi-wallet2';
-                    const paymentSlug = paymentKey ? paymentKey.replace(/\s+/g, '-') : 'default';
-
-                    const paymentBadgeHTML = paymentTypeName
-                        ? `<span class="payment-type-pill payment-type-${paymentSlug}"><i class="bi ${paymentIcon}"></i><span>${paymentTypeName}</span></span>`
-                        : `<span class="payment-type-pill payment-type-default"><i class="bi bi-wallet2"></i><span>—</span></span>`;
-
                     invoiceItemsHTML += `
                         <div class="job-card-details-invoice-line">
-                            <span>${index + 1}</span>
-                            <span>
-                                <strong>${serviceName}</strong><br>
-                                <small>${item.subcategory || '—'}</small>
-                            </span>
+                            <span><span class="jcd-invoice-num-badge">${index + 1}</span></span>
+                            <span><strong>${serviceName}</strong></span>
                             <span>${staffNames}</span>
-                            <span>${paymentBadgeHTML}</span>
                             <span>₹${formattedAmount}</span>
                         </div>
                     `;
                 });
 
-                document.getElementById('jobCardDetailsNumber').textContent = `#JC-${String(jobCard.id).padStart(5, '0')}`;
                 document.getElementById('jobCardDetailsName').textContent = jobCard.job_card_name || '—';
                 document.getElementById('jobCardDetailsCreated').textContent = jobCard.created_at
-                    ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    ? new Date(jobCard.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                     : '—';
                 document.getElementById('jobCardDetailsCustomer').textContent = customerText;
-                document.getElementById('jobCardDetailsServices').textContent = uniqueServices;
-                document.getElementById('jobCardDetailsStaff').textContent = uniqueStaff;
-                document.getElementById('jobCardDetailsTotalAmount').textContent = `₹${formattedTotal}`;
+                document.getElementById('jobCardDetailsPaymentType').textContent = jobCardPaymentTypeName;
                 document.getElementById('jobCardDetailsInvoiceItems').innerHTML = invoiceItemsHTML;
                 document.getElementById('jobCardDetailsSubtotal').textContent = `₹${formattedSubtotal}`;
                 document.getElementById('jobCardDetailsDiscountVal').textContent = `-₹${formattedDiscount}`;
                 document.getElementById('jobCardDetailsTotal').textContent = `₹${formattedTotal}`;
-
-                const discountRow = document.getElementById('jobCardDetailsDiscountRow');
-                if (discountRow) {
-                    discountRow.style.display = discount > 0 ? '' : 'none';
-                }
 
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('jobCardDetailsModal')).show();
             }
@@ -1589,8 +1585,16 @@
                     commitDiscountEditor();
                 }
 
-                // Validate all service items
                 let isValid = true;
+
+                // Validate the single job-card-level payment method
+                const paymentSelect = document.getElementById('payment_type_id');
+                if (!paymentSelect || !paymentSelect.value) {
+                    if (window.showToast) window.showToast('Please select a payment method', 'danger');
+                    isValid = false;
+                }
+
+                // Validate all service items
                 serviceItems.forEach((item, index) => {
                     const serviceSelect = item.querySelector('.service-select');
                     const subcategorySelect = item.querySelector('.subcategory-select');

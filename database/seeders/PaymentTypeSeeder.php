@@ -9,7 +9,7 @@ class PaymentTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['Cash', 'UPI', 'Card'] as $name) {
+        foreach (['Cash', 'UPI', 'Card', 'EC'] as $name) {
             PaymentType::updateOrCreate(['name' => $name], ['is_active' => true]);
         }
     }

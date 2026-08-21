@@ -76,7 +76,8 @@ class JobCardController extends Controller
                 $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
                 $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
                 $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
-                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->join(', ') ?: '—',
+                // Payment type is now a single value shared by every service item on the job card
+                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->unique()->join(', ') ?: '—',
                 '₹' . number_format($jobCard->getSubtotalAmount(), 2),
                 '₹' . number_format($jobCard->getDiscountAmount(), 2),
                 '₹' . number_format($jobCard->getFinalAmount(), 2),
@@ -102,7 +103,8 @@ class JobCardController extends Controller
                 $jobCard->serviceItems->map(fn($item) => $item->subcategory)->join(', ') ?: '—',
                 $jobCard->serviceItems->flatMap(fn($item) => $item->staff->pluck('name'))->unique()->join(', ') ?: '—',
                 $jobCard->serviceItems->map(fn($item) => '₹' . number_format($item->amount, 2))->join(', ') ?: '—',
-                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->join(', ') ?: '—',
+                // Payment type is now a single value shared by every service item on the job card
+                $jobCard->serviceItems->map(fn($item) => $item->paymentType?->name)->filter()->unique()->join(', ') ?: '—',
                 '₹' . number_format($jobCard->getSubtotalAmount(), 2),
                 '₹' . number_format($jobCard->getDiscountAmount(), 2),
                 '₹' . number_format($jobCard->getFinalAmount(), 2),
@@ -122,6 +124,11 @@ class JobCardController extends Controller
 
     /**
      * Store job card with service items.
+     *
+     * NOTE: Payment method is now a single, job-card-level selection
+     * (`payment_type_id`) made once in the UI — it is applied to every
+     * service item created for this job card, rather than being chosen
+     * per service item.
      */
     public function store(Request $request)
     {
@@ -166,7 +173,8 @@ class JobCardController extends Controller
                 'numeric',
                 'min:0',
             ],
-            'service_items.*.payment_type_id' => [
+            // Single payment method for the whole job card
+            'payment_type_id' => [
                 'required',
                 'exists:payment_types,id',
             ],
@@ -202,7 +210,8 @@ class JobCardController extends Controller
             // Sync customers
             $jobCard->customers()->sync($validated['customer_ids']);
 
-            // Create service items and assign staff
+            // Create service items and assign staff — every item gets the
+            // single job-card-level payment type selected in the UI.
             foreach ($validated['service_items'] as $item) {
                 $service = Service::findOrFail($item['service_id']);
 
@@ -211,13 +220,12 @@ class JobCardController extends Controller
                     throw new \Exception('Selected subcategory does not belong to the selected service.');
                 }
 
-                // Create service item (each item carries its own payment type)
                 $serviceItem = JobCardService::create([
                     'job_card_id' => $jobCard->id,
                     'service_id' => $item['service_id'],
                     'subcategory' => $item['subcategory'],
                     'amount' => $item['amount'],
-                    'payment_type_id' => $item['payment_type_id'],
+                    'payment_type_id' => $validated['payment_type_id'],
                 ]);
 
                 // Assign staff to service item
@@ -232,6 +240,9 @@ class JobCardController extends Controller
 
     /**
      * Update job card with service items.
+     *
+     * NOTE: Payment method is now a single, job-card-level selection
+     * (`payment_type_id`) — it is applied to every service item.
      */
     public function update(Request $request, JobCard $jobCard)
     {
@@ -276,7 +287,8 @@ class JobCardController extends Controller
                 'numeric',
                 'min:0',
             ],
-            'service_items.*.payment_type_id' => [
+            // Single payment method for the whole job card
+            'payment_type_id' => [
                 'required',
                 'exists:payment_types,id',
             ],
@@ -315,7 +327,8 @@ class JobCardController extends Controller
             // Delete existing service items (cascade will delete staff associations)
             $jobCard->serviceItems()->delete();
 
-            // Create new service items and assign staff, preserving each item's payment type
+            // Create new service items and assign staff — every item gets the
+            // single job-card-level payment type selected in the UI.
             foreach ($validated['service_items'] as $item) {
                 $service = Service::findOrFail($item['service_id']);
 
@@ -324,13 +337,12 @@ class JobCardController extends Controller
                     throw new \Exception('Selected subcategory does not belong to the selected service.');
                 }
 
-                // Create service item
                 $serviceItem = JobCardService::create([
                     'job_card_id' => $jobCard->id,
                     'service_id' => $item['service_id'],
                     'subcategory' => $item['subcategory'],
                     'amount' => $item['amount'],
-                    'payment_type_id' => $item['payment_type_id'],
+                    'payment_type_id' => $validated['payment_type_id'],
                 ]);
 
                 // Assign staff to service item

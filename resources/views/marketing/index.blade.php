@@ -7,37 +7,48 @@
 <style>
 
     /* ==========================================================
-       MARKETING TABLE — 7 COLUMNS (# DATE LOCATION TYPE COUNT STAFF ACTION)
+       MARKETING TABLE — 7 COLUMNS (# TYPE DATE LOCATION COUNT STAFF ACTION)
        ========================================================== */
 
     .premium-list--marketing {
     --marketing-grid:
-        42px
-        minmax(170px, 1.2fr)
-        110px
+        48px
+        minmax(220px, 1.55fr)
+        minmax(145px, .9fr)
         minmax(150px, 1fr)
-        75px
+        105px
         minmax(150px, 1fr)
-        125px;
-}
+        90px;
+    }
 
     .premium-list--marketing .premium-list-head,
     .premium-list--marketing .premium-list-item {
         display: grid !important;
         grid-template-columns: var(--marketing-grid) !important;
         align-items: center !important;
-        column-gap: 10px !important;
+        column-gap: 20px !important;
         width: 100%;
         min-width: 900px;
     }
 
     .premium-list--marketing .premium-list-head {
-        min-height: 48px;
+        min-height: 44px;
+        padding: 0 20px;
+        color: #536482;
+        border: 0;
+        border-bottom: 1px solid #edf1f6;
+        border-radius: 0;
+        background: transparent;
     }
 
     .premium-list--marketing .premium-list-item {
-        min-height: 66px;
-        padding: 10px 12px;
+        min-height: 54px;
+        margin-top: 6px;
+        padding: 7px 20px;
+        border: 1px solid #e8edf4;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: none;
     }
 
     .premium-list--marketing .premium-list-item > * {
@@ -48,42 +59,31 @@
     .marketing-date {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 0;
         white-space: nowrap;
-        font-size: .75rem;
+        font-size: .88rem;
         font-weight: 600;
-        color: #475569;
+        color: #253451;
     }
 
-    .marketing-date i { color: #6366F1; }
+    .marketing-date i { display: none; }
 
     /* LOCATION */
     .marketing-location {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 0;
         min-width: 0;
     }
 
-    .marketing-location-icon {
-        width: 30px;
-        height: 30px;
-        flex: 0 0 30px;
-        border-radius: 9px;
-        background: #EFF6FF;
-        color: #2563EB;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-    }
+    .marketing-location-icon { display: none; }
 
     .marketing-location-name {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: .8rem;
+        font-size: .88rem;
         font-weight: 600;
         color: #334155;
     }
@@ -92,17 +92,17 @@
     .marketing-type-plain {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         min-width: 0;
     }
 
     .marketing-type-plain i {
-        font-size: 1.05rem;
+        font-size: 1.25rem;
         flex-shrink: 0;
     }
 
     .marketing-type-label {
-        font-size: .85rem;
+        font-size: .92rem;
         font-weight: 800;
         color: #1E293B;
         overflow: hidden;
@@ -130,7 +130,7 @@
         align-items: center;
         gap: 1px;
         color: #F59E0B;
-        font-size: .6rem;
+        font-size: .7rem;
         line-height: 1;
     }
 
@@ -145,30 +145,18 @@
     .marketing-staff {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0;
         min-width: 0;
     }
 
-    .marketing-staff-avatar {
-        width: 32px;
-        height: 32px;
-        flex: 0 0 32px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #6366F1, #8B5CF6);
-        color: white;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .7rem;
-        font-weight: 800;
-    }
+    .marketing-staff-avatar { display: none; }
 
     .marketing-staff-name {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: .78rem;
+        font-size: .88rem;
         font-weight: 600;
         color: #334155;
     }
@@ -200,6 +188,30 @@
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+    }
+
+    .premium-list--marketing .premium-list-item > :nth-child(2) { grid-column: 3; grid-row: 1; }
+    .premium-list--marketing .premium-list-item > :nth-child(3) { grid-column: 4; grid-row: 1; }
+    .premium-list--marketing .premium-list-item > :nth-child(4) { grid-column: 2; grid-row: 1; }
+    .premium-list--marketing .premium-list-item > :nth-child(5) { grid-column: 5; grid-row: 1; }
+    .premium-list--marketing .premium-list-item > :nth-child(6) { grid-column: 6; grid-row: 1; }
+    .premium-list--marketing .premium-list-item > :nth-child(7) { grid-column: 7; grid-row: 1; }
+
+    .premium-list--marketing .pli-action-dots {
+        width: 40px;
+        height: 40px;
+        color: #415278;
+        border: 1px solid #e2e8f2;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 2px 7px rgba(30, 41, 59, .03);
+    }
+
+    .premium-list--marketing .pli-action-dots:hover,
+    .premium-list--marketing .pli-action-dots.is-open {
+        color: #5b3df5;
+        border-color: #d9d0ff;
+        background: #f8f6ff;
     }
 
     /* MODAL */
@@ -492,9 +504,9 @@
 
                 <div class="premium-list-head">
                     <span class="pli-head-cell col-center">#</span>
+                    <span class="pli-head-cell col-left">MARKETING TYPE</span>
                     <span class="pli-head-cell col-left">DATE</span>
                     <span class="pli-head-cell col-left">LOCATION</span>
-                    <span class="pli-head-cell col-left">MARKETING TYPE</span>
                     <span class="pli-head-cell col-center">COUNT</span>
                     <span class="pli-head-cell col-left">STAFF</span>
                     <span class="pli-head-cell col-center">ACTION</span>
@@ -672,11 +684,9 @@
 
             </div>
 
-            @if($marketingActivities->hasPages())
-                <div class="content-card-footer">
-                    @include('partials.pagination', ['paginator' => $marketingActivities])
-                </div>
-            @endif
+            <div class="content-card-footer table-pagination">
+                @include('partials.pagination-bar', ['paginator' => $marketingActivities])
+            </div>
 
         @else
 

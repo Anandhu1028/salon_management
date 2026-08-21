@@ -13,8 +13,8 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $this->date($request->input('start_date'), now()->startOfWeek());
-        $endDate = $this->date($request->input('end_date'), now()->endOfWeek());
+        $startDate = $this->date($request->input('start_date'), now()->startOfMonth());
+        $endDate = $this->date($request->input('end_date'), now()->endOfDay());
 
         if ($endDate->lt($startDate)) {
             [$startDate, $endDate] = [$endDate, $startDate];
@@ -35,7 +35,6 @@ class ReportController extends Controller
                 'staff',
                 'customer',
                 'customers',
-                'paymentType',
             ])
             ->get();
 
@@ -82,8 +81,7 @@ class ReportController extends Controller
         ->values();
 
         $paymentBreakdown = $salesCards->groupBy(function (JobCard $card) {
-            return $card->paymentType?->name 
-                ?? $card->serviceItems->first()?->paymentType?->name 
+            return $card->serviceItems->map(fn ($it) => $it->paymentType?->name)->filter()->first()
                 ?? 'Not recorded';
         })
             ->map(fn ($cards, $name) => ['name' => $name, 'amount' => $cards->sum($cardTotal), 'count' => $cards->count()])
@@ -100,27 +98,28 @@ class ReportController extends Controller
         $page = max(1, (int) $request->input('page', 1));
 
         $paymentMethods = $salesCards->flatMap(function (JobCard $card) {
-            $types = collect([$card->paymentType?->name]);
-            foreach ($card->serviceItems as $item) {
-                if ($item->paymentType?->name) {
-                    $types->push($item->paymentType->name);
-                }
-            }
-            return $types;
-        })->filter()->unique()->sort()->values();
+            return $card->serviceItems->map(fn ($it) => $it->paymentType?->name)->filter();
+        })->unique()->sort()->values();
 
         $filteredSalesRows = $salesCards->filter(function (JobCard $card) use ($salesSearch, $paymentFilter) {
             if ($salesSearch !== '') {
+                $cardStaffNames = $card->serviceItems->flatMap->staff->pluck('name')->unique()->join(' ');
                 $match = str_contains(strtolower($card->job_card_name), strtolower($salesSearch))
-                    || str_contains(strtolower($card->customer?->name ?? ''), strtolower($salesSearch));
+                    || str_contains(strtolower($card->customer?->name ?? ''), strtolower($salesSearch))
+                    || str_contains(strtolower($card->customer?->mobile_number ?? ''), strtolower($salesSearch))
+                    || str_contains(strtolower($card->primaryStaff?->name ?? ''), strtolower($salesSearch))
+                    || str_contains(strtolower($cardStaffNames), strtolower($salesSearch));
 
                 if (! $match) {
                     return false;
                 }
             }
 
-            if ($paymentFilter !== '' && ($card->paymentType?->name ?? 'Not recorded') !== $paymentFilter) {
-                return false;
+            if ($paymentFilter !== '') {
+                $cardPayments = $card->serviceItems->map(fn ($it) => $it->paymentType?->name)->filter()->unique();
+                if (! $cardPayments->contains($paymentFilter)) {
+                    return false;
+                }
             }
 
             return true;
@@ -157,8 +156,8 @@ class ReportController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $startDate = $this->date($request->input('start_date'), now()->startOfWeek());
-        $endDate = $this->date($request->input('end_date'), now()->endOfWeek());
+        $startDate = $this->date($request->input('start_date'), now()->startOfMonth());
+        $endDate = $this->date($request->input('end_date'), now()->endOfDay());
 
         if ($endDate->lt($startDate)) {
             [$startDate, $endDate] = [$endDate, $startDate];
@@ -180,7 +179,6 @@ class ReportController extends Controller
                 'primaryStaff',
                 'staff',
                 'customer',
-                'paymentType',
             ])
             ->get();
 
@@ -195,16 +193,13 @@ class ReportController extends Controller
                 $cardStaffNames = $card->serviceItems->flatMap->staff->pluck('name')->unique()->join(' ');
                 $match = str_contains(strtolower($card->job_card_name), strtolower($salesSearch))
                     || str_contains(strtolower($card->customer?->name ?? ''), strtolower($salesSearch))
-                    || str_contains(strtolower($card->customer?->phone ?? ''), strtolower($salesSearch))
+                    || str_contains(strtolower($card->customer?->mobile_number ?? ''), strtolower($salesSearch))
                     || str_contains(strtolower($card->primaryStaff?->name ?? ''), strtolower($salesSearch))
                     || str_contains(strtolower($cardStaffNames), strtolower($salesSearch));
                 if (! $match) return false;
             }
             if ($paymentFilter !== '') {
-                $cardPayments = collect([$card->paymentType?->name])
-                    ->concat($card->serviceItems->map(fn($it) => $it->paymentType?->name))
-                    ->filter()
-                    ->unique();
+                $cardPayments = $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->unique();
                 if (! $cardPayments->contains($paymentFilter)) return false;
             }
             if ($staffFilter !== '') {

@@ -33,14 +33,25 @@
 
 .premium-list--complaints .premium-list-head {
     grid-template-columns: var(--complaint-grid) !important;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 0;
+    border-bottom: 1px solid #edf1f6;
+    border-radius: 0;
+    background: transparent;
 }
 
 .premium-list--complaints .premium-list-item {
     grid-template-columns: var(--complaint-grid) !important;
     grid-auto-flow: column !important;
     align-items: center !important;
-    min-height: 64px;
-    padding: 10px 12px;
+    min-height: 54px;
+    margin-top: 6px;
+    padding: 7px 20px;
+    border: 1px solid #e8edf4;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: none;
 }
 
 .premium-list--complaints .premium-list-item > * {
@@ -178,6 +189,22 @@
     justify-content: center !important;
 }
 
+.premium-list--complaints .pli-action-dots {
+    width: 42px;
+    height: 42px;
+    color: #415278;
+    border: 1px solid #e2e8f2;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.premium-list--complaints .pli-action-dots:hover,
+.premium-list--complaints .pli-action-dots.is-open {
+    color: #5b3df5;
+    border-color: #d9d0ff;
+    background: #f8f6ff;
+}
+
 /* Responsive — scroll, never wrap */
 .premium-list--complaints {
     overflow-x: auto;
@@ -279,7 +306,7 @@
 
 /* Wider Add/Edit Complaint modal */
 #complaintModal .modal-dialog {
-    max-width: 760px;
+    max-width: 660px;
 }
 
 @media (max-width: 800px) {
@@ -341,8 +368,8 @@
     font-size: 0.7rem;
     font-weight: 700;
     color: #64748B;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: 0;
     margin-bottom: 7px;
 }
 
@@ -416,7 +443,7 @@
 
 .cmp-field textarea.form-control {
     height: auto;
-    min-height: 110px;
+    min-height: 116px;
     padding: 12px 14px;
     line-height: 1.55;
     resize: vertical;
@@ -435,7 +462,8 @@
 .cmp-dropzone {
     border: 2px dashed #DDD6FE;
     border-radius: 14px;
-    padding: 22px 16px;
+    min-height: 130px;
+    padding: 18px 16px;
     text-align: center;
     background: #FAFAFF;
     cursor: pointer;
@@ -468,6 +496,20 @@
 .cmp-dropzone p { margin: 0; }
 .cmp-dropzone .cmp-dz-title { color: #4B5563; font-size: 0.84rem; font-weight: 600; }
 .cmp-dropzone .cmp-dz-sub { color: #9CA3AF; font-size: 0.72rem; margin-top: 3px; }
+
+.cmp-additional-help {
+    margin: -11px 0 13px;
+    color: #8491a7;
+    font-size: .72rem;
+}
+
+#complaintModal .att-modal-header { padding: 20px 24px; border-bottom: 1px solid #edf1f7; }
+#complaintModal .modal-body { padding: 24px !important; }
+#complaintModal .modal-footer { padding: 16px 24px !important; }
+
+@media (max-width: 600px) {
+    .cmp-grid-3 { grid-template-columns: 1fr; }
+}
 
 /* Note box */
 .cmp-note-box {
@@ -744,13 +786,17 @@
         </div>
         <div class="content-card-header-actions">
             {{-- Search --}}
-            <form method="GET" action="{{ route('complaints.index') }}" class="d-flex align-items-center gap-2">
+            <form method="GET" action="{{ route('complaints.index') }}">
                 <input type="hidden" name="type_filter" value="{{ $typeFilter }}">
                 <input type="hidden" name="status_filter" value="">
-                <div class="search-input-wrap">
-                    <i class="bi bi-search search-icon"></i>
-                    <input type="search" name="search" class="form-control search-input"
-                           placeholder="Search complaints..." value="{{ $search }}" autocomplete="off">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="search" name="search" placeholder="Search complaints..." value="{{ $search }}" autocomplete="off">
+                    @if($search)
+                        <a href="{{ route('complaints.index', array_filter(['type_filter' => $typeFilter ?? '', 'status_filter' => ''])) }}" title="Clear search">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    @endif
                 </div>
             </form>
         </div>
@@ -879,53 +925,31 @@
                 </span>
             </div>
 
-            {{-- Actions --}}
+            {{-- Actions — shared Job Card-style three-dot menu --}}
             <div class="pli-col pli-col-actions actions-cell col-center">
+                <div class="dropdown pli-dots-dropdown d-md-none">
+                    <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Complaint actions">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end pli-action-menu">
+                        <li><button type="button" class="dropdown-item pli-menu-item" onclick="openViewComplaintModal({{ $complaint->id }})"><span class="pli-menu-icon pli-menu-icon--view"><i class="bi bi-eye"></i></span><span>View</span></button></li>
+                        <li><button type="button" class="dropdown-item pli-menu-item" data-bs-toggle="modal" data-bs-target="#complaintModal" onclick='openEditComplaintModal(@json($complaint))'><span class="pli-menu-icon pli-menu-icon--edit"><i class="bi bi-pencil"></i></span><span>Edit</span></button></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><button type="button" class="dropdown-item pli-menu-item pli-menu-item--danger" onclick="openDeleteComplaintModal({{ $complaint->id }}, @js($complaint->subject))"><span class="pli-menu-icon pli-menu-icon--delete"><i class="bi bi-trash3"></i></span><span>Delete</span></button></li>
+                    </ul>
+                </div>
 
-                {{-- View --}}
-                <button
-                    type="button"
-                    class="pli-btn-icon pli-btn-icon--view"
-                    title="View"
-                    onclick="openViewComplaintModal({{ $complaint->id }})"
-                >
-                    @include('partials.action-icons', [
-                        'type' => 'view',
-                        'size' => 15
-                    ])
-                </button>
-
-                {{-- Edit --}}
-                <button
-                    type="button"
-                    class="pli-btn-icon pli-btn-icon--edit"
-                    title="Edit"
-                    data-bs-toggle="modal"
-                    data-bs-target="#complaintModal"
-                    onclick='openEditComplaintModal(@json($complaint))'
-                >
-                    @include('partials.action-icons', [
-                        'type' => 'edit',
-                        'size' => 15
-                    ])
-                </button>
-
-                {{-- Delete --}}
-                <button
-                    type="button"
-                    class="pli-btn-icon pli-btn-icon--danger"
-                    title="Delete"
-                    onclick="openDeleteComplaintModal(
-                        {{ $complaint->id }},
-                        @js($complaint->subject)
-                    )"
-                >
-                    @include('partials.action-icons', [
-                        'type' => 'delete',
-                        'size' => 15
-                    ])
-                </button>
-
+                <div class="pli-action-menu-wrap pli-action-buttons-desktop">
+                    <button type="button" class="pli-action-dots" aria-label="Complaint actions" aria-expanded="false" onclick="togglePliActions(this)">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <div class="pli-action-popover">
+                        <button type="button" class="pli-popover-action" onclick="openViewComplaintModal({{ $complaint->id }}); closePliActions(this)"><span class="pli-popover-icon pli-popover-icon--view"><i class="bi bi-eye"></i></span><span>View</span></button>
+                        <button type="button" class="pli-popover-action" data-bs-toggle="modal" data-bs-target="#complaintModal" onclick='openEditComplaintModal(@json($complaint)); closePliActions(this)'><span class="pli-popover-icon pli-popover-icon--edit"><i class="bi bi-pencil"></i></span><span>Edit</span></button>
+                        <div class="pli-popover-divider"></div>
+                        <button type="button" class="pli-popover-action pli-popover-action--danger" onclick="openDeleteComplaintModal({{ $complaint->id }}, @js($complaint->subject)); closePliActions(this)"><span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span><span>Delete</span></button>
+                    </div>
+                </div>
             </div>
 
         </article>
@@ -935,11 +959,9 @@
 </div>
 
     {{-- Pagination --}}
-    @if($complaints->hasPages())
-        <div class="content-card-footer">
-            @include('partials.pagination', ['paginator' => $complaints])
-        </div>
-    @endif
+    <div class="content-card-footer table-pagination">
+        @include('partials.pagination-bar', ['paginator' => $complaints])
+    </div>
 
     @else
     <div class="empty-state">
@@ -989,17 +1011,14 @@
                 {{-- Modal Body --}}
                 <div class="modal-body" style="padding: 26px;">
 
-                    {{-- Complaint Information Section --}}
-                    <div class="cmp-section-label">Complaint Information</div>
-
-                    {{-- Row 1: Complainant + Type --}}
-                    <div class="cmp-grid-2 mb-4">
+                    {{-- Row 1: Staff, type, and date --}}
+                    <div class="cmp-grid-3 mb-4">
                         <div class="cmp-field">
-                            <label>Complainant (Staff) <span>*</span></label>
+                            <label>Satff <span>*</span></label>
                             <div class="cmp-select-wrap">
                                 <span class="cmp-select-icon cmp-icon--violet"><i class="bi bi-person"></i></span>
                                 <select name="complainant_staff_id" id="comp_complainant_id" class="form-select" required>
-                                    <option value="">Select staff member...</option>
+                                    <option value=""> select staff</option>
                                     @foreach($staff as $member)
                                         <option value="{{ $member->id }}">{{ $member->name }} ({{ $member->id }})</option>
                                     @endforeach
@@ -1018,24 +1037,24 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="cmp-field mb-4">
-                        <label>Date of Complaint <span>*</span></label>
-                        <div class="cmp-select-wrap">
-                            <span class="cmp-select-icon cmp-icon--blue"><i class="bi bi-calendar3"></i></span>
-                            <input type="date" name="date_of_complaint" id="comp_date" class="form-control" required>
+                        <div class="cmp-field">
+                            <label>Date of Complaint <span>*</span></label>
+                            <div class="cmp-select-wrap">
+                                <span class="cmp-select-icon cmp-icon--blue"><i class="bi bi-calendar3"></i></span>
+                                <input type="date" name="date_of_complaint" id="comp_date" class="form-control" required>
+                            </div>
                         </div>
                     </div>
+
                     {{-- Subject & Description --}}
                     <div class="cmp-field mb-4">
                         <label>Subject <span>*</span></label>
-                        <input type="text" name="subject" id="comp_subject" class="form-control" maxlength="255" required>
+                        <input type="text" name="subject" id="comp_subject" class="form-control" maxlength="255" placeholder="Enter subject of the complaint" required>
                     </div>
 
                     <div class="cmp-field mb-4">
                         <label>Description <span>*</span></label>
-                        <textarea name="description" id="comp_description" class="form-control" rows="4" maxlength="1000" required oninput="updateCharCounter()"></textarea>
+                        <textarea name="description" id="comp_description" class="form-control" rows="4" maxlength="1000" placeholder="Provide details about the complaint..." required oninput="updateCharCounter()"></textarea>
                         <small class="cmp-char-counter" id="comp_char_counter">0 / 1000</small>
                     </div>
 
@@ -1043,9 +1062,9 @@
 
                     {{-- Additional Information --}}
                     <div class="cmp-section-label">Additional Information</div>
+                    <div class="cmp-additional-help">Attach evidence or supporting documents (optional)</div>
 
                     <div class="cmp-field mb-4">
-                        <label>Attach Evidence (Optional)</label>
                         <div class="cmp-dropzone" id="evidenceDropZone">
                             <div class="cmp-dropzone-icon"><i class="bi bi-cloud-arrow-up"></i></div>
                             <p class="cmp-dz-title">Drag & drop files here or click to browse</p>
@@ -1141,6 +1160,7 @@
 
 
 @push('scripts')
+<script src="{{ asset('js/pli-action-popover.js') }}"></script>
 <script>
     let selectedComplaintId = null;
 

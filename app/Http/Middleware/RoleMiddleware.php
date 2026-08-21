@@ -24,8 +24,8 @@ class RoleMiddleware
                 ->with('error', 'Please login to continue.');
         }
 
-        // Get user's role from database
-        $userRole = strtolower(trim((string) $user->role));
+        // Get user's role name safely from relationship
+        $userRole = strtolower(trim((string) ($user->role?->name ?? '')));
 
         // Normalize allowed roles from route
         $allowedRoles = array_map(

@@ -14,16 +14,13 @@
             $cardStaffNames = $card->serviceItems->flatMap->staff->pluck('name')->unique()->join(' ');
             $match = str_contains(strtolower($card->job_card_name), strtolower($salesSearch))
                   || str_contains(strtolower($card->customer?->name ?? ''), strtolower($salesSearch))
-                  || str_contains(strtolower($card->customer?->phone ?? ''), strtolower($salesSearch))
+                  || str_contains(strtolower($card->customer?->mobile_number ?? ''), strtolower($salesSearch))
                   || str_contains(strtolower($card->primaryStaff?->name ?? ''), strtolower($salesSearch))
                   || str_contains(strtolower($cardStaffNames), strtolower($salesSearch));
             if (! $match) return false;
         }
         if ($paymentFilter !== '') {
-            $cardPayments = collect([$card->paymentType?->name])
-                ->concat($card->serviceItems->map(fn($it) => $it->paymentType?->name))
-                ->filter()
-                ->unique();
+            $cardPayments = $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->unique();
             if (! $cardPayments->contains($paymentFilter)) {
                 return false;
             }
@@ -77,8 +74,7 @@
                 <tbody>
                     @foreach($salesPaginator as $card)
                         @php
-                            $paymentName = $card->paymentType?->name 
-                                ?? $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->unique()->first() 
+                            $paymentName = $card->serviceItems->map(fn($it) => $it->paymentType?->name)->filter()->first()
                                 ?? 'Cash';
                             [$icon, $cls] = $paymentStyles[$paymentName] ?? ['bi-wallet2', 'other'];
                             $amount   = (float) $card->serviceItems->sum('amount');
@@ -103,12 +99,12 @@
                             </td>
                             <td>
                                 <span class="sales-customer-name">{{ $card->customer?->name ?? '—' }}</span>
-                                @if($card->customer?->phone)
+                                @if($card->customer?->mobile_number)
                                     <span class="report-contact-cell" style="margin-top: 3px; font-size: 11px;">
                                         <svg class="report-contact-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                         </svg>
-                                        <span>{{ $card->customer->phone }}</span>
+                                        <span>{{ $card->customer->mobile_number }}</span>
                                     </span>
                                 @endif
                             </td>

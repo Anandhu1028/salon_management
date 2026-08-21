@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\JobCard;
+use App\Models\JobCardService;
+use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\Staff;
@@ -19,14 +21,15 @@ class DashboardDemoDataSeeder extends Seeder
     {
         $now = now();
 
-        foreach ([
+        $staffList = collect([
             ['name' => 'Anjali Nair', 'mobile_country_code' => '+91', 'mobile_number' => '9001001001', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001001', 'status' => 'active'],
             ['name' => 'Rohan Varma', 'mobile_country_code' => '+91', 'mobile_number' => '9001001002', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001002', 'status' => 'active'],
             ['name' => 'Kavya Iyer', 'mobile_country_code' => '+91', 'mobile_number' => '9001001003', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001003', 'status' => 'active'],
             ['name' => 'Sanjay Kumar', 'mobile_country_code' => '+91', 'mobile_number' => '9001001004', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9001001004', 'status' => 'inactive'],
-        ] as $row) {
-            Staff::firstOrCreate(['name' => $row['name']], $row);
-        }
+        ])->map(function ($row) {
+            return Staff::firstOrCreate(['name' => $row['name']], $row);
+        });
+        $activeStaff = $staffList->where('status', 'active')->values();
 
         $customerRows = [
             ['name' => 'Nandita Bose', 'mobile_country_code' => '+91', 'mobile_number' => '9002001001', 'whatsapp_country_code' => '+91', 'whatsapp_number' => '9002001001'],
@@ -51,21 +54,26 @@ class DashboardDemoDataSeeder extends Seeder
         })->values();
 
         $serviceRows = [
-            ['service_name' => 'Hair Spa Ritual', 'category' => 'Hair', 'subcategory' => 'Spa', 'price' => 1400, 'status' => 'active'],
-            ['service_name' => 'Global Hair Colour', 'category' => 'Hair', 'subcategory' => 'Colour', 'price' => 4200, 'status' => 'active'],
-            ['service_name' => 'Hydra Glow Facial', 'category' => 'Skin', 'subcategory' => 'Facial', 'price' => 1800, 'status' => 'active'],
-            ['service_name' => 'Luxury Pedicure', 'category' => 'Nails', 'subcategory' => 'Pedicure', 'price' => 1200, 'status' => 'active'],
-            ['service_name' => 'Relaxing Back Massage', 'category' => 'Spa', 'subcategory' => 'Massage', 'price' => 1500, 'status' => 'active'],
-            ['service_name' => 'Groom Package', 'category' => 'Grooming', 'subcategory' => 'Package', 'price' => 1100, 'status' => 'active'],
+            ['service_name' => 'Hair Spa Ritual', 'category' => 'Hair', 'subcategory' => 'Spa', 'amount' => 1400.00, 'status' => 'active'],
+            ['service_name' => 'Global Hair Colour', 'category' => 'Hair', 'subcategory' => 'Colour', 'amount' => 4200.00, 'status' => 'active'],
+            ['service_name' => 'Hydra Glow Facial', 'category' => 'Skin', 'subcategory' => 'Facial', 'amount' => 1800.00, 'status' => 'active'],
+            ['service_name' => 'Luxury Pedicure', 'category' => 'Nails', 'subcategory' => 'Pedicure', 'amount' => 1200.00, 'status' => 'active'],
+            ['service_name' => 'Relaxing Back Massage', 'category' => 'Spa', 'subcategory' => 'Massage', 'amount' => 1500.00, 'status' => 'active'],
+            ['service_name' => 'Groom Package', 'category' => 'Grooming', 'subcategory' => 'Package', 'amount' => 1100.00, 'status' => 'active'],
         ];
 
-        $services = collect($serviceRows)->map(function (array $row) {
+        $serviceAmounts = [];
+        $services = collect($serviceRows)->map(function (array $row) use (&$serviceAmounts) {
+            $amt = $row['amount'];
+            unset($row['amount']);
             $icon = ServiceIconResolver::resolve($row['service_name'], $row['category'], $row['subcategory']);
 
-            return Service::firstOrCreate(
+            $svc = Service::firstOrCreate(
                 ['service_name' => $row['service_name']],
                 [...$row, 'icon' => $icon['primary']]
             );
+            $serviceAmounts[$svc->id] = $amt;
+            return $svc;
         })->values();
 
         foreach ([
@@ -79,9 +87,15 @@ class DashboardDemoDataSeeder extends Seeder
             Product::firstOrCreate(['product_name' => $row['product_name']], $row);
         }
 
+        $paymentType = PaymentType::where('is_active', true)->first();
+        if (!$paymentType) {
+            $paymentType = PaymentType::create(['name' => 'Cash', 'is_active' => true]);
+        }
+
         foreach (range(0, 71) as $index) {
             $customer = $customers[$index % $customers->count()];
             $service = $services[$index % $services->count()];
+            $staffMember = $activeStaff[$index % $activeStaff->count()];
             $date = $now->copy()->subDays(140 - ($index * 2));
             $name = sprintf('%s Visit %02d', $service->service_name, $index + 1);
 
@@ -90,19 +104,35 @@ class DashboardDemoDataSeeder extends Seeder
                 [
                     'customer_id' => $customer->id,
                     'service_id' => $service->id,
+                    'staff_id' => $staffMember->id,
                     'subcategory' => $service->subcategory ?? $service->category,
                     'status' => 'completed',
+                    'discount_amount' => 0,
                 ]
             );
 
             if ($jobCard->wasRecentlyCreated) {
                 $jobCard->forceFill(['created_at' => $date, 'updated_at' => $date->copy()->addHours(2)])->saveQuietly();
+                $jobCard->customers()->sync([$customer->id]);
+                $jobCard->staff()->sync([$staffMember->id]);
+
+                $svcItem = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $service->id,
+                    'subcategory' => $service->subcategory ?? $service->category,
+                    'amount' => $serviceAmounts[$service->id] ?? 1000.00,
+                    'payment_type_id' => $paymentType->id,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+                $svcItem->staff()->sync([$staffMember->id]);
             }
         }
 
         foreach (range(0, 11) as $index) {
             $customer = $customers[$index % $customers->count()];
             $service = $services[($index + 2) % $services->count()];
+            $staffMember = $activeStaff[($index + 1) % $activeStaff->count()];
             $status = ['completed', 'completed', 'pending', 'in_progress', 'completed', 'cancelled'][$index % 6];
             $date = $now->copy()->startOfDay()->addHours(9 + ($index % 8));
             $name = sprintf('Today %s %02d', $service->service_name, $index + 1);
@@ -112,13 +142,28 @@ class DashboardDemoDataSeeder extends Seeder
                 [
                     'customer_id' => $customer->id,
                     'service_id' => $service->id,
+                    'staff_id' => $staffMember->id,
                     'subcategory' => $service->subcategory ?? $service->category,
                     'status' => $status,
+                    'discount_amount' => 0,
                 ]
             );
 
             if ($jobCard->wasRecentlyCreated) {
                 $jobCard->forceFill(['created_at' => $date, 'updated_at' => $date])->saveQuietly();
+                $jobCard->customers()->sync([$customer->id]);
+                $jobCard->staff()->sync([$staffMember->id]);
+
+                $svcItem = JobCardService::create([
+                    'job_card_id' => $jobCard->id,
+                    'service_id' => $service->id,
+                    'subcategory' => $service->subcategory ?? $service->category,
+                    'amount' => $serviceAmounts[$service->id] ?? 1000.00,
+                    'payment_type_id' => $paymentType->id,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+                $svcItem->staff()->sync([$staffMember->id]);
             }
         }
     }

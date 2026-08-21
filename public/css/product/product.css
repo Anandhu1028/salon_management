@@ -11,3 +11,38 @@
 .product-search {
     margin: 0;
 }
+
+/* ============================================================
+   PRODUCT LIST TABLE — column alignment & spacing
+   (# | Name | Category | Sub Category | Price | Purchases | Status | Actions)
+   Wider, evenly-proportioned columns with a bigger gap between
+   them so the row doesn't feel cramped.
+   ============================================================ */
+.premium-list--catalog.premium-list--feed.premium-list--product {
+    --pli-grid: 44px minmax(220px, 1.6fr) minmax(130px, 1fr) minmax(140px, 1fr) 110px 110px 100px 90px;
+    gap: 10px;
+    padding: 0 20px 18px;
+}
+
+.premium-list--product .premium-list-head {
+    gap: 24px;
+    padding: 16px 20px 14px;
+}
+
+.premium-list--product .premium-list-item {
+    gap: 24px;
+    padding: 18px 20px;
+}
+
+.premium-list--product .pli-head-cell {
+    font-size: 0.6875rem;
+}
+
+.premium-list--product .pli-col-category,
+.premium-list--product .pli-col-subcategory {
+    padding-right: 6px;
+}
+
+.premium-list--product .price-cell .pli-col-price {
+    font-size: 0.875rem;
+}

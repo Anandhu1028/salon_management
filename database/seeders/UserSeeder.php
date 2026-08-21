@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Administrator',
-                'password' => 'password',
+                'password' => 'password123',
                 'role_id' => $administrator->id,
             ]
         );

@@ -70,6 +70,7 @@
             </li>
 
             {{-- Reports --}}
+            @if(auth()->user()?->hasAnyRole(['administrator', 'manager']))
             <li class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 <a href="{{ route('reports.index') }}">
                     <span class="sidebar-nav-icon nav-icon-reports">
@@ -80,6 +81,7 @@
                     </span>
                 </a>
             </li>
+            @endif
 
             {{-- Marketing --}}
             <li class="{{ request()->routeIs('marketing.*') ? 'active' : '' }}">
@@ -94,6 +96,7 @@
             </li>
 
             {{-- Complaints --}}
+            @if(auth()->user()?->hasAnyRole(['administrator', 'manager']))
             <li class="{{ request()->routeIs('complaints.*') ? 'active' : '' }}">
                 <a href="{{ route('complaints.index') }}">
                     <span class="sidebar-nav-icon nav-icon-complaints">
@@ -104,6 +107,7 @@
                     </span>
                 </a>
             </li>
+            @endif
 
         </ul>
 
@@ -111,10 +115,6 @@
         {{-- =====================================================
         MASTER
         ====================================================== --}}
-        {{-- =====================================================
-        MASTER
-        ====================================================== --}}
-        
 
         <ul class="sidebar-menu sidebar-menu-master">
 
@@ -146,6 +146,7 @@
                 <ul class="sidebar-submenu {{ $masterActive ? 'show' : '' }}" id="masterSubmenu">
 
                     {{-- Staff --}}
+                    @if(auth()->user()?->hasAnyRole(['administrator', 'manager']))
                     <li
                         class="{{ request()->routeIs('staff.*') || request()->is('staff') || request()->is('staff/*') ? 'active' : '' }}">
                         <a href="{{ route('staff.index') }}">
@@ -170,6 +171,7 @@
                             </span>
                         </a>
                     </li>
+                    @endif
 
                     {{-- Customers --}}
                     <li
@@ -198,6 +200,7 @@
                     </li>
 
                     {{-- Products --}}
+                    @if(auth()->user()?->hasAnyRole(['administrator', 'manager']))
                     <li
                         class="{{ request()->routeIs('products.*') || request()->is('products') || request()->is('products/*') ? 'active' : '' }}">
                         <a href="{{ route('products.index') }}">
@@ -209,11 +212,10 @@
                             </span>
                         </a>
                     </li>
+                    @endif
 
                 </ul>
             </li>
-
-            
 
         </ul>
     </nav>
@@ -230,17 +232,17 @@
 
                 <div class="sidebar-profile-avatar-wrap">
                     <div class="sidebar-profile-avatar">
-                        AD
+                        {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}
                     </div>
                     <span class="sidebar-profile-status"></span>
                 </div>
 
                 <div class="sidebar-profile-info">
                     <div class="sidebar-profile-name">
-                        Administrator
+                        {{ auth()->user()?->name ?? 'User' }}
                     </div>
                     <div class="sidebar-profile-role">
-                        Salon Manager
+                        {{ ucfirst(auth()->user()?->role?->name ?? 'Staff') }}
                     </div>
                 </div>
 

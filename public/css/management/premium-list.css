@@ -673,9 +673,20 @@
     --pli-grid: 46px minmax(180px, 1.5fr) 110px 110px 90px 90px 90px 68px;
 }
 
-/* ── Service — 7-column aligned grid ── */
+/* ── Service — 6-column aligned grid (#, Name, Category, Sub Category,
+   Status, Actions). Name is capped so it doesn't stretch to eat all
+   the leftover width — that space is handed to Actions instead, so
+   the action button sits comfortably toward the far right of the
+   table instead of hugging the Status column. ── */
 .premium-list--catalog.premium-list--feed.premium-list--service {
-    --pli-grid: 50px minmax(240px, 1.8fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px 130px minmax(150px, 1fr);
+    --pli-grid: 50px minmax(220px, 320px) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 120px minmax(140px, 1fr);
+}
+
+.premium-list--service .pli-col-actions,
+.premium-list--service .pli-head-cell:last-child {
+    /* Extra breathing room so Actions reads as clearly separated
+       from the Status column while staying inside the table. */
+    margin-left: 28px;
 }
 
 /* ── Staff — 6-column aligned grid ── */

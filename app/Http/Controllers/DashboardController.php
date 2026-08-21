@@ -6,8 +6,8 @@ use App\Models\Customer;
 use App\Models\JobCard;
 use App\Models\Staff;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
@@ -92,19 +92,35 @@ class DashboardController extends Controller
             ->when($validated['staff_id'] ?? null, fn ($query, $staffId) => $query->whereKey($staffId))
             ->orderBy('name')
             ->get(['id', 'name']);
+
         $jobs = JobCard::query()
-            ->with('service:id,price')
-            ->whereIn('staff_id', $staff->pluck('id'))
+            ->with(['serviceItems.service', 'serviceItems.staff'])
             ->whereBetween('created_at', [$from, $to])
-            ->get()
-            ->groupBy('staff_id');
+            ->get();
 
         $performance = $staff->map(function (Staff $member) use ($jobs) {
-            $assigned = $jobs->get($member->id, collect());
+            $assigned = $jobs->filter(function (JobCard $jobCard) use ($member) {
+                return $jobCard->staff_id == $member->id
+                    || $jobCard->serviceItems->contains(fn ($item) => $item->staff->contains('id', $member->id));
+            });
+
             $total = $assigned->count();
             $completed = $assigned->where('status', 'completed');
             $completedCount = $completed->count();
             $completionRate = $total ? round(($completedCount / $total) * 100, 1) : 0;
+
+            $revenue = $completed->sum(function (JobCard $jobCard) use ($member) {
+                $memberItems = $jobCard->serviceItems->filter(function ($item) use ($member, $jobCard) {
+                    return $item->staff->contains('id', $member->id) || ($item->staff->isEmpty() && $jobCard->staff_id == $member->id);
+                });
+                if ($memberItems->isNotEmpty()) {
+                    return (float) $memberItems->sum('amount');
+                }
+                if ($jobCard->staff_id == $member->id) {
+                    return (float) $jobCard->getTotalAmount();
+                }
+                return 0.0;
+            });
 
             return [
                 'id' => $member->id,
@@ -114,7 +130,7 @@ class DashboardController extends Controller
                 'cancelled_appointments' => $assigned->where('status', 'cancelled')->count(),
                 'pending_appointments' => $assigned->whereIn('status', ['pending', 'in_progress'])->count(),
                 'services_completed' => $completedCount,
-                'revenue_generated' => round($completed->sum(fn (JobCard $jobCard) => (float) ($jobCard->service?->price ?? 0)), 2),
+                'revenue_generated' => round($revenue, 2),
                 'completion_rate' => $completionRate,
                 'overall_performance' => $completionRate,
             ];
@@ -129,7 +145,11 @@ class DashboardController extends Controller
 
     private function completedJobsBetween(Carbon $from, Carbon $to): Collection
     {
-        return JobCard::query()->with('service')->where('status', 'completed')->whereBetween('created_at', [$from, $to])->get();
+        return JobCard::query()
+            ->with(['serviceItems.service', 'serviceItems.staff'])
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$from, $to])
+            ->get();
     }
 
     private function staffPerformanceRange(string $period, ?string $startDate, ?string $endDate): array
@@ -155,7 +175,7 @@ class DashboardController extends Controller
 
     private function revenue(Collection $jobCards): float
     {
-        return (float) $jobCards->sum(fn (JobCard $jobCard) => (float) ($jobCard->service?->price ?? 0));
+        return (float) $jobCards->sum(fn (JobCard $jobCard) => $jobCard->getTotalAmount());
     }
 
     private function percentageChange(float|int $current, float|int $previous): float
@@ -165,7 +185,8 @@ class DashboardController extends Controller
 
     private function monthlyCounts($query, int $months): array
     {
-        $labels = []; $values = [];
+        $labels = [];
+        $values = [];
         for ($offset = $months - 1; $offset >= 0; $offset--) {
             $month = now()->copy()->subMonths($offset);
             $labels[] = $month->format('M');
@@ -176,7 +197,8 @@ class DashboardController extends Controller
 
     private function monthlyRevenue(int $months): array
     {
-        $labels = []; $values = [];
+        $labels = [];
+        $values = [];
         for ($offset = $months - 1; $offset >= 0; $offset--) {
             $month = now()->copy()->subMonths($offset);
             $labels[] = $month->format('M');
@@ -211,25 +233,42 @@ class DashboardController extends Controller
             ? now()->copy()->subMonths($period - 1)->startOfMonth()
             : now()->copy()->subDays($period - 1)->startOfDay();
         $staff = Staff::where('status', 'active')->orderBy('name')->get(['id', 'name']);
-        $jobsByStaff = JobCard::with('service')
+        $jobs = JobCard::with(['serviceItems.service', 'serviceItems.staff'])
             ->where('status', 'completed')
-            ->whereNotNull('staff_id')
             ->whereBetween('created_at', [$from, now()])
-            ->get()
-            ->groupBy('staff_id')
-            ->map(fn (Collection $jobs) => $this->revenue($jobs));
+            ->get();
+
+        $staffRevenue = $staff->map(function (Staff $member) use ($jobs) {
+            $amount = $jobs->sum(function (JobCard $jobCard) use ($member) {
+                $memberItems = $jobCard->serviceItems->filter(function ($item) use ($member, $jobCard) {
+                    return $item->staff->contains('id', $member->id) || ($item->staff->isEmpty() && $jobCard->staff_id == $member->id);
+                });
+                if ($memberItems->isNotEmpty()) {
+                    return (float) $memberItems->sum('amount');
+                }
+                if ($jobCard->staff_id == $member->id) {
+                    return (float) $jobCard->getTotalAmount();
+                }
+                return 0.0;
+            });
+            return round($amount, 2);
+        });
 
         return [
             'labels' => $staff->pluck('name')->values()->all(),
-            'values' => $staff->map(fn (Staff $member) => $jobsByStaff->get($member->id, 0))->values()->all(),
+            'values' => $staffRevenue->values()->all(),
         ];
     }
 
     private function categoryRevenue(Collection $jobs): Collection
     {
-        return $jobs->groupBy(fn (JobCard $jobCard) => $jobCard->service?->category ?: 'Other')
-            ->map(fn (Collection $items) => $this->revenue($items))->sortDesc()->take(4)
-            ->map(fn (float $amount, string $name) => ['name' => $name, 'amount' => $amount])->values();
+        return $jobs->flatMap(fn (JobCard $jobCard) => $jobCard->serviceItems)
+            ->groupBy(fn ($item) => $item->service?->category ?: 'Other')
+            ->map(fn (Collection $items) => (float) $items->sum('amount'))
+            ->sortDesc()
+            ->take(4)
+            ->map(fn (float $amount, string $name) => ['name' => $name, 'amount' => $amount])
+            ->values();
     }
 
     private function weeklyCustomerCounts(): array

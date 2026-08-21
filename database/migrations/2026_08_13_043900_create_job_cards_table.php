@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('job_cards', function (Blueprint $table) {
             $table->id();
             $table->string('job_card_name');
-            $table->foreignId('customer_id') ->constrained('customers') ->cascadeOnDelete();
-            $table->foreignId('service_id') ->constrained('services') ->cascadeOnDelete();
-            $table->string('subcategory');
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
+            $table->string('subcategory')->nullable();
             $table->enum('status', [
                 'pending',
                 'in_progress',

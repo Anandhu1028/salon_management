@@ -159,18 +159,20 @@ Route::middleware('auth')->group(function () {
         Route::put('/job-cards/{jobCard}', [JobCardController::class, 'update']) ->name('job-cards.update');
         Route::delete('/job-cards/{jobCard}', [JobCardController::class, 'destroy']) ->name('job-cards.destroy');
     });
- /*
+    /*
     |--------------------------------------------------------------------------
     | Report
     |--------------------------------------------------------------------------
+    | Administrator + Manager
+    |--------------------------------------------------------------------------
     */
 
-    Route::prefix('reports') ->name('reports.')->group(function () {
-        Route::get('/', [ReportController::class, 'index']) ->name('index');
+    Route::middleware('role:administrator,manager')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
-        Route::get('/sales', [ReportController::class, 'sales']) ->name('sales');
-        Route::get('/expenses', [ReportController::class, 'expenses'])  ->name('expenses');
-        Route::get('/staff-daily-target', [ReportController::class, 'staffDailyTarget']) ->name('staff.daily-target');
+        Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+        Route::get('/expenses', [ReportController::class, 'expenses'])->name('expenses');
+        Route::get('/staff-daily-target', [ReportController::class, 'staffDailyTarget'])->name('staff.daily-target');
         Route::get('/purchases', [ReportController::class, 'purchases'])->name('purchases');
     });
 

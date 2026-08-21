@@ -17,7 +17,6 @@ class JobCard extends Model
         'subcategory',
         'status',
         'discount_amount',
-        'payment_type_id',
     ];
 
     protected $casts = [
@@ -49,15 +48,15 @@ class JobCard extends Model
         return $this->belongsTo(Staff::class, 'staff_id');
     }
 
-    public function paymentType()
-    {
-        return $this->belongsTo(PaymentType::class);
-    }
-
     /**
      * Relationship to JobCardServices (new structure)
      */
     public function serviceItems()
+    {
+        return $this->hasMany(JobCardService::class);
+    }
+
+    public function jobCardServices()
     {
         return $this->hasMany(JobCardService::class);
     }
@@ -67,15 +66,26 @@ class JobCard extends Model
      */
     public function getSubtotalAmount(): float
     {
-        return (float) $this->serviceItems()->sum('amount');
+        return (float) ($this->relationLoaded('serviceItems')
+            ? $this->serviceItems->sum('amount')
+            : $this->serviceItems()->sum('amount'));
+    }
+
+    public function getDiscountAmount(): float
+    {
+        return (float) ($this->discount_amount ?? 0);
     }
 
     public function getTotalAmount(): float
     {
         $subtotal = $this->getSubtotalAmount();
-
-        $discount = (float) ($this->discount_amount ?? 0);
+        $discount = $this->getDiscountAmount();
 
         return max(0, $subtotal - $discount);
+    }
+
+    public function getFinalAmount(): float
+    {
+        return $this->getTotalAmount();
     }
 }

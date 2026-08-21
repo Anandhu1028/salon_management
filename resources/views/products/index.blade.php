@@ -144,7 +144,6 @@
                                     </div>
                                     <div class="pli-name-stack">
                                         <span class="pli-title product-name">{{ $product->product_name }}</span>
-                                        <span class="pli-subtext pli-product-cat">{{ $product->category ?: 'General' }}@if($product->subcategory) • {{ $product->subcategory }}@endif</span>
                                     </div>
                                 </div>
                             </div>
@@ -181,9 +180,10 @@
                             {{-- ACTIONS — always last, pinned to the far right edge       --}}
                             {{-- ========================================================= --}}
                             <div class="pli-col pli-col-actions actions-cell product-actions-col">
-                                <div class="dropdown product-action-dropdown">
+                                {{-- Mobile Dropdown --}}
+                                <div class="dropdown product-action-dropdown d-md-none">
                                     <span id="mob-prod-status-badge-{{ $product->id }}"
-                                        class="pli-mob-status-dot d-md-none {{ $product->status === 'active' ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive' }}"
+                                        class="pli-mob-status-dot {{ $product->status === 'active' ? 'pli-mob-status-dot--active' : 'pli-mob-status-dot--inactive' }}"
                                         title="{{ ucfirst($product->status) }}"></span>
 
                                     <button class="pli-btn-dots" type="button" data-bs-toggle="dropdown"
@@ -243,6 +243,88 @@
                                             </button>
                                         </li>
                                     </ul>
+                                </div>
+
+                                {{-- Desktop: 3-dot action popover (same pattern used on Services / Job Cards / Attendance) --}}
+                                <div class="pli-action-menu-wrap pli-action-buttons-desktop">
+                                    <button
+                                        type="button"
+                                        class="pli-action-dots"
+                                        aria-label="Product actions"
+                                        aria-expanded="false"
+                                        onclick="togglePliActions(this)"
+                                    >
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+
+                                    <div class="pli-action-popover">
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            onclick="openPurchaseModal({{ $product->id }}, @js($product->product_name), @js($product->category), @js($product->subcategory), {{ (float) $product->price }}); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--view">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </span>
+                                            <span>Record Purchase</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            onclick="openPurchaseHistory({{ $product->id }}, @js($product->product_name), @js($product->category), @js($product->subcategory)); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--view">
+                                                <i class="bi bi-clock-history"></i>
+                                            </span>
+                                            <span>Purchase History</span>
+                                        </button>
+
+                                        <div class="pli-popover-divider"></div>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#productModal"
+                                            onclick='openEditProductModal(@json($product)); closePliActions(this)'
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </span>
+                                            <span>Edit Product</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action pli-popover-status-btn"
+                                            id="desk-prod-status-btn-{{ $product->id }}"
+                                            data-status="{{ $product->status }}"
+                                            onclick="triggerProductStatusToggle({{ $product->id }}, @js($product->product_name)); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-status-left">
+                                                <span class="pli-popover-icon pli-popover-icon--status">
+                                                    <i class="bi {{ $product->status === 'active' ? 'bi-toggle2-on' : 'bi-toggle2-off' }}"></i>
+                                                </span>
+                                                <span class="pli-popover-status-text">
+                                                    {{ $product->status === 'active' ? 'Deactivate Product' : 'Activate Product' }}
+                                                </span>
+                                            </span>
+                                        </button>
+
+                                        <div class="pli-popover-divider"></div>
+
+                                        <button
+                                            type="button"
+                                            class="pli-popover-action pli-popover-action--danger"
+                                            onclick="openDeleteProductModal({{ $product->id }}, @js($product->product_name)); closePliActions(this)"
+                                        >
+                                            <span class="pli-popover-icon pli-popover-icon--delete">
+                                                <i class="bi bi-trash3"></i>
+                                            </span>
+                                            <span>Delete Product</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -1027,13 +1109,13 @@
            ============================================================ */
 
         .premium-list--catalog.premium-list--feed.premium-list--product {
-            --pli-grid: 40px minmax(190px, 1.3fr) 120px 120px 90px 100px 90px 56px !important;
+            --pli-grid: 40px minmax(190px, 1.3fr) 120px 120px 90px 100px 90px minmax(96px, auto) !important;
         }
 
         .premium-list--product .premium-list-head,
         .premium-list--product .premium-list-item {
             gap: 10px;
-            min-width: 880px;
+            min-width: 960px;
         }
 
         /* Base: every head cell and data cell becomes a flex box so
@@ -1098,11 +1180,21 @@
         .premium-list--product .product-actions-col {
             justify-content: flex-end;
             align-self: center;
+            /* Comfortable, consistent breathing room between the Status
+               column and the Actions column on every row. */
+            margin-left: 14px;
+            overflow: visible;
         }
 
         .premium-list--product .product-action-dropdown {
             display: inline-flex;
             align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* Desktop 3-dot popover trigger sits in the same right-aligned
+           actions column as the mobile dropdown above. */
+        .premium-list--product .pli-action-menu-wrap {
             justify-content: flex-end;
         }
 
@@ -1131,6 +1223,7 @@
 
 
 @push('scripts')
+    <script src="{{ asset('js/pli-action-popover.js') }}"></script>
     <script>
         let currentProductId = null;
         let currentProductTargetStatus = null;
@@ -1284,6 +1377,20 @@
                 const text = actionBtn.querySelector('.product-action-status-text');
                 if (text) {
                     text.textContent = isActive ? 'Deactivate Product' : 'Activate Product';
+                }
+            }
+
+            // Desktop popover status button (separate markup/id from the mobile one above).
+            const deskActionBtn = document.getElementById(`desk-prod-status-btn-${productId}`);
+            if (deskActionBtn) {
+                deskActionBtn.dataset.status = status;
+                const deskIcon = deskActionBtn.querySelector('.pli-popover-icon i');
+                if (deskIcon) {
+                    deskIcon.className = 'bi ' + (isActive ? 'bi-toggle2-on' : 'bi-toggle2-off');
+                }
+                const deskText = deskActionBtn.querySelector('.pli-popover-status-text');
+                if (deskText) {
+                    deskText.textContent = isActive ? 'Deactivate Product' : 'Activate Product';
                 }
             }
 
