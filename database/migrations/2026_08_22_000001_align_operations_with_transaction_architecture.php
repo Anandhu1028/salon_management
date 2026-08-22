@@ -62,7 +62,7 @@ return new class extends Migration
             $table->text('notes')->nullable()->after('payment_method');
         });
 
-        foreach (['Staff Salary', 'OT Staff', 'Staff Incentive', 'KSEB', 'Rent', 'Electricity', 'Water', 'Internet', 'Maintenance', 'Other'] as $name) {
+        foreach (['Staff Salary', 'OT Staff', 'Staff Incentive', 'KSEB', 'Other'] as $name) {
             DB::table('expense_categories')->updateOrInsert(['name' => $name], ['status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
         }
     }

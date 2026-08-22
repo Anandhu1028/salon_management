@@ -3,6 +3,9 @@
 @section('page-title', 'Expenses')
 @section('content')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/management/module-lists.css') }}">
+<link rel="stylesheet" href="{{ asset('css/job-card/job-card.css') }}">
 <style>
     :root{
         --exp-purple:#6d5ef8;
@@ -68,60 +71,62 @@
     .exp-pagination .page-link{border-radius:8px;margin:0 2px;border:1px solid #e7e8f0;color:#4b5165;}
     .exp-pagination .page-item.active .page-link{background:var(--exp-purple);border-color:var(--exp-purple);}
 </style>
+@endpush
 
-<div class="container-fluid py-3">
+<div class="expense-page management-page">
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
 
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div>
-            <h4 class="mb-0 fw-bold">Expense Management</h4>
-            <small class="text-muted">This month: ₹{{ number_format($monthTotal,2) }} · Total: ₹{{ number_format($total,2) }}</small>
-        </div>
+       
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary rounded-3" data-bs-toggle="modal" data-bs-target="#categoryModal">Add category</button>
             <button class="btn btn-primary rounded-3" style="background:var(--exp-purple);border-color:var(--exp-purple);" onclick="openExpense()">+ Add expense</button>
         </div>
     </div>
 
-    {{-- Stat cards --}}
-    <div class="row g-3 mb-3">
-        <div class="col-6 col-lg-3">
-            <div class="exp-stat-card">
-                <span class="exp-stat-dot" style="background:var(--exp-purple);"></span>
-                <div class="exp-stat-icon mb-2" style="background:var(--exp-purple);">₹</div>
-                <div class="exp-stat-label">This Month</div>
-                <div class="exp-stat-value">₹{{ number_format($monthTotal,2) }}</div>
-                <div class="exp-stat-sub">Expenses this month</div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="exp-stat-card">
-                <span class="exp-stat-dot" style="background:var(--exp-blue);"></span>
-                <div class="exp-stat-icon mb-2" style="background:var(--exp-blue);">Σ</div>
-                <div class="exp-stat-label">Total Expenses</div>
-                <div class="exp-stat-value">₹{{ number_format($total,2) }}</div>
-                <div class="exp-stat-sub">All time expenses</div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="exp-stat-card">
-                <span class="exp-stat-dot" style="background:var(--exp-green);"></span>
-                <div class="exp-stat-icon mb-2" style="background:var(--exp-green);">＋</div>
-                <div class="exp-stat-label">Categories</div>
-                <div class="exp-stat-value">{{ $categoriesCount }}</div>
-                <div class="exp-stat-sub">Total categories</div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="exp-stat-card">
-                <span class="exp-stat-dot" style="background:var(--exp-orange);"></span>
-                <div class="exp-stat-icon mb-2" style="background:var(--exp-orange);">👤</div>
-                <div class="exp-stat-label">This Month Count</div>
-                <div class="exp-stat-value">{{ $monthCount }}</div>
-                <div class="exp-stat-sub">Total transactions</div>
-            </div>
-        </div>
+    {{-- Premium Statistics --}}
+    <div class="mgmt-stats-grid mgmt-stats-grid--4">
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'indigo',
+            'icon' => 'rupee-green',
+            'label' => 'This Month',
+            'value' => '₹' . number_format($monthTotal, 2),
+            'subtext' => 'Expenses this month',
+            'sparkColor' => '#6366F1',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'blue',
+            'icon' => 'clipboard-cyan',
+            'label' => 'Total Expenses',
+            'value' => '₹' . number_format($total, 2),
+            'subtext' => 'All time expenses',
+            'sparkColor' => '#3B82F6',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'green',
+            'icon' => 'box-blue',
+            'label' => 'Categories',
+            'value' => $categoriesCount,
+            'subtext' => 'Total categories',
+            'sparkColor' => '#22C55E',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'orange',
+            'icon' => 'calendar-orange',
+            'label' => 'This Month Count',
+            'value' => $monthCount,
+            'subtext' => 'Total transactions',
+            'sparkColor' => '#F59E0B',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
     </div>
 
     {{-- Filter bar --}}
@@ -130,108 +135,169 @@
         <div class="col-auto"><select name="expense_category_id" class="form-select"><option value="">All categories</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected(request('expense_category_id')==$category->id)>{{ $category->name }}</option>@endforeach</select></div>
         <div class="col-auto"><input type="date" name="from" value="{{ request('from') }}" class="form-control"></div>
         <div class="col-auto"><input type="date" name="to" value="{{ request('to') }}" class="form-control"></div>
-        <div class="col-auto flex-grow-1"><input type="text" name="search" value="{{ request('search') }}" class="form-control exp-search-input" placeholder="Search expenses..."></div>
         <div class="col-auto"><button class="btn btn-outline-primary rounded-3">Filter</button></div>
     </form>
 
-    {{-- Table --}}
-    <div class="exp-table-card">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3">
+    {{-- Premium Expense List --}}
+    <div class="content-card">
+        <div class="content-card-header">
             <div>
-                <div class="fw-bold">Expense List</div>
-                <small class="text-muted">{{ $expenses->total() }} total expenses</small>
+                <h2>Expense List</h2>
+                <span>{{ $expenses->total() }} total expenses</span>
             </div>
+            <form method="GET" action="{{ route('expenses.index') }}" class="module-list-search">
+                @foreach(request()->except('search','page') as $key => $value)
+                    @if(is_scalar($value))
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search expenses...">
+                    @if(request('search'))
+                        <a href="{{ route('expenses.index', request()->except('search','page')) }}" class="text-muted" title="Clear search">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
         </div>
-        <div class="table-responsive mt-2">
-            <table class="table align-middle mb-0">
-                <thead>
-                <tr>
-                    <th>#</th><th>Date</th><th>Category</th><th>Staff</th><th>Description</th><th>Amount</th><th>Payment</th><th></th>
-                </tr>
-                </thead>
-                <tbody>
-                @php
-                    $badgePalette = [
-                        ['bg' => '#efeafe', 'text' => '#6d5ef8'],
-                        ['bg' => '#fef3e2', 'text' => '#f59e0b'],
-                        ['bg' => '#e8f0fe', 'text' => '#3b82f6'],
-                        ['bg' => '#fde8ee', 'text' => '#ef4477'],
-                        ['bg' => '#e6f9f2', 'text' => '#10b981'],
-                        ['bg' => '#fff2e0', 'text' => '#f97316'],
-                    ];
-                    $avatarPalette = ['#6d5ef8', '#3b82f6', '#10b981', '#f59e0b', '#ef4477', '#0ea5e9'];
-                    $payMeta = [
-                        'Cash' => ['color' => '#10b981', 'icon' => '💵'],
-                        'UPI' => ['color' => '#3b82f6', 'icon' => '📱'],
-                        'Card' => ['color' => '#f59e0b', 'icon' => '💳'],
-                        'Bank Transfer' => ['color' => '#6d5ef8', 'icon' => '🏦'],
-                        'Other' => ['color' => '#9aa0b4', 'icon' => '⋯'],
-                    ];
-                @endphp
-                @forelse($expenses as $expense)
+
+        @if($expenses->count())
+            @php
+                $listStart = ($expenses->currentPage() - 1) * $expenses->perPage();
+                $badgePalette = [
+                    ['bg' => '#F5F3FF', 'text' => '#6D28D9', 'class' => 'module-pill--indigo'],
+                    ['bg' => '#FFF7ED', 'text' => '#C2410C', 'class' => 'module-pill--orange'],
+                    ['bg' => '#EFF6FF', 'text' => '#1D4ED8', 'class' => 'module-pill--blue'],
+                    ['bg' => '#FDF2F8', 'text' => '#BE185D', 'class' => 'module-pill--pink'],
+                    ['bg' => '#F0FDF4', 'text' => '#15803D', 'class' => 'module-pill--green'],
+                ];
+                $avatarPalette = ['#6366F1','#3B82F6','#10B981','#F59E0B','#EC4899','#0EA5E9'];
+                $payMeta = [
+                    'Cash' => ['color' => '#16A34A', 'icon' => 'bi-cash'],
+                    'UPI' => ['color' => '#2563EB', 'icon' => 'bi-phone'],
+                    'Card' => ['color' => '#7C3AED', 'icon' => 'bi-credit-card'],
+                    'Bank Transfer' => ['color' => '#0891B2', 'icon' => 'bi-bank'],
+                    'Other' => ['color' => '#64748B', 'icon' => 'bi-wallet2'],
+                ];
+            @endphp
+
+            <div class="premium-list premium-list--expenses">
+                <div class="premium-list-head" style="grid-template-columns: 44px 120px minmax(130px,1fr) minmax(160px,1.1fr) minmax(180px,1.35fr) 120px 120px 70px; min-width:1100px;">
+                    <span class="pli-head-cell text-center">#</span>
+                    <span class="pli-head-cell text-center">Date</span>
+                    <span class="pli-head-cell text-center">Category</span>
+                    <span class="pli-head-cell text-center">Staff</span>
+                    <span class="pli-head-cell text-center">Description</span>
+                    <span class="pli-head-cell text-center">Amount</span>
+                    <span class="pli-head-cell text-center">Payment</span>
+                    <span class="pli-head-cell text-center">Actions</span>
+                </div>
+
+                @foreach($expenses as $expense)
                     @php
                         $catColor = $badgePalette[$expense->expense_category_id % count($badgePalette)];
                         $avColor = $avatarPalette[($expense->staff_id ?? 0) % count($avatarPalette)];
-                        $pay = $payMeta[$expense->payment_method] ?? ['color' => '#9aa0b4', 'icon' => '⋯'];
-                        $initial = $expense->staff ? strtoupper(substr($expense->staff->name, 0, 1)) : '—';
+                        $pay = $payMeta[$expense->payment_method] ?? $payMeta['Other'];
+                        $initial = $expense->staff ? strtoupper(substr($expense->staff->name, 0, 1)) : '?';
                     @endphp
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td class="exp-date-cell">
-                            {{ $expense->expense_date->format('d M Y') }}
-                            <span class="exp-time">{{ $expense->created_at?->format('h:i A') }}</span>
-                        </td>
-                        <td>
-                            <span class="exp-badge" style="background:{{ $catColor['bg'] }};color:{{ $catColor['text'] }};">{{ $expense->category->name }}</span>
-                        </td>
-                        <td>
+
+                    <article class="premium-list-item expense-list-row"
+                             id="expense-row-{{ $expense->id }}"
+                             style="grid-template-columns: 44px 120px minmax(130px,1fr) minmax(160px,1.1fr) minmax(180px,1.35fr) 120px 120px 70px; min-width:1100px;">
+                        <div class="pli-rank">{{ $listStart + $loop->iteration }}</div>
+
+                        <div class="pli-col justify-content-center">
+                            <div class="text-center">
+                                <span class="purchase-date-main" style="display:block;font-size:.76rem;font-weight:700;color:#0F172A;white-space:nowrap;">
+                                    <i class="bi bi-calendar3 me-1" style="color:#94A3B8"></i>{{ $expense->expense_date->format('d M Y') }}
+                                </span>
+                                <span class="module-meta">{{ $expense->created_at?->format('h:i A') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="pli-col justify-content-center">
+                            <span class="module-pill {{ $catColor['class'] }}" title="{{ $expense->category->name }}">
+                                <i class="bi bi-tag"></i>{{ $expense->category->name }}
+                            </span>
+                        </div>
+
+                        <div class="pli-col justify-content-center">
                             @if($expense->staff)
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="exp-avatar" style="background:{{ $avColor }};">{{ $initial }}</span>
-                                    <div>
-                                        <div class="exp-staff-name">{{ $expense->staff->name }}</div>
-                                        <div class="exp-staff-role">{{ $expense->staff->role ?? $expense->staff->position ?? '' }}</div>
-                                    </div>
+                                <div class="module-person">
+                                    <span class="module-avatar" style="background:linear-gradient(135deg,{{ $avColor }},{{ $avColor }}CC);">{{ $initial }}</span>
+                                    <span class="module-person-info">
+                                        <span class="module-person-name">{{ $expense->staff->name }}</span>
+                                        <span class="module-person-sub">{{ $expense->staff->role ?? $expense->staff->position ?? 'Staff member' }}</span>
+                                    </span>
                                 </div>
                             @else
-                                <span class="text-muted">—</span>
+                                <span class="module-pill module-pill--slate">Not assigned</span>
                             @endif
-                        </td>
-                        <td>
-                            <div class="exp-desc-main">{{ $expense->description ?? '—' }}</div>
-                            @if($expense->notes)<div class="exp-desc-sub">{{ \Illuminate\Support\Str::limit($expense->notes, 40) }}</div>@endif
-                        </td>
-                        <td class="exp-amount">₹{{ number_format($expense->amount,2) }}</td>
-                        <td>
-                            <span class="exp-pay" style="color:{{ $pay['color'] }};">
-                                <span>{{ $pay['icon'] }}</span>{{ $expense->payment_method }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="exp-action-btn" data-bs-toggle="dropdown">⋮</button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><button class="dropdown-item" onclick='openExpense(@json($expense))'>Edit</button></li>
-                                    <li>
-                                        <form action="{{ route('expenses.destroy',$expense) }}" method="POST" onsubmit="return confirm('Delete this expense?')">
-                                            @csrf @method('DELETE')
-                                            <button class="dropdown-item text-danger">Delete</button>
-                                        </form>
-                                    </li>
-                                </ul>
+                        </div>
+
+                        <div class="pli-col justify-content-center">
+                            <div style="width:100%;min-width:0;text-align:center;">
+                                <span class="pli-col-text" style="font-size:.79rem;font-weight:600;color:#0F172A;" title="{{ $expense->description }}">{{ $expense->description ?: '—' }}</span>
+                                @if($expense->notes)
+                                    <span class="module-meta" title="{{ $expense->notes }}">{{ \Illuminate\Support\Str::limit($expense->notes, 42) }}</span>
+                                @endif
                             </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="8" class="text-center text-muted py-4">No expenses found.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="d-flex justify-content-between align-items-center px-3 py-3">
-            <small class="text-muted">Showing {{ $expenses->firstItem() }} to {{ $expenses->lastItem() }} of {{ $expenses->total() }} entries</small>
-            <div class="exp-pagination">{{ $expenses->links() }}</div>
-        </div>
+                        </div>
+
+                        <div class="pli-col justify-content-center">
+                            <span class="module-amount">₹{{ number_format($expense->amount,2) }}</span>
+                        </div>
+
+                        <div class="pli-col justify-content-center">
+                            <span class="module-pill module-pill--slate" style="color:{{ $pay['color'] }};background:#fff;border-color:#E2E8F0;">
+                                <i class="bi {{ $pay['icon'] }}"></i>{{ $expense->payment_method }}
+                            </span>
+                        </div>
+
+                        <div class="pli-col pli-col-actions">
+                            <div class="module-action-menu-wrap">
+                                <button type="button" class="module-action-dots" onclick="toggleExpenseActions(this)" aria-label="Expense actions">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div class="module-action-popover">
+                                    <button type="button" class="module-popover-action"
+                                            onclick='openExpense(@json($expense)); closeExpenseActions(this)'>
+                                        <span class="module-popover-icon module-popover-icon--edit"><i class="bi bi-pencil"></i></span>
+                                        <span>Edit Expense</span>
+                                    </button>
+                                    <div class="module-popover-divider"></div>
+                                    <form method="POST" action="{{ route('expenses.destroy',$expense) }}">
+                                        @csrf @method('DELETE')
+                                        <button class="module-popover-action" type="submit" onclick="return confirm('Delete this expense?')">
+                                            <span class="module-popover-icon module-popover-icon--delete"><i class="bi bi-trash3"></i></span>
+                                            <span>Delete Expense</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center px-4 py-3 flex-wrap gap-2">
+                <small class="text-muted">
+                    Showing {{ $expenses->firstItem() }} to {{ $expenses->lastItem() }} of {{ $expenses->total() }} entries
+                </small>
+                <div class="exp-pagination">{{ $expenses->links() }}</div>
+            </div>
+        @else
+            <div class="module-empty-state">
+                <div class="empty-icon"><i class="bi bi-wallet2"></i></div>
+                <h3>No expenses found</h3>
+                <p>Record your first expense transaction to see it here.</p>
+                <button class="btn btn-primary mt-3" style="background:linear-gradient(135deg,#6366F1,#4F46E5);border:0;" onclick="openExpense()">
+                    <i class="bi bi-plus-lg me-1"></i> Add Expense
+                </button>
+            </div>
+        @endif
     </div>
 </div>
 
@@ -246,6 +312,24 @@
 const expenseModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('expenseModal'));
 function syncStaff(){document.getElementById('expenseStaffWrap').style.display=document.getElementById('expenseCategory').selectedOptions[0].dataset.staff==='1'?'block':'none'}
 document.getElementById('expenseCategory').onchange=syncStaff;
+
+function toggleExpenseActions(button) {
+    const wrap = button.closest('.module-action-menu-wrap');
+    document.querySelectorAll('.module-action-menu-wrap.is-open').forEach(item => {
+        if (item !== wrap) item.classList.remove('is-open');
+    });
+    wrap?.classList.toggle('is-open');
+}
+function closeExpenseActions(element) {
+    element.closest('.module-action-menu-wrap')?.classList.remove('is-open');
+}
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.module-action-menu-wrap')) {
+        document.querySelectorAll('.module-action-menu-wrap.is-open')
+            .forEach(item => item.classList.remove('is-open'));
+    }
+});
+
 function openExpense(e=null){
     const f=document.getElementById('expenseForm');
     f.reset();

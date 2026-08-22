@@ -4,6 +4,7 @@
 @section('page-title', 'Complaints')
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/management/module-lists.css') }}">
     <style>
 
         /* ============================================================
@@ -627,6 +628,106 @@
             margin-bottom: 16px;
         }
 
+        /* Final visual alignment with the shared Job Card / Purchase list */
+        .complaint-page .complaint-list {
+            gap: 8px;
+            padding: 0 14px 16px;
+            overflow-x: auto;
+        }
+
+        .complaint-page .complaint-list-head {
+            margin-top: 12px;
+            border: 1px solid #E0E7FF;
+            border-radius: 13px;
+            background: linear-gradient(135deg,#F8FAFF 0%,#EEF2FF 55%,#F5F3FF 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
+
+        .complaint-page .complaint-list-item {
+            border: 1px solid #E8EDF3;
+            border-radius: 14px;
+            background: linear-gradient(145deg,#FFFFFF 0%,#FCFDFF 100%);
+            box-shadow: 0 1px 2px rgba(15,23,42,.025);
+            margin: 0;
+        }
+
+        .complaint-page .complaint-list-item:last-child {
+            border-bottom: 1px solid #E8EDF3;
+        }
+
+        .complaint-page .complaint-list-item:hover {
+            border-color:#C7D2FE;
+            background:linear-gradient(145deg,#FFFFFF 0%,#F8FAFF 100%);
+            box-shadow:0 8px 24px rgba(99,102,241,.09);
+        }
+
+        .complaint-page .complaint-head-cell {
+            font-size:.625rem;
+            letter-spacing:.08em;
+        }
+
+        .complaint-page .complaint-action-dots {
+            width:34px;
+            height:34px;
+        }
+
+        .complaint-page .complaint-search .search-box {
+            background:#F8FAFC;
+            border:1.5px solid #E2E8F0;
+            border-radius:11px;
+        }
+
+        .complaint-page .complaint-search .search-box:focus-within {
+            background:#fff;
+            border-color:#8B5CF6;
+            box-shadow:0 0 0 3px rgba(139,92,246,.10);
+        }
+
+        .complaint-page .complaint-stats-grid {
+            margin-bottom:22px;
+        }
+
+        .complaint-page .complaint-stat-card {
+            min-height:148px;
+            border-radius:18px;
+            padding:20px 22px 18px;
+            background:linear-gradient(148deg,#FFFFFF 0%,#F8F7FF 42%,#EEF2FF 100%);
+            box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 32px rgba(15,23,42,.06);
+            transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .complaint-page .complaint-stat-card:hover {
+            transform:translateY(-3px);
+            box-shadow:0 2px 4px rgba(15,23,42,.04),0 14px 34px rgba(15,23,42,.10);
+        }
+
+        .complaint-page .complaint-stat-icon {
+            width:46px;
+            height:46px;
+            border-radius:14px;
+            box-shadow:0 7px 18px rgba(99,102,241,.22);
+        }
+
+        .complaint-page .complaint-stat-label {
+            color:#64748B;
+        }
+
+        .complaint-page .complaint-stat-value {
+            color:#4338CA;
+            font-size:1.9rem;
+        }
+
+        .complaint-page .complaint-stat-sub {
+            color:#94A3B8;
+        }
+
+        .complaint-page .complaint-stat-dot {
+            box-shadow:0 0 0 4px rgba(99,102,241,.12);
+        }
+
         /* Mobile / responsive */
         @media (max-width: 992px) {
             .complaint-list-head,
@@ -704,74 +805,55 @@
 
     <div class="complaint-page management-page">
         <div class="mgmt-top-actions">
-            
+           
             <button type="button" class="btn-add-complaint" onclick="openComplaint()">
                 <i class="bi bi-plus-lg"></i> Add Complaint
             </button>
         </div>
 
-        {{-- Stat cards --}}
-        <div class="complaint-stats-grid">
-
-            <div class="complaint-stat-card">
-                <div class="complaint-stat-top">
-                    <div class="complaint-stat-icon complaint-stat-icon--indigo"><i class="bi bi-chat-square-text-fill"></i></div>
-                    <span class="complaint-stat-dot complaint-stat-dot--indigo"></span>
-                </div>
-                <div class="complaint-stat-label">Total Complaints</div>
-                <div class="complaint-stat-value">{{ $totalComplaintsCount }}</div>
-                <div class="complaint-stat-sub">All complaint records</div>
-                <div class="complaint-stat-spark complaint-stat-spark--indigo">
-                    <span style="height:35%"></span><span style="height:55%"></span><span style="height:40%"></span>
-                    <span style="height:70%"></span><span style="height:50%"></span><span style="height:85%"></span>
-                </div>
-            </div>
-
-            <div class="complaint-stat-card">
-                <div class="complaint-stat-top">
-                    <div class="complaint-stat-icon complaint-stat-icon--orange"><i class="bi bi-hourglass-split"></i></div>
-                    <span class="complaint-stat-dot complaint-stat-dot--orange"></span>
-                </div>
-                <div class="complaint-stat-label">Pending</div>
-                <div class="complaint-stat-value">{{ $pendingComplaintsCount }}</div>
-                <div class="complaint-stat-sub">Need attention</div>
-                <div class="complaint-stat-spark complaint-stat-spark--orange">
-                    <span style="height:60%"></span><span style="height:30%"></span><span style="height:50%"></span>
-                    <span style="height:25%"></span><span style="height:45%"></span><span style="height:35%"></span>
-                </div>
-            </div>
-
-            <div class="complaint-stat-card">
-                <div class="complaint-stat-top">
-                    <div class="complaint-stat-icon complaint-stat-icon--green"><i class="bi bi-check-circle-fill"></i></div>
-                    <span class="complaint-stat-dot complaint-stat-dot--green"></span>
-                </div>
-                <div class="complaint-stat-label">Resolved</div>
-                <div class="complaint-stat-value">{{ $resolvedComplaintsCount }}</div>
-                <div class="complaint-stat-sub">Successfully handled</div>
-                <div class="complaint-stat-spark complaint-stat-spark--green">
-                    <span style="height:40%"></span><span style="height:65%"></span><span style="height:55%"></span>
-                    <span style="height:80%"></span><span style="height:60%"></span><span style="height:90%"></span>
-                </div>
-            </div>
-
-            <div class="complaint-stat-card">
-                <div class="complaint-stat-top">
-                    <div class="complaint-stat-icon complaint-stat-icon--amber"><i class="bi bi-wallet2"></i></div>
-                    <span class="complaint-stat-dot complaint-stat-dot--amber"></span>
-                </div>
-                <div class="complaint-stat-label">Total Compensation</div>
-                <div class="complaint-stat-value">₹{{ number_format($totalCompensationSum, 2) }}</div>
-                <div class="complaint-stat-sub">Total compensation</div>
-                <div class="complaint-stat-spark complaint-stat-spark--amber">
-                    <span style="height:50%"></span><span style="height:35%"></span><span style="height:65%"></span>
-                    <span style="height:45%"></span><span style="height:75%"></span><span style="height:55%"></span>
-                </div>
-            </div>
-
+        {{-- Premium Statistics --}}
+        <div class="mgmt-stats-grid mgmt-stats-grid--4">
+            @include('partials.mgmt-stat-card', [
+                'theme' => 'indigo',
+                'icon' => 'people-purple',
+                'label' => 'Total Complaints',
+                'value' => $totalComplaintsCount,
+                'subtext' => 'All complaint records',
+                'sparkColor' => '#6366F1',
+                'trend' => '0.0',
+                'trendUp' => true,
+            ])
+            @include('partials.mgmt-stat-card', [
+                'theme' => 'orange',
+                'icon' => 'calendar-orange',
+                'label' => 'Pending',
+                'value' => $pendingComplaintsCount,
+                'subtext' => 'Need attention',
+                'sparkColor' => '#F59E0B',
+                'trend' => '0.0',
+                'trendUp' => false,
+            ])
+            @include('partials.mgmt-stat-card', [
+                'theme' => 'green',
+                'icon' => 'check-green',
+                'label' => 'Resolved',
+                'value' => $resolvedComplaintsCount,
+                'subtext' => 'Successfully handled',
+                'sparkColor' => '#22C55E',
+                'trend' => '0.0',
+                'trendUp' => true,
+            ])
+            @include('partials.mgmt-stat-card', [
+                'theme' => 'orange',
+                'icon' => 'rupee-green',
+                'label' => 'Total Compensation',
+                'value' => '₹' . number_format($totalCompensationSum, 2),
+                'subtext' => 'Total compensation',
+                'sparkColor' => '#F59E0B',
+                'trend' => '0.0',
+                'trendUp' => true,
+            ])
         </div>
-
-        
 
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-3">
