@@ -159,13 +159,13 @@ class ProductPurchaseController extends Controller
     }
 
     /**
-     * Transaction-safe sequential purchase number (PUR-001, PUR-002, ...),
+     * Transaction-safe sequential purchase number (PC-001, PC-002, ...),
      * consistent with the existing application's approach.
      */
     private function nextPurchaseNumber(): string
     {
         $next = (int) ProductPurchase::lockForUpdate()->max('id') + 1;
 
-        return 'PUR-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+        return 'PC-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
     }
 }

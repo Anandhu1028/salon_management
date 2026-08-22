@@ -794,10 +794,10 @@
 
 /* Staff Dropdown Panel (Multi-Select Popover) */
 .job-card-staff-dropdown-panel {
-    position: absolute;
-    top: calc(100% + 4px);
+    position: fixed;
+    top: 0;
     left: 0;
-    right: 0;
+    width: 260px;
     background: #FFFFFF;
     border: 1.5px solid #E2E8F0;
     border-radius: 12px;

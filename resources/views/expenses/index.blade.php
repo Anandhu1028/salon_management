@@ -660,14 +660,10 @@
                                         <span>Edit Expense</span>
                                     </button>
                                     <div class="pli-popover-divider"></div>
-                                    <form method="POST" action="{{ route('expenses.destroy', $expense) }}" onsubmit="return confirm('Delete this expense record?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="pli-popover-action pli-popover-action--danger">
-                                            <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
-                                            <span>Delete Expense</span>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="pli-popover-action pli-popover-action--danger" onclick="openDeleteExpenseModal({{ $expense->id }}, @js($expense->description ?: 'this expense')); closeExpenseActions(this)">
+                                        <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
+                                        <span>Delete Expense</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -686,6 +682,27 @@
                 </button>
             </div>
         @endif
+    </div>
+</div>
+
+{{-- DELETE CONFIRMATION MODAL --}}
+<div class="modal fade premium-modal" id="deleteExpenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="confirm-modal-body">
+                <div class="confirm-icon danger"><i class="bi bi-trash3"></i></div>
+                <h5 class="confirm-title">Delete Expense?</h5>
+                <p class="confirm-message" id="deleteExpenseMessage">This action cannot be undone.</p>
+                <form id="deleteExpenseForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="confirm-actions">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -919,6 +936,15 @@
 
 @push('scripts')
 <script>
+    const deleteExpenseModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteExpenseModal'));
+
+    function openDeleteExpenseModal(expenseId, expenseDescription) {
+        closeAllExpenseActionMenus();
+        document.getElementById('deleteExpenseForm').action = `/expenses/${expenseId}`;
+        document.getElementById('deleteExpenseMessage').textContent = `Are you sure you want to delete ${expenseDescription}?`;
+        deleteExpenseModal.show();
+    }
+
     const expenseModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('expenseModal'));
     const expenseDetailsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('expenseDetailsModal'));
 

@@ -485,14 +485,10 @@
                                         <span>Edit Complaint</span>
                                     </button>
                                     <div class="pli-popover-divider"></div>
-                                    <form method="POST" action="{{ route('complaints.destroy', $complaint) }}" onsubmit="return confirm('Delete this complaint record?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="pli-popover-action pli-popover-action--danger">
-                                            <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
-                                            <span>Delete Complaint</span>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="pli-popover-action pli-popover-action--danger" onclick="openDeleteComplaintModal({{ $complaint->id }}, @js($complaint->reason ?: 'this complaint')); closeComplaintActions(this)">
+                                        <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
+                                        <span>Delete Complaint</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -511,6 +507,27 @@
                 </button>
             </div>
         @endif
+    </div>
+</div>
+
+{{-- DELETE CONFIRMATION MODAL --}}
+<div class="modal fade premium-modal" id="deleteComplaintModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="confirm-modal-body">
+                <div class="confirm-icon danger"><i class="bi bi-trash3"></i></div>
+                <h5 class="confirm-title">Delete Complaint?</h5>
+                <p class="confirm-message" id="deleteComplaintMessage">This action cannot be undone.</p>
+                <form id="deleteComplaintForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="confirm-actions">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -786,6 +803,7 @@
 <script>
     const complaintModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('complaintModal'));
     const complaintDetailsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('complaintDetailsModal'));
+    const deleteComplaintModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteComplaintModal'));
     const jobCardsData = @json($jobCardsDataForJs);
     const allActiveStaff = @json($allActiveStaffForJs);
 
@@ -947,6 +965,13 @@
         document.getElementById('detailsCompensation').textContent = `₹ ${comp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
         complaintDetailsModal.show();
+    }
+
+    function openDeleteComplaintModal(complaintId, complaintReason) {
+        closeAllComplaintActionMenus();
+        document.getElementById('deleteComplaintForm').action = `/complaints/${complaintId}`;
+        document.getElementById('deleteComplaintMessage').textContent = `Are you sure you want to delete ${complaintReason}?`;
+        deleteComplaintModal.show();
     }
 
     // ---------------------------------------------------------------

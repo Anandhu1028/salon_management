@@ -372,6 +372,155 @@
             background: #DDD6FE !important;
             color: #6D28D9 !important;
         }
+
+        /* Custom purchase selectors keep the native fields for form semantics
+           while presenting a controlled, readable option menu. */
+        .product-purchase-page .purchase-custom-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .product-purchase-page .purchase-native-select {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .product-purchase-page .purchase-select-trigger {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #334155;
+            font-size: .88rem;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .product-purchase-page .purchase-select-value {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .product-purchase-page .purchase-select-trigger:focus-visible,
+        .product-purchase-page .purchase-custom-select.is-open .purchase-select-trigger {
+            outline: 2px solid rgba(124, 58, 237, .28);
+            outline-offset: -2px;
+        }
+
+        .product-purchase-page .purchase-select-trigger.is-placeholder {
+            color: #94A3B8;
+        }
+
+        .product-purchase-page .purchase-select-trigger i {
+            flex: 0 0 auto;
+            color: #94A3B8;
+            transition: transform .18s ease;
+        }
+
+        .product-purchase-page .purchase-custom-select.is-open .purchase-select-trigger i {
+            transform: rotate(180deg);
+            color: #7C3AED;
+        }
+
+        .product-purchase-page .purchase-select-menu {
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, .16);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+        }
+
+        .product-purchase-page .job-card-input-box .purchase-select-menu {
+            width: max(100%, 260px);
+            max-width: calc(100vw - 32px);
+        }
+
+        .product-purchase-page .field-control-wrap .purchase-select-menu {
+            width: max(100%, 320px);
+            max-width: calc(100vw - 32px);
+        }
+
+        .product-purchase-page .purchase-custom-select.is-open .purchase-select-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .product-purchase-page .purchase-select-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 38px;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #334155;
+            font-size: .84rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .product-purchase-page .purchase-select-option:hover,
+        .product-purchase-page .purchase-select-option:focus-visible {
+            background: #F5F3FF;
+            color: #6D28D9;
+            outline: none;
+        }
+
+        .product-purchase-page .purchase-select-option.is-selected {
+            background: #EDE9FE;
+            color: #5B21B6;
+        }
+
+        .product-purchase-page .purchase-select-option i {
+            margin-left: auto;
+            color: #7C3AED;
+        }
+
+        .product-purchase-page .field-control-wrap:has(.purchase-custom-select) > .job-card-select-arrow,
+        .product-purchase-page .job-card-input-box:has(.purchase-custom-select) > .job-card-select-arrow {
+            display: none;
+        }
+
+        .product-purchase-page .field-control-wrap:has(.purchase-custom-select) {
+            overflow: visible !important;
+            z-index: 20;
+        }
+
+        .product-purchase-page .field-control-wrap:has(.purchase-custom-select) .purchase-custom-select {
+            z-index: 21;
+        }
+
+        @media (max-width: 576px) {
+            .product-purchase-page .purchase-select-menu {
+                max-height: 210px;
+            }
+        }
     </style>
 @endpush
 
@@ -395,7 +544,7 @@
     <div class="content-card">
         <div class="content-card-header">
             <div><h2>Product Purchase List</h2><span>{{ $purchases->total() }} total purchases</span></div>
-            <div class="content-card-header-actions"><form method="GET" action="{{ route('product-purchases.index') }}" class="job-card-search"><input type="hidden" name="date_from" value="{{ $dateFrom }}"><input type="hidden" name="date_to" value="{{ $dateTo }}"><input type="hidden" name="customer_id" value="{{ $customerId }}"><input type="hidden" name="product_id" value="{{ $productId }}"><input type="hidden" name="payment_type_id" value="{{ $paymentTypeId }}"><div class="search-box"><i class="bi bi-search"></i><input type="text" name="search" value="{{ $search }}" placeholder="Search purchases..."><button class="border-0 bg-transparent" aria-label="Search"><i class="bi bi-search"></i></button></div></form></div>
+            <div class="content-card-header-actions"><form method="GET" action="{{ route('product-purchases.index') }}" class="job-card-search"><input type="hidden" name="date_from" value="{{ $dateFrom }}"><input type="hidden" name="date_to" value="{{ $dateTo }}"><input type="hidden" name="customer_id" value="{{ $customerId }}"><input type="hidden" name="product_id" value="{{ $productId }}"><input type="hidden" name="payment_type_id" value="{{ $paymentTypeId }}"><div class="search-box"><i class="bi bi-search"></i><input type="text" name="search" value="{{ $search }}" placeholder="Search purchases..."><button class="border-0 bg-transparent" aria-label="Search"></button></div></form></div>
         </div>
 
         @if($purchases->count())
@@ -467,14 +616,10 @@
                                 <span>Edit Purchase</span>
                             </button>
                             <div class="pli-popover-divider"></div>
-                            <form method="POST" action="{{ route('product-purchases.destroy', $purchase) }}" onsubmit="return confirm('Delete this purchase?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="pli-popover-action pli-popover-action--danger">
-                                    <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
-                                    <span>Delete Purchase</span>
-                                </button>
-                            </form>
+                            <button type="button" class="pli-popover-action pli-popover-action--danger" onclick="openDeletePurchaseModal({{ $purchase->id }}, @js($purchase->purchase_number)); closePurchaseActions(this)">
+                                <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
+                                <span>Delete Purchase</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -485,6 +630,27 @@
         @else
         <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-cart-check"></i></div><h3>No purchases found</h3><p>Record your first product purchase transaction.</p><button class="btn btn-primary mt-2" onclick="openPurchaseModal()"><i class="bi bi-plus-lg"></i> Add Purchase</button></div>
         @endif
+    </div>
+</div>
+
+{{-- DELETE CONFIRMATION MODAL --}}
+<div class="modal fade premium-modal" id="deletePurchaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="confirm-modal-body">
+                <div class="confirm-icon danger"><i class="bi bi-trash3"></i></div>
+                <h5 class="confirm-title">Delete Purchase?</h5>
+                <p class="confirm-message" id="deletePurchaseMessage">This action cannot be undone.</p>
+                <form id="deletePurchaseForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="confirm-actions">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -520,7 +686,7 @@
                                     <label for="purchaseCustomer" class="form-label">CUSTOMER <span>*</span></label>
                                     <div class="field-control-wrap">
                                         <span class="form-field-icon"><i class="bi bi-person"></i></span>
-                                        <select id="purchaseCustomer" name="customer_id" class="no-nice-select" required>
+                                        <select id="purchaseCustomer" name="customer_id" class="no-nice-select purchase-native-select">
                                             <option value="">Select customer</option>
                                             @foreach($customers as $customer)
                                                 <option value="{{ $customer->id }}">
@@ -531,6 +697,7 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                        <div class="purchase-custom-select" data-select-id="purchaseCustomer"></div>
                                         <i class="bi bi-chevron-down job-card-select-arrow"></i>
                                     </div>
                                 </div>
@@ -719,6 +886,7 @@
 @push('scripts')
 <script>
 const purchaseModalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('purchaseModal'));
+const deletePurchaseModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deletePurchaseModal'));
 const purchaseProductsData = @json($purchaseProductsForJs);
 
 function formatPurchaseCurrency(value) {
@@ -753,9 +921,10 @@ function addProductItemRow(container, itemData = null) {
             <div class="job-card-item-field-col">
                 <label class="job-card-item-label">PRODUCT</label>
                 <div class="job-card-input-box">
-                    <select class="product-select" data-item-id="${itemId}" name="products[${itemIndex}][product_id]" required>
+                    <select class="product-select purchase-native-select" data-item-id="${itemId}" name="products[${itemIndex}][product_id]">
                         ${productItemOptionsHtml(productId)}
                     </select>
+                    <div class="purchase-custom-select"></div>
                     <i class="bi bi-chevron-down job-card-select-arrow"></i>
                 </div>
             </div>
@@ -811,6 +980,101 @@ function renumberProductItems() {
                 field.setAttribute('name', nameAttr.replace(/\[\d+\]/, `[${index}]`));
             }
         });
+    });
+}
+
+function closePurchaseDropdowns(except = null) {
+    document.querySelectorAll('.purchase-custom-select.is-open').forEach(dropdown => {
+                if (dropdown !== except) {
+                    dropdown.classList.remove('is-open');
+                    dropdown.querySelector('.purchase-select-trigger')?.setAttribute('aria-expanded', 'false');
+                }
+    });
+}
+
+        function positionPurchaseDropdown(customSelect) {
+            const trigger = customSelect.querySelector('.purchase-select-trigger');
+            const menu = customSelect.querySelector('.purchase-select-menu');
+            if (!trigger || !menu) return;
+
+            const triggerRect = trigger.getBoundingClientRect();
+            const menuHeight = Math.min(menu.scrollHeight, window.innerWidth <= 576 ? 210 : 250);
+            const gap = 7;
+            const opensAbove = triggerRect.bottom + gap + menuHeight > window.innerHeight && triggerRect.top - gap - menuHeight > 8;
+
+            menu.style.left = `${Math.max(8, triggerRect.left)}px`;
+            menu.style.width = `${Math.min(Math.max(triggerRect.width, customSelect.closest('.field-control-wrap') ? 320 : 260), window.innerWidth - 16)}px`;
+            menu.style.top = opensAbove
+                ? `${Math.max(8, triggerRect.top - menuHeight - gap)}px`
+                : `${triggerRect.bottom + gap}px`;
+        }
+
+function initializePurchaseDropdown(select, customSelect) {
+    if (!select || !customSelect || customSelect.dataset.initialized === 'true') return;
+
+    customSelect.dataset.initialized = 'true';
+    customSelect.innerHTML = `
+        <button type="button" class="purchase-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span class="purchase-select-value"></span>
+            <i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="purchase-select-menu" role="listbox"></div>
+    `;
+
+    const trigger = customSelect.querySelector('.purchase-select-trigger');
+    const value = customSelect.querySelector('.purchase-select-value');
+    const menu = customSelect.querySelector('.purchase-select-menu');
+
+    function syncDropdown() {
+        const selectedOption = select.options[select.selectedIndex];
+        const selected = selectedOption && selectedOption.value !== '';
+        value.textContent = selected ? selectedOption.textContent.trim() : (select.id === 'purchaseCustomer' ? 'Select customer' : 'Select product');
+        trigger.classList.toggle('is-placeholder', !selected);
+        menu.querySelectorAll('.purchase-select-option').forEach(option => {
+            const isSelected = option.dataset.value === select.value;
+            option.classList.toggle('is-selected', isSelected);
+            option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+            const check = option.querySelector('i');
+            if (check) check.classList.toggle('d-none', !isSelected);
+        });
+    }
+
+    function renderOptions() {
+        menu.innerHTML = '';
+        Array.from(select.options).forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'purchase-select-option';
+            optionButton.dataset.value = option.value;
+            optionButton.setAttribute('role', 'option');
+            optionButton.innerHTML = `<span>${option.textContent.trim()}</span><i class="bi bi-check-lg d-none"></i>`;
+            optionButton.addEventListener('click', () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                customSelect.classList.remove('is-open');
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+            menu.appendChild(optionButton);
+        });
+        syncDropdown();
+    }
+
+    trigger.addEventListener('click', () => {
+        const isOpen = !customSelect.classList.contains('is-open');
+        closePurchaseDropdowns(customSelect);
+        customSelect.classList.toggle('is-open', isOpen);
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) positionPurchaseDropdown(customSelect);
+    });
+
+    select.addEventListener('change', syncDropdown);
+    renderOptions();
+}
+
+function initializeAllPurchaseDropdowns() {
+    document.querySelectorAll('.purchase-native-select').forEach(select => {
+        const customSelect = select.parentElement.querySelector('.purchase-custom-select');
+        initializePurchaseDropdown(select, customSelect);
     });
 }
 
@@ -911,6 +1175,7 @@ function initializeProductItemBuilder(items) {
     renumberProductItems();
     updatePurchaseTotals();
     setupProductItemEvents();
+    initializeAllPurchaseDropdowns();
 }
 
 // ---------------------------------------------------------------
@@ -990,6 +1255,7 @@ function openPurchaseModal(purchase = null) {
         : '<i class="bi bi-cart-check"></i> Save Purchase';
 
     document.getElementById('purchaseCustomer').value = purchase?.customer_id ?? '';
+    document.getElementById('purchaseCustomer').dispatchEvent(new Event('change', { bubbles: true }));
 
     setPurchasePaymentMethod(purchase?.payment_type_id ?? '');
 
@@ -1071,6 +1337,12 @@ function openPurchaseDetailsModal(purchase) {
     bootstrap.Modal.getOrCreateInstance(document.getElementById('purchaseDetailsModal')).show();
 }
 
+function openDeletePurchaseModal(purchaseId, purchaseNumber) {
+    document.getElementById('deletePurchaseForm').action = `/product-purchases/${purchaseId}`;
+    document.getElementById('deletePurchaseMessage').textContent = `Are you sure you want to delete purchase ${purchaseNumber}?`;
+    deletePurchaseModal.show();
+}
+
 // ---------------------------------------------------------------
 // FORM VALIDATION
 // ---------------------------------------------------------------
@@ -1124,6 +1396,19 @@ document.getElementById('purchaseForm').addEventListener('submit', function (e) 
 });
 
 setupPurchasePaymentEvents();
+initializeAllPurchaseDropdowns();
+
+document.addEventListener('click', event => {
+    if (!event.target.closest('.purchase-custom-select')) closePurchaseDropdowns();
+});
+
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.purchase-custom-select.is-open').forEach(positionPurchaseDropdown);
+});
+
+document.querySelector('.job-card-builder-scroll-area')?.addEventListener('scroll', () => {
+    document.querySelectorAll('.purchase-custom-select.is-open').forEach(positionPurchaseDropdown);
+});
 
 // ---------------------------------------------------------------
 // ROW ACTION MENU (list view 3-dot popover)

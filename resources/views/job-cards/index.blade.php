@@ -201,6 +201,128 @@
         .job-card-payment-card.is-selected { border-color: #8B5CF6; background: #F5F3FF; color: #5B21B6; box-shadow: 0 0 0 3px rgba(139, 92, 246, .10); }
         .job-card-payment-card.is-selected .payment-card-check { border-color: #7C3AED; background: #7C3AED; color: #fff; }
         .job-card-payment-card.is-selected .payment-card-icon { background: #EDE9FE; color: #6D28D9; }
+
+        /* Custom customer selector keeps the native field for form semantics
+           while presenting the same controlled option menu as purchases. */
+        .job-card-custom-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .job-card-native-select {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .job-card-select-trigger {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #334155;
+            font-size: .88rem;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .job-card-select-value {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .job-card-select-trigger:focus-visible,
+        .job-card-custom-select.is-open .job-card-select-trigger {
+            outline: 2px solid rgba(124, 58, 237, .28);
+            outline-offset: -2px;
+        }
+
+        .job-card-select-trigger.is-placeholder { color: #94A3B8; }
+
+        .job-card-select-trigger i {
+            flex: 0 0 auto;
+            color: #94A3B8;
+            transition: transform .18s ease;
+        }
+
+        .job-card-custom-select.is-open .job-card-select-trigger i {
+            transform: rotate(180deg);
+            color: #7C3AED;
+        }
+
+        .job-card-select-menu {
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, .16);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+        }
+
+        .job-card-custom-select.is-open .job-card-select-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .job-card-select-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 38px;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #334155;
+            font-size: .84rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .job-card-select-option:hover,
+        .job-card-select-option:focus-visible {
+            background: #F5F3FF;
+            color: #6D28D9;
+            outline: none;
+        }
+
+        .job-card-select-option.is-selected {
+            background: #EDE9FE;
+            color: #5B21B6;
+        }
+
+        .job-card-select-option i { margin-left: auto; color: #7C3AED; }
+
+        .field-control-wrap:has(.job-card-custom-select) {
+            overflow: visible !important;
+            z-index: 20;
+        }
+
+        @media (max-width: 576px) {
+            .job-card-select-menu { max-height: 210px; }
+        }
     </style>
 @endpush
 
@@ -641,7 +763,7 @@
                                         </label>
                                         <div class="field-control-wrap">
                                             <span class="form-field-icon"><i class="bi bi-person"></i></span>
-                                            <select name="customer_ids[]" id="customer_ids" class="no-nice-select" required style="border: 0 !important; outline: none !important; background: transparent !important; box-shadow: none !important; height: 100% !important; padding: 0 24px 0 4px !important; color: #1E293B !important; font-size: 0.88rem !important; font-weight: 500 !important; width: 100% !important; cursor: pointer; -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important;">
+                                            <select name="customer_ids[]" id="customer_ids" class="no-nice-select job-card-native-select" required>
                                                 <option value="">Select customer</option>
                                                 @foreach($customers as $customer)
                                                     <option value="{{ $customer->id }}">
@@ -652,7 +774,7 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <i class="bi bi-chevron-down ms-auto text-muted" style="pointer-events: none; font-size: 12px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                                <div class="job-card-custom-select" data-select-id="customer_ids"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -914,6 +1036,166 @@
                 });
             }
 
+            function closeJobCardCustomerDropdown(except = null) {
+                document.querySelectorAll('.job-card-custom-select.is-open').forEach(dropdown => {
+                    if (dropdown !== except) {
+                        dropdown.classList.remove('is-open');
+                        dropdown.querySelector('.job-card-select-trigger')?.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            function positionJobCardStaffDropdown(panel, trigger) {
+                if (!panel || !trigger) return;
+
+                const triggerRect = trigger.getBoundingClientRect();
+                const panelHeight = Math.min(panel.scrollHeight, 220);
+                const gap = 6;
+                const opensAbove = triggerRect.bottom + gap + panelHeight > window.innerHeight
+                    && triggerRect.top - gap - panelHeight > 8;
+
+                panel.style.left = `${Math.max(8, triggerRect.left)}px`;
+                panel.style.width = `${Math.min(Math.max(triggerRect.width, 260), window.innerWidth - 16)}px`;
+                panel.style.top = opensAbove
+                    ? `${Math.max(8, triggerRect.top - panelHeight - gap)}px`
+                    : `${triggerRect.bottom + gap}px`;
+            }
+
+            function positionJobCardCustomerDropdown(customSelect) {
+                const trigger = customSelect.querySelector('.job-card-select-trigger');
+                const menu = customSelect.querySelector('.job-card-select-menu');
+                if (!trigger || !menu) return;
+
+                const triggerRect = trigger.getBoundingClientRect();
+                const menuHeight = Math.min(menu.scrollHeight, window.innerWidth <= 576 ? 210 : 250);
+                const gap = 7;
+                const opensAbove = triggerRect.bottom + gap + menuHeight > window.innerHeight
+                    && triggerRect.top - gap - menuHeight > 8;
+
+                menu.style.left = `${Math.max(8, triggerRect.left)}px`;
+                const minimumWidth = customSelect.closest('.job-card-item-field-col') ? 260 : 320;
+                menu.style.width = `${Math.min(Math.max(triggerRect.width, minimumWidth), window.innerWidth - 16)}px`;
+                menu.style.top = opensAbove
+                    ? `${Math.max(8, triggerRect.top - menuHeight - gap)}px`
+                    : `${triggerRect.bottom + gap}px`;
+            }
+
+            function initializeJobCardCustomerDropdown() {
+                const select = document.getElementById('customer_ids');
+                const customSelect = document.querySelector('.job-card-custom-select[data-select-id="customer_ids"]');
+                if (!select || !customSelect || customSelect.dataset.initialized === 'true') return;
+
+                customSelect.dataset.initialized = 'true';
+                customSelect.innerHTML = `
+                    <button type="button" class="job-card-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="job-card-select-value"></span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="job-card-select-menu" role="listbox"></div>
+                `;
+
+                const trigger = customSelect.querySelector('.job-card-select-trigger');
+                const value = customSelect.querySelector('.job-card-select-value');
+                const menu = customSelect.querySelector('.job-card-select-menu');
+
+                function syncDropdown() {
+                    const selectedOption = select.options[select.selectedIndex];
+                    const selected = selectedOption && selectedOption.value !== '';
+                    value.textContent = selected ? selectedOption.textContent.trim() : 'Select customer';
+                    trigger.classList.toggle('is-placeholder', !selected);
+                    menu.querySelectorAll('.job-card-select-option').forEach(option => {
+                        const isSelected = option.dataset.value === select.value;
+                        option.classList.toggle('is-selected', isSelected);
+                        option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                        option.querySelector('i')?.classList.toggle('d-none', !isSelected);
+                    });
+                }
+
+                Array.from(select.options).forEach(option => {
+                    const optionButton = document.createElement('button');
+                    optionButton.type = 'button';
+                    optionButton.className = 'job-card-select-option';
+                    optionButton.dataset.value = option.value;
+                    optionButton.setAttribute('role', 'option');
+                    optionButton.innerHTML = `<span>${option.textContent.trim()}</span><i class="bi bi-check-lg d-none"></i>`;
+                    optionButton.addEventListener('click', () => {
+                        select.value = option.value;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        customSelect.classList.remove('is-open');
+                        trigger.setAttribute('aria-expanded', 'false');
+                    });
+                    menu.appendChild(optionButton);
+                });
+
+                trigger.addEventListener('click', () => {
+                    const isOpen = !customSelect.classList.contains('is-open');
+                    closeJobCardCustomerDropdown(customSelect);
+                    customSelect.classList.toggle('is-open', isOpen);
+                    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    if (isOpen) positionJobCardCustomerDropdown(customSelect);
+                });
+
+                select.addEventListener('change', syncDropdown);
+                syncDropdown();
+            }
+
+            function initializeJobCardServiceDropdown(select, customSelect) {
+                if (!select || !customSelect || customSelect.dataset.initialized === 'true') return;
+
+                customSelect.dataset.initialized = 'true';
+                customSelect.innerHTML = `
+                    <button type="button" class="job-card-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="job-card-select-value"></span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="job-card-select-menu" role="listbox"></div>
+                `;
+
+                const trigger = customSelect.querySelector('.job-card-select-trigger');
+                const value = customSelect.querySelector('.job-card-select-value');
+                const menu = customSelect.querySelector('.job-card-select-menu');
+
+                function syncDropdown() {
+                    const selectedOption = select.options[select.selectedIndex];
+                    const selected = selectedOption && selectedOption.value !== '';
+                    value.textContent = selected ? selectedOption.textContent.trim() : 'Select service';
+                    trigger.classList.toggle('is-placeholder', !selected);
+                    menu.querySelectorAll('.job-card-select-option').forEach(option => {
+                        const isSelected = option.dataset.value === select.value;
+                        option.classList.toggle('is-selected', isSelected);
+                        option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                        option.querySelector('i')?.classList.toggle('d-none', !isSelected);
+                    });
+                }
+
+                Array.from(select.options).forEach(option => {
+                    const optionButton = document.createElement('button');
+                    optionButton.type = 'button';
+                    optionButton.className = 'job-card-select-option';
+                    optionButton.dataset.value = option.value;
+                    optionButton.setAttribute('role', 'option');
+                    optionButton.innerHTML = `<span>${option.textContent.trim()}</span><i class="bi bi-check-lg d-none"></i>`;
+                    optionButton.addEventListener('click', () => {
+                        select.value = option.value;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        customSelect.classList.remove('is-open');
+                        trigger.setAttribute('aria-expanded', 'false');
+                    });
+                    menu.appendChild(optionButton);
+                });
+
+                trigger.addEventListener('click', () => {
+                    const isOpen = !customSelect.classList.contains('is-open');
+                    closeJobCardCustomerDropdown(customSelect);
+                    customSelect.classList.toggle('is-open', isOpen);
+                    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    if (isOpen) positionJobCardCustomerDropdown(customSelect);
+                });
+
+                select.addEventListener('change', syncDropdown);
+                syncDropdown();
+            }
+
             function openAddJobCardModal() {
                 closeAllJobCardActionMenus();
 
@@ -925,7 +1207,9 @@
                 document.getElementById('jobCardModalSubtitle').textContent = 'Create a new customer service job card.';
                 document.getElementById('jobCardSubmitButton').innerHTML = '<i class="bi bi-clipboard2-plus"></i> Create Job Card';
 
-                document.getElementById('customer_ids').value = '';
+                const customerSelect = document.getElementById('customer_ids');
+                customerSelect.value = '';
+                customerSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
                 setJobCardPaymentMethod('');
 
@@ -953,7 +1237,9 @@
                     ? jobCard.customers.map(c => String(c.id))
                     : (jobCard.customer_id ? [String(jobCard.customer_id)] : []);
 
-                document.getElementById('customer_ids').value = customerIds[0] || '';
+                const customerSelect = document.getElementById('customer_ids');
+                customerSelect.value = customerIds[0] || '';
+                customerSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
                 // Populate the single job-card-level payment method from the
                 // first service item's payment type (all items share one now).
@@ -1004,7 +1290,7 @@
                         <div class="job-card-item-field-col">
                             <label class="job-card-item-label">SERVICE</label>
                             <div class="job-card-input-box">
-                                <select name="service_items[${itemIndex}][service_id]" class="service-select" data-item-id="${itemId}" required>
+                                <select name="service_items[${itemIndex}][service_id]" class="service-select job-card-native-select" data-item-id="${itemId}" required>
                                     <option value="">Select service</option>
                                     @foreach($services as $service)
                                         <option value="{{ $service->id }}" data-subcategory="{{ $service->subcategory }}" data-category="{{ $service->category }}">
@@ -1012,7 +1298,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i class="bi bi-chevron-down job-card-select-arrow"></i>
+                                <div class="job-card-custom-select"></div>
                             </div>
                         </div>
 
@@ -1091,6 +1377,11 @@
                 const itemElement = wrapper.firstElementChild;
                 container.appendChild(itemElement);
 
+                initializeJobCardServiceDropdown(
+                    itemElement.querySelector('.service-select'),
+                    itemElement.querySelector('.job-card-custom-select')
+                );
+
                 // Populate with existing data if editing
                 if (itemData) {
                     const serviceSelect = itemElement.querySelector('.service-select');
@@ -1098,6 +1389,7 @@
                     const amountInput = itemElement.querySelector('.amount-input');
 
                     serviceSelect.value = itemData.service_id || '';
+                    serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
                     amountInput.value = itemData.amount || '';
 
                     // Load and select subcategory
@@ -1182,7 +1474,9 @@
                         });
 
                         if (panel) {
-                            panel.classList.toggle('is-open');
+                            const isOpen = !panel.classList.contains('is-open');
+                            panel.classList.toggle('is-open', isOpen);
+                            if (isOpen) positionJobCardStaffDropdown(panel, staffTrigger);
                         }
                         return;
                     }
@@ -1207,7 +1501,10 @@
                         } else {
                             // Reset the single item fields
                             const serv = item.querySelector('.service-select');
-                            if (serv) serv.value = '';
+                            if (serv) {
+                                serv.value = '';
+                                serv.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
                             const subcat = item.querySelector('.subcategory-select');
                             if (subcat) {
                                 subcat.disabled = true;
@@ -1228,6 +1525,20 @@
                     if (!e.target.closest('.job-card-staff-picker-wrap')) {
                         document.querySelectorAll('.job-card-staff-dropdown-panel').forEach(p => p.classList.remove('is-open'));
                     }
+                });
+
+                window.addEventListener('resize', function () {
+                    document.querySelectorAll('.job-card-staff-dropdown-panel.is-open').forEach(panel => {
+                        const trigger = panel.closest('.job-card-staff-picker-wrap')?.querySelector('.job-card-staff-trigger');
+                        positionJobCardStaffDropdown(panel, trigger);
+                    });
+                });
+
+                document.querySelector('.job-card-builder-scroll-area')?.addEventListener('scroll', function () {
+                    document.querySelectorAll('.job-card-staff-dropdown-panel.is-open').forEach(panel => {
+                        const trigger = panel.closest('.job-card-staff-picker-wrap')?.querySelector('.job-card-staff-trigger');
+                        positionJobCardStaffDropdown(panel, trigger);
+                    });
                 });
 
                 // Add Service button click
@@ -1580,6 +1891,22 @@
                     button.disabled = false;
                     button.textContent = 'Delete';
                 }
+            });
+
+            initializeJobCardCustomerDropdown();
+
+            document.addEventListener('click', function (event) {
+                if (!event.target.closest('.job-card-custom-select')) {
+                    closeJobCardCustomerDropdown();
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                document.querySelectorAll('.job-card-custom-select.is-open').forEach(positionJobCardCustomerDropdown);
+            });
+
+            document.querySelector('.job-card-builder-scroll-area')?.addEventListener('scroll', function () {
+                document.querySelectorAll('.job-card-custom-select.is-open').forEach(positionJobCardCustomerDropdown);
             });
 
             // Form submission handler
