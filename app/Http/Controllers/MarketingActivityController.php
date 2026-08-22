@@ -36,6 +36,8 @@ class MarketingActivityController extends Controller
     {
         $search = trim((string) $request->input('search', ''));
         $activityDate = trim((string) $request->input('activity_date', ''));
+        $dateFrom = trim((string) $request->input('date_from', ''));
+        $dateTo = trim((string) $request->input('date_to', ''));
         $marketingType = trim((string) $request->input('marketing_type', ''));
         $location = trim((string) $request->input('location', ''));
         $staffId = trim((string) $request->input('staff_id', ''));
@@ -65,6 +67,12 @@ class MarketingActivityController extends Controller
         */
         if ($activityDate !== '') {
             $query->whereDate('activity_date', $activityDate);
+        }
+        if ($dateFrom !== '') {
+            $query->whereDate('activity_date', '>=', $dateFrom);
+        }
+        if ($dateTo !== '') {
+            $query->whereDate('activity_date', '<=', $dateTo);
         }
 
         /*
@@ -148,6 +156,8 @@ class MarketingActivityController extends Controller
             'marketingTypes',
             'search',
             'activityDate',
+            'dateFrom',
+            'dateTo',
             'marketingType',
             'location',
             'staffId',

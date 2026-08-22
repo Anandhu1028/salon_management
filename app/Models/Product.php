@@ -14,10 +14,12 @@ class Product extends Model
         'product_name',
         'category',
         'subcategory',
+        'price',
         'status',
     ];
 
     protected $casts = [
+        'price' => 'decimal:2',
     ];
 
     public function purchases(): HasMany

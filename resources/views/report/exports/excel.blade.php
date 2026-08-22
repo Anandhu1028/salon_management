@@ -188,16 +188,23 @@
                 <th style="width: 120px;">Date</th>
                 <th style="width: 200px;">Expense Name</th>
                 <th style="width: 150px;">Category</th>
-                <th style="width: 150px;">Vendor / Payee</th>
+                <th style="width: 150px;">Staff Name</th>
                 <th style="width: 120px;">Payment Type</th>
                 <th class="text-right" style="width: 140px;">Amount (₹)</th>
             </tr>
-            <tr>
-                <td colspan="7" class="text-center" style="padding: 20px; color: #64748B;">No expense records available for this period.</td>
-            </tr>
+            @forelse($expenseRows as $expense)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td><td>{{ $expense->expense_date->format('d M Y') }}</td>
+                    <td>{{ $expense->description ?: '—' }}</td><td>{{ $expense->category?->name ?? '—' }}</td>
+                    <td>{{ $expense->staff?->name ?? '—' }}</td><td>{{ $expense->payment_method ?: '—' }}</td>
+                    <td class="text-right">₹{{ number_format($expense->amount, 2) }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="7" class="text-center" style="padding: 20px; color: #64748B;">No expense records available for this period.</td></tr>
+            @endforelse
             <tr class="total-row">
                 <td colspan="6" class="text-right text-bold">Grand Total</td>
-                <td class="text-right grand-total-val">₹0.00</td>
+                <td class="text-right grand-total-val">₹{{ number_format($expenseRows->sum('amount'), 2) }}</td>
             </tr>
         </table>
     @endif

@@ -4,1238 +4,1020 @@
 @section('page-title', 'Complaints')
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/job-card/job-card.css') }}">
     <link rel="stylesheet" href="{{ asset('css/management/module-lists.css') }}">
     <style>
-
         /* ============================================================
-           STAT CARDS (top row)
+           COMPLAINT LIST TABLE — 9-column grid layout
            ============================================================ */
-
-        .complaint-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .complaint-stat-card {
-            position: relative;
-            background: #FFFFFF;
-            border: 1px solid #E8EDF3;
-            border-radius: 16px;
-            padding: 16px 18px;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-            overflow: hidden;
-        }
-
-        .complaint-stat-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .complaint-stat-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            color: #fff;
-        }
-
-        .complaint-stat-icon--indigo { background: linear-gradient(135deg, #818CF8, #6366F1); }
-        .complaint-stat-icon--orange { background: linear-gradient(135deg, #FBBF24, #F59E0B); }
-        .complaint-stat-icon--green  { background: linear-gradient(135deg, #4ADE80, #22C55E); }
-        .complaint-stat-icon--amber  { background: linear-gradient(135deg, #FB923C, #F97316); }
-
-        .complaint-stat-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .complaint-stat-dot--indigo { background: #6366F1; }
-        .complaint-stat-dot--orange { background: #F59E0B; }
-        .complaint-stat-dot--green  { background: #22C55E; }
-        .complaint-stat-dot--amber  { background: #F97316; }
-
-        .complaint-stat-label {
-            font-size: 0.68rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #94A3B8;
-            margin-bottom: 6px;
-        }
-
-        .complaint-stat-value {
-            font-size: 1.7rem;
-            font-weight: 800;
-            color: #0F172A;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
-
-        .complaint-stat-sub {
-            font-size: 0.78rem;
-            color: #94A3B8;
-            font-weight: 500;
-        }
-
-        .complaint-stat-spark {
-            position: absolute;
-            right: 14px;
-            bottom: 14px;
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 26px;
-            opacity: 0.55;
-        }
-
-        .complaint-stat-spark span {
-            display: inline-block;
-            width: 4px;
-            border-radius: 2px;
-        }
-
-        .complaint-stat-spark--indigo span { background: #A5B4FC; }
-        .complaint-stat-spark--orange span { background: #FCD34D; }
-        .complaint-stat-spark--green span  { background: #86EFAC; }
-        .complaint-stat-spark--amber span  { background: #FDBA74; }
-
-        @media (max-width: 992px) {
-            .complaint-stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 576px) {
-            .complaint-stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ============================================================
-           COMPLAINT PAGE — premium list styling (mirrors Job Card UI)
-           ============================================================ */
-
-        .complaint-page .content-card {
-            background: #FFFFFF;
-            border: 1px solid #E8EDF3;
-            border-radius: 14px;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-            overflow: hidden;
-        }
-
-        .complaint-page .content-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 18px 20px;
-            border-bottom: 1px solid #E8EDF3;
-        }
-
-        .complaint-page .content-card-header h2 {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: #0F172A;
-            margin: 0;
-        }
-
-        .complaint-page .content-card-header span {
-            font-size: 0.8rem;
-            color: #94A3B8;
-            font-weight: 600;
-        }
-
-        .complaint-page .mgmt-top-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .complaint-page .mgmt-top-actions .mgmt-title h4 {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #0F172A;
-            margin: 0 0 2px 0;
-        }
-
-        .complaint-page .mgmt-top-actions .mgmt-title small {
-            color: #94A3B8;
-            font-weight: 500;
-        }
-
-        .complaint-page .btn-add-complaint {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            border-radius: 11px;
-            border: none;
-            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
-            transition: transform .16s ease, box-shadow .16s ease;
-        }
-
-        .complaint-page .btn-add-complaint:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 14px rgba(99, 102, 241, 0.32);
-            color: #fff;
-        }
-
-        /* ---- Search box (header) ---- */
-
-        .complaint-search {
-            margin: 0;
-        }
-
-        .complaint-search .search-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 240px;
-            height: 40px;
-            padding: 0 14px;
-            border: 1.5px solid #E2E8F0;
-            border-radius: 10px;
-            background: #F8FAFC;
-            transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
-        }
-
-        .complaint-search .search-box:focus-within {
-            border-color: #8B5CF6;
-            background: #fff;
-            box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.12);
-        }
-
-        .complaint-search .search-box i.bi-search {
-            color: #94A3B8;
-            font-size: 0.9rem;
-        }
-
-        .complaint-search .search-box input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 0.85rem;
-            color: #1E293B;
-            font-weight: 500;
-        }
-
-        .complaint-search .search-box a {
-            color: #94A3B8;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* ---- Grid list ---- */
-
-        .complaint-list {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .complaint-list-head,
-        .complaint-list-item {
-            display: grid;
-            grid-template-columns:
+        .complaint-page .premium-list--complaints {
+            --complaint-grid:
                 44px
-                minmax(170px, 1.1fr)
-                minmax(140px, 0.95fr)
-                minmax(180px, 1.2fr)
-                minmax(180px, 1.2fr)
-                120px
-                130px
-                90px;
-            align-items: center;
-            column-gap: 12px;
-            padding: 0 20px;
+                minmax(180px, 1.3fr)
+                minmax(140px, 1fr)
+                minmax(150px, 1.1fr)
+                minmax(180px, 1.4fr)
+                minmax(160px, 1.2fr)
+                110px
+                110px
+                70px;
         }
 
-        .complaint-list-head {
-            background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
-            border-bottom: 1px solid #E8EDF3;
-            padding-top: 12px;
-            padding-bottom: 12px;
+        .complaint-page .premium-list--complaints .premium-list-head,
+        .complaint-page .premium-list--complaints .premium-list-item {
+            grid-template-columns: var(--complaint-grid) !important;
+            min-width: 1180px !important;
         }
 
-        .complaint-head-cell {
-            font-size: 0.68rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #64748B;
+        .complaint-page .premium-list--complaints .premium-list-head {
+            gap: 12px !important;
         }
 
-        .complaint-head-cell.col-center { text-align: center; }
-        .complaint-head-cell.col-left { text-align: left; }
-
-        .complaint-list-item {
-            padding-top: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #F1F5F9;
-            transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
-            position: relative;
+        .complaint-page .premium-list--complaints .premium-list-item {
+            gap: 12px !important;
+            min-height: 68px;
         }
 
-        .complaint-list-item:last-child {
-            border-bottom: none;
-        }
-
-        .complaint-list-item:hover {
-            transform: translateY(-1px);
-            background-color: #FAFAFF;
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.08);
-            z-index: 1;
-        }
-
-        .complaint-list-item.action-menu-row-open {
-            z-index: 40;
-        }
-
-        .complaint-col-num {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #94A3B8;
-            text-align: center;
-        }
-
-        /* Staff cell */
-        .complaint-staff-cell {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-align: left;
-        }
-
-        .complaint-staff-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            flex-shrink: 0;
+        .complaint-page .complaint-cell-center {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: #fff;
-            background: linear-gradient(135deg, #818CF8 0%, #6366F1 60%, #7C3AED 100%);
-            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+            min-width: 0;
         }
 
-        .complaint-staff-info {
+        .complaint-page .complaint-jobcard-cell {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
             min-width: 0;
         }
 
-        .complaint-staff-name {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #0F172A;
+        .complaint-page .complaint-code {
+            font-size: .6875rem;
+            font-weight: 600;
+            color: #6366F1;
+            letter-spacing: 0.03em;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .complaint-staff-role {
-            font-size: 0.72rem;
-            font-weight: 500;
+        .complaint-page .complaint-customer-sub {
+            font-size: .75rem;
+            font-weight: 600;
             color: #94A3B8;
-        }
-
-        /* Complaint type pill — dot marker + text, matching the reference design */
-        .complaint-col-type {
-            text-align: center;
-        }
-
-        .complaint-type-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            padding: 5px 12px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            font-size: 0.72rem;
-            font-weight: 700;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        .complaint-type-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            flex-shrink: 0;
-        }
-
-        /* Customer Behavior */
-        .complaint-type-customer {
-            color: #4F46E5;
-            background: #EEF2FF;
-        }
-
-        /* Service Issue */
-        .complaint-type-service {
-            color: #C2410C;
-            background: #FFF7ED;
-        }
-
-        /* Staff Behavior */
-        .complaint-type-staff {
-            color: #7C3AED;
-            background: #FAF5FF;
-        }
-
-        /* Product Issue */
-        .complaint-type-product {
-            color: #BE185D;
-            background: #FDF2F8;
-        }
-
-        /* Appointment Issue */
-        .complaint-type-appointment {
-            color: #0891B2;
-            background: #ECFEFF;
-        }
-
-        /* Payment Issue */
-        .complaint-type-payment {
-            color: #6D28D9;
-            background: #F5F3FF;
-        }
-
-        /* Fallback */
-        .complaint-type-default {
-            color: #64748B;
-            background: #F8FAFC;
-        }
-
-        /* Reason / Action taken */
-        .complaint-col-reason,
-        .complaint-col-action {
-            text-align: center;
-            min-width: 0;
-        }
-
-        .complaint-text-ellipsis {
-            display: block;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: #64748B;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
         }
 
-        /* Compensation (optional field) */
-        .complaint-col-compensation {
-            text-align: center;
-        }
-
-        .complaint-compensation-val {
+        .complaint-page .complaint-text-box {
             display: block;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #1E293B;
-        }
-
-        .complaint-compensation-tag {
-            font-size: 0.68rem;
-            font-weight: 600;
-            color: #16A34A;
-            margin-top: 1px;
-        }
-
-        /* Date */
-        .complaint-col-date {
-            text-align: center;
-        }
-
-        .complaint-date-val {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .complaint-date-val i {
-            font-size: 0.8rem;
-            color: #94A3B8;
-        }
-
-        /* Actions */
-        .complaint-col-actions {
-            text-align: center;
-            position: relative;
-        }
-
-        .complaint-action-menu-wrap {
-            position: relative;
-            display: inline-flex;
-        }
-
-        .complaint-action-dots {
-            width: 32px;
-            height: 32px;
-            border-radius: 9px;
-            border: 1px solid #E2E8F0;
-            background: #fff;
-            color: #64748B;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: .16s ease;
-        }
-
-        .complaint-action-dots:hover,
-        .complaint-action-dots.is-open {
-            background: #F5F3FF;
-            border-color: #C4B5FD;
-            color: #6D28D9;
-        }
-
-        .complaint-action-popover {
-            position: absolute;
-            top: calc(100% + 6px);
-            right: 0;
-            min-width: 190px;
-            background: #fff;
-            border: 1px solid #E8EDF3;
-            border-radius: 12px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
-            padding: 6px;
-            display: none;
-            flex-direction: column;
-            gap: 2px;
-            z-index: 50;
-        }
-
-        .complaint-action-menu-wrap.is-open .complaint-action-popover {
-            display: flex;
-        }
-
-        .complaint-popover-action {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            border: none;
-            background: transparent;
-            padding: 8px 10px;
-            border-radius: 9px;
-            font-size: 0.82rem;
-            font-weight: 600;
+            max-width: 100%;
+            font-size: .82rem;
+            font-weight: 500;
             color: #334155;
-            text-align: left;
-            transition: background-color .14s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .complaint-popover-action:hover {
-            background: #F8FAFC;
+        .complaint-page .complaint-action-box {
+            display: block;
+            max-width: 100%;
+            font-size: .82rem;
+            font-weight: 500;
+            color: #16A34A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .complaint-popover-icon {
-            width: 26px;
-            height: 26px;
-            border-radius: 8px;
+        .complaint-page .complaint-compensation-pill {
             display: inline-flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            gap: 1px;
+        }
+
+        .complaint-page .complaint-comp-amount {
+            font-size: .84rem;
+            font-weight: 700;
+            color: #0F172A;
+            white-space: nowrap;
+        }
+
+        .complaint-page .complaint-comp-badge {
+            font-size: .62rem;
+            font-weight: 700;
+            color: #16A34A;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .complaint-page .complaint-date-text {
+            font-size: .82rem;
+            font-weight: 600;
+            color: #64748B;
+            white-space: nowrap;
+        }
+
+        .complaint-page .complaint-service-chip {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            max-width: 100%;
+        }
+
+        .complaint-page .complaint-service-name {
+            font-size: .82rem;
+            font-weight: 700;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .complaint-page .complaint-category-tag {
+            font-size: .68rem;
+            font-weight: 600;
+            color: #6366F1;
+            background: #EEF2FF;
+            padding: 1px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .complaint-page .complaint-staff-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .complaint-page .complaint-staff-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366F1, #4F46E5);
+            color: #FFFFFF;
+            font-size: .72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
 
-        .complaint-popover-icon--edit {
-            background: #EDE9FE;
-            color: #6D28D9;
-        }
-
-        .complaint-popover-icon--delete {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .complaint-popover-action--danger {
-            color: #DC2626;
-        }
-
-        .complaint-popover-divider {
-            height: 1px;
-            background: #F1F5F9;
-            margin: 4px 2px;
-        }
-
-        .complaint-delete-form {
-            margin: 0;
-        }
-
-        /* Empty state (mirrors Job Card empty state) */
-        .complaint-empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .complaint-empty-state-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: #F5F3FF;
-            color: #8B5CF6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 16px;
-        }
-
-        .complaint-empty-state h3 {
-            font-size: 1rem;
-            font-weight: 800;
+        .complaint-page .complaint-staff-name {
+            font-size: .82rem;
+            font-weight: 700;
             color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .complaint-page .complaint-list-actions,
+        .complaint-page .premium-list--complaints .complaint-list-actions,
+        .complaint-page .premium-list--complaints .pli-col-actions {
+            grid-column: 9 !important;
+            grid-row: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: visible !important;
+        }
+
+        .complaint-page .premium-list--complaints .premium-list-head .pli-head-cell:last-child {
+            grid-column: 9 !important;
+            grid-row: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Ensure 3-dot action popover opens downward and stays on top */
+        .complaint-page .content-card,
+        .complaint-page .premium-list,
+        .complaint-page .premium-list--complaints {
+            overflow: visible !important;
+        }
+
+        .complaint-page .premium-list-item {
+            position: relative;
+        }
+
+        .complaint-page .premium-list-item.action-menu-row-open {
+            z-index: 100 !important;
+        }
+
+        .complaint-page .pli-action-menu-wrap {
+            position: relative;
+        }
+
+        .complaint-page .pli-action-menu-wrap.is-open {
+            z-index: 105 !important;
+        }
+
+        .complaint-page .pli-action-popover,
+        .complaint-page .premium-list-item:last-child .pli-action-popover,
+        .complaint-page .premium-list-item.pli-open-upward .pli-action-popover,
+        .complaint-page .premium-list-item:last-child .pli-action-menu-wrap.is-open .pli-action-popover,
+        .complaint-page .premium-list-item.pli-open-upward .pli-action-menu-wrap.is-open .pli-action-popover {
+            top: calc(100% + 6px) !important;
+            bottom: auto !important;
+            right: 0 !important;
+            left: auto !important;
+            z-index: 120 !important;
+            transform-origin: top right !important;
+            transform: translateY(0) scale(1) !important;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15) !important;
+        }
+
+        /* Detail Modal Styles */
+        .complaint-detail-quote {
+            background: #F8FAFC;
+            border-left: 3.5px solid #6366F1;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            margin-top: 14px;
+        }
+
+        .complaint-detail-quote-label {
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #64748B;
             margin-bottom: 4px;
         }
 
-        .complaint-empty-state p {
-            font-size: 0.85rem;
-            color: #94A3B8;
-            margin-bottom: 16px;
+        .complaint-detail-quote-text {
+            font-size: .88rem;
+            font-weight: 500;
+            color: #1E293B;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
 
-        /* Final visual alignment with the shared Job Card / Purchase list */
-        .complaint-page .complaint-list {
-            gap: 8px;
-            padding: 0 14px 16px;
-            overflow-x: auto;
+        .complaint-detail-quote--success {
+            background: #F0FDF4;
+            border-left-color: #22C55E;
         }
 
-        .complaint-page .complaint-list-head {
-            margin-top: 12px;
-            border: 1px solid #E0E7FF;
-            border-radius: 13px;
-            background: linear-gradient(135deg,#F8FAFF 0%,#EEF2FF 55%,#F5F3FF 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
-            position: sticky;
-            top: 0;
-            z-index: 4;
+        .complaint-detail-quote--success .complaint-detail-quote-label {
+            color: #15803D;
         }
 
-        .complaint-page .complaint-list-item {
-            border: 1px solid #E8EDF3;
-            border-radius: 14px;
-            background: linear-gradient(145deg,#FFFFFF 0%,#FCFDFF 100%);
-            box-shadow: 0 1px 2px rgba(15,23,42,.025);
-            margin: 0;
-        }
-
-        .complaint-page .complaint-list-item:last-child {
-            border-bottom: 1px solid #E8EDF3;
-        }
-
-        .complaint-page .complaint-list-item:hover {
-            border-color:#C7D2FE;
-            background:linear-gradient(145deg,#FFFFFF 0%,#F8FAFF 100%);
-            box-shadow:0 8px 24px rgba(99,102,241,.09);
-        }
-
-        .complaint-page .complaint-head-cell {
-            font-size:.625rem;
-            letter-spacing:.08em;
-        }
-
-        .complaint-page .complaint-action-dots {
-            width:34px;
-            height:34px;
-        }
-
-        .complaint-page .complaint-search .search-box {
-            background:#F8FAFC;
-            border:1.5px solid #E2E8F0;
-            border-radius:11px;
-        }
-
-        .complaint-page .complaint-search .search-box:focus-within {
-            background:#fff;
-            border-color:#8B5CF6;
-            box-shadow:0 0 0 3px rgba(139,92,246,.10);
-        }
-
-        .complaint-page .complaint-stats-grid {
-            margin-bottom:22px;
-        }
-
-        .complaint-page .complaint-stat-card {
-            min-height:148px;
-            border-radius:18px;
-            padding:20px 22px 18px;
-            background:linear-gradient(148deg,#FFFFFF 0%,#F8F7FF 42%,#EEF2FF 100%);
-            box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 32px rgba(15,23,42,.06);
-            transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-        }
-
-        .complaint-page .complaint-stat-card:hover {
-            transform:translateY(-3px);
-            box-shadow:0 2px 4px rgba(15,23,42,.04),0 14px 34px rgba(15,23,42,.10);
-        }
-
-        .complaint-page .complaint-stat-icon {
-            width:46px;
-            height:46px;
-            border-radius:14px;
-            box-shadow:0 7px 18px rgba(99,102,241,.22);
-        }
-
-        .complaint-page .complaint-stat-label {
-            color:#64748B;
-        }
-
-        .complaint-page .complaint-stat-value {
-            color:#4338CA;
-            font-size:1.9rem;
-        }
-
-        .complaint-page .complaint-stat-sub {
-            color:#94A3B8;
-        }
-
-        .complaint-page .complaint-stat-dot {
-            box-shadow:0 0 0 4px rgba(99,102,241,.12);
-        }
-
-        /* Mobile / responsive */
-        @media (max-width: 992px) {
-            .complaint-list-head,
-            .complaint-list-item {
-                grid-template-columns:
-                    36px
-                    minmax(150px, 1.1fr)
-                    minmax(130px, 0.95fr)
-                    minmax(160px, 1.2fr)
-                    minmax(160px, 1.2fr)
-                    110px
-                    120px
-                    60px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .complaint-list-head {
-                display: none;
-            }
-
-            .complaint-list-item {
-                grid-template-columns: 1fr;
-                row-gap: 8px;
-                padding: 14px 16px;
-            }
-
-            .complaint-col-num { display: none; }
-
-            .complaint-col-reason,
-            .complaint-col-action,
-            .complaint-col-compensation,
-            .complaint-col-date,
-            .complaint-col-type {
-                text-align: left;
-            }
-
-            .complaint-text-ellipsis {
-                white-space: normal;
-            }
-
-            .complaint-col-actions {
-                text-align: right;
-                position: absolute;
-                top: 12px;
-                right: 12px;
-            }
-
-            .complaint-action-dots-mobile {
-                width: 30px;
-                height: 30px;
-                border-radius: 9px;
-                border: 1px solid #E2E8F0;
-                background: #fff;
-                color: #64748B;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .complaint-action-menu-wrap.d-desktop-only {
-                display: none !important;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .complaint-dropdown-mobile {
-                display: none !important;
-            }
+        .complaint-detail-quote--success .complaint-detail-quote-text {
+            color: #14532D;
         }
     </style>
 @endpush
 
 @section('content')
+<div class="job-card-page complaint-page management-page">
+    @include('partials.mgmt-top-actions', [
+        'addLabel' => 'Add Complaint',
+        'addModal' => '#complaintModal',
+        'addOnclick' => 'openComplaint()',
+        'filterModule' => 'complaints',
+        'filterRoute' => route('complaints.index'),
+        'filterData' => ['staff' => $staff, 'services' => $services],
+    ])
 
-    <div class="complaint-page management-page">
-        <div class="mgmt-top-actions">
-           
-            <button type="button" class="btn-add-complaint" onclick="openComplaint()">
-                <i class="bi bi-plus-lg"></i> Add Complaint
-            </button>
+    {{-- Statistics Cards --}}
+    <div class="mgmt-stats-grid mgmt-stats-grid--4">
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'indigo',
+            'icon' => 'people-purple',
+            'label' => 'Total Complaints',
+            'value' => $totalComplaintsCount,
+            'subtext' => 'All complaint records',
+            'sparkColor' => '#6366F1',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'orange',
+            'icon' => 'calendar-orange',
+            'label' => 'Pending',
+            'value' => $pendingComplaintsCount,
+            'subtext' => 'Need attention',
+            'sparkColor' => '#F59E0B',
+            'trend' => '0.0',
+            'trendUp' => false,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'green',
+            'icon' => 'check-green',
+            'label' => 'Resolved',
+            'value' => $resolvedComplaintsCount,
+            'subtext' => 'Successfully handled',
+            'sparkColor' => '#22C55E',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+        @include('partials.mgmt-stat-card', [
+            'theme' => 'orange',
+            'icon' => 'rupee-green',
+            'label' => 'Total Compensation',
+            'value' => '₹' . number_format($totalCompensationSum, 2),
+            'subtext' => 'All compensation paid',
+            'sparkColor' => '#F59E0B',
+            'trend' => '0.0',
+            'trendUp' => true,
+        ])
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    @endif
 
-        {{-- Premium Statistics --}}
-        <div class="mgmt-stats-grid mgmt-stats-grid--4">
-            @include('partials.mgmt-stat-card', [
-                'theme' => 'indigo',
-                'icon' => 'people-purple',
-                'label' => 'Total Complaints',
-                'value' => $totalComplaintsCount,
-                'subtext' => 'All complaint records',
-                'sparkColor' => '#6366F1',
-                'trend' => '0.0',
-                'trendUp' => true,
-            ])
-            @include('partials.mgmt-stat-card', [
-                'theme' => 'orange',
-                'icon' => 'calendar-orange',
-                'label' => 'Pending',
-                'value' => $pendingComplaintsCount,
-                'subtext' => 'Need attention',
-                'sparkColor' => '#F59E0B',
-                'trend' => '0.0',
-                'trendUp' => false,
-            ])
-            @include('partials.mgmt-stat-card', [
-                'theme' => 'green',
-                'icon' => 'check-green',
-                'label' => 'Resolved',
-                'value' => $resolvedComplaintsCount,
-                'subtext' => 'Successfully handled',
-                'sparkColor' => '#22C55E',
-                'trend' => '0.0',
-                'trendUp' => true,
-            ])
-            @include('partials.mgmt-stat-card', [
-                'theme' => 'orange',
-                'icon' => 'rupee-green',
-                'label' => 'Total Compensation',
-                'value' => '₹' . number_format($totalCompensationSum, 2),
-                'subtext' => 'Total compensation',
-                'sparkColor' => '#F59E0B',
-                'trend' => '0.0',
-                'trendUp' => true,
-            ])
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    @endif
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show mb-3">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="content-card">
+        <div class="content-card-header">
+            <div>
+                <h2>Complaint List</h2>
+                <span>{{ $complaints->total() }} total complaints</span>
             </div>
-        @endif
-
-        <div class="content-card">
-
-            <div class="content-card-header">
-                <div>
-                    <h2>Complaint List</h2>
-                    <span>{{ $complaints->total() }} total complaints</span>
-                </div>
-
-                <form method="GET" action="{{ route('complaints.index') }}" class="complaint-search">
+            <div class="content-card-header-actions">
+                <form method="GET" action="{{ route('complaints.index') }}" class="job-card-search">
+                    <input type="hidden" name="date_from" value="{{ $dateFrom }}"><input type="hidden" name="date_to" value="{{ $dateTo }}"><input type="hidden" name="status" value="{{ $statusFilter }}"><input type="hidden" name="staff_id" value="{{ $staffId }}"><input type="hidden" name="service_id" value="{{ $serviceId }}">
                     <div class="search-box">
                         <i class="bi bi-search"></i>
                         <input type="text" name="search" value="{{ $search }}" placeholder="Search complaints...">
                         @if($search)
-                            <a href="{{ route('complaints.index') }}" title="Clear search">
-                                <i class="bi bi-x"></i>
-                            </a>
+                            <a href="{{ route('complaints.index') }}" class="text-muted" title="Clear search"><i class="bi bi-x"></i></a>
                         @endif
                     </div>
                 </form>
             </div>
-
-            @if($complaints->count())
-
-                @php
-                    $complaintListStart = ($complaints->currentPage() - 1) * $complaints->perPage();
-                @endphp
-
-                <div class="complaint-list">
-                    <div class="complaint-list-head">
-                        <span class="complaint-head-cell col-center">#</span>
-                        <span class="complaint-head-cell col-left">Staff</span>
-                        <span class="complaint-head-cell col-center">Complaint Type</span>
-                        <span class="complaint-head-cell col-center">Reason</span>
-                        <span class="complaint-head-cell col-center">Action Taken</span>
-                        <span class="complaint-head-cell col-center">Compensation</span>
-                        <span class="complaint-head-cell col-center">Date</span>
-                        <span class="complaint-head-cell col-center">Actions</span>
-                    </div>
-
-                    @foreach($complaints as $complaint)
-                        @php
-                            $complaintTypeKey = strtolower(trim($complaint->complaint_type_text ?? ''));
-
-                            $complaintTypeClass = match (true) {
-                                str_contains($complaintTypeKey, 'customer') => 'complaint-type-customer',
-                                str_contains($complaintTypeKey, 'service') => 'complaint-type-service',
-                                str_contains($complaintTypeKey, 'staff') => 'complaint-type-staff',
-                                str_contains($complaintTypeKey, 'product') => 'complaint-type-product',
-                                str_contains($complaintTypeKey, 'appointment') => 'complaint-type-appointment',
-                                str_contains($complaintTypeKey, 'payment') => 'complaint-type-payment',
-                                default => 'complaint-type-default',
-                            };
-
-                            $complaintStaffName = $complaint->staff?->name ?? '—';
-                            $complaintStaffInitial = $complaintStaffName !== '—' ? strtoupper(substr($complaintStaffName, 0, 1)) : '?';
-                            $complaintStaffRole = $complaint->staff?->role ?? null;
-
-                            $complaintCompensation = (float) ($complaint->compensation ?? 0);
-                        @endphp
-
-                        <article class="complaint-list-item" id="complaint-row-{{ $complaint->id }}">
-
-                            <div class="complaint-col-num">{{ $complaintListStart + $loop->iteration }}</div>
-
-                            <div class="complaint-col col-left">
-                                <div class="complaint-staff-cell">
-                                    <div class="complaint-staff-avatar">{{ $complaintStaffInitial }}</div>
-                                    <div class="complaint-staff-info">
-                                        <span class="complaint-staff-name">{{ $complaintStaffName }}</span>
-                                        @if($complaintStaffRole)
-                                            <span class="complaint-staff-role">{{ $complaintStaffRole }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="complaint-col complaint-col-type">
-                                @if($complaint->complaint_type_text)
-                                    <span class="complaint-type-pill {{ $complaintTypeClass }}">
-                                        <span class="complaint-type-dot"></span>
-                                        <span>{{ $complaint->complaint_type_text }}</span>
-                                    </span>
-                                @else
-                                    <span class="complaint-text-ellipsis">—</span>
-                                @endif
-                            </div>
-
-                            <div class="complaint-col complaint-col-reason">
-                                <span class="complaint-text-ellipsis" title="{{ $complaint->reason }}">
-                                    {{ $complaint->reason ?: '—' }}
-                                </span>
-                            </div>
-
-                            <div class="complaint-col complaint-col-action">
-                                <span class="complaint-text-ellipsis" title="{{ $complaint->action_taken }}">
-                                    {{ $complaint->action_taken ?: '—' }}
-                                </span>
-                            </div>
-
-                            {{-- Compensation is optional — falls back to ₹0.00 with no "Compensation" tag when empty --}}
-                            <div class="complaint-col complaint-col-compensation">
-                                <span class="complaint-compensation-val">₹{{ number_format($complaintCompensation, 2) }}</span>
-                                @if($complaintCompensation > 0)
-                                    <div class="complaint-compensation-tag">Compensation</div>
-                                @endif
-                            </div>
-
-                            <div class="complaint-col complaint-col-date">
-                                <span class="complaint-date-val">
-                                    <i class="bi bi-calendar3"></i>
-                                    {{ $complaint->complaint_date?->format('d/m/Y') ?? '—' }}
-                                </span>
-                            </div>
-
-                            <div class="complaint-col complaint-col-actions">
-
-                                {{-- Mobile dropdown --}}
-                                <div class="dropdown complaint-dropdown-mobile">
-                                    <button class="complaint-action-dots-mobile" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <button type="button" class="dropdown-item" onclick='openComplaint(@json($complaint))'>
-                                                <i class="bi bi-pencil me-2"></i> Edit Complaint
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1"></li>
-                                        <li>
-                                            <form method="POST" action="{{ route('complaints.destroy', $complaint) }}" class="complaint-delete-form">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger"
-                                                    onclick="return confirm('Delete complaint?')">
-                                                    <i class="bi bi-trash3 me-2"></i> Delete Complaint
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                {{-- Desktop popover --}}
-                                <div class="complaint-action-menu-wrap d-desktop-only">
-                                    <button
-                                        type="button"
-                                        class="complaint-action-dots"
-                                        aria-label="Complaint actions"
-                                        aria-expanded="false"
-                                        onclick="toggleComplaintActions(this)"
-                                    >
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-
-                                    <div class="complaint-action-popover">
-
-                                        <button
-                                            type="button"
-                                            class="complaint-popover-action"
-                                            onclick='openComplaint(@json($complaint)); closeComplaintActions(this)'
-                                        >
-                                            <span class="complaint-popover-icon complaint-popover-icon--edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </span>
-                                            <span>Edit Complaint</span>
-                                        </button>
-
-                                        <div class="complaint-popover-divider"></div>
-
-                                        <form method="POST" action="{{ route('complaints.destroy', $complaint) }}" class="complaint-delete-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button
-                                                type="submit"
-                                                class="complaint-popover-action complaint-popover-action--danger"
-                                                onclick="return confirm('Delete complaint?')"
-                                            >
-                                                <span class="complaint-popover-icon complaint-popover-icon--delete">
-                                                    <i class="bi bi-trash3"></i>
-                                                </span>
-                                                <span>Delete Complaint</span>
-                                            </button>
-                                        </form>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </article>
-                    @endforeach
-                </div>
-
-                <div class="p-3">
-                    {{ $complaints->links() }}
-                </div>
-
-            @else
-
-                <div class="complaint-empty-state">
-                    <div class="complaint-empty-state-icon">
-                        <i class="bi bi-exclamation-circle"></i>
-                    </div>
-                    <h3>No complaints found</h3>
-                    <p>{{ $search ? 'No complaints match your search.' : 'Staff complaint records will appear here.' }}</p>
-                    <button type="button" class="btn-add-complaint" onclick="openComplaint()">
-                        <i class="bi bi-plus-lg"></i> Add Complaint
-                    </button>
-                </div>
-
-            @endif
-
         </div>
 
+        @if($complaints->count())
+            @php
+                $complaintListStart = ($complaints->currentPage() - 1) * $complaints->perPage();
+            @endphp
+
+            <div class="premium-list premium-list--complaints premium-list--feed premium-list--compact premium-list--mgmt">
+                <div class="premium-list-head">
+                    <span class="pli-head-cell col-center">#</span>
+                    <span class="pli-head-cell col-left">Job Card</span>
+                    <span class="pli-head-cell col-left">Staff</span>
+                    <span class="pli-head-cell col-center">Service</span>
+                    <span class="pli-head-cell col-center">Reason</span>
+                    <span class="pli-head-cell col-center">Action Taken</span>
+                    <span class="pli-head-cell col-center">Compensation</span>
+                    <span class="pli-head-cell col-center">Date</span>
+                    <span class="pli-head-cell col-center">Actions</span>
+                </div>
+
+                @foreach($complaints as $complaint)
+                    @php
+                        $jobCard = $complaint->jobCard;
+                        $jobCardNum = $jobCard?->job_card_number ?? ($jobCard ? 'JC-' . str_pad($jobCard->id, 3, '0', STR_PAD_LEFT) : '—');
+                        $jobCardName = $jobCard?->job_card_name ?? ($jobCard ? 'Job Card #' . $jobCard->id : 'Direct Complaint');
+                        $customerName = $jobCard?->customer?->name ?? '—';
+                        $staffName = $complaint->staff?->name ?? '—';
+                        $staffInitial = $staffName !== '—' ? strtoupper(substr($staffName, 0, 1)) : '?';
+                        $serviceName = $complaint->service?->service_name ?? '—';
+                        $categoryName = $complaint->category ?: ($complaint->service?->category ?? '');
+                        $compAmount = (float) ($complaint->compensation ?? 0);
+                    @endphp
+
+                    <article class="premium-list-item" id="complaint-row-{{ $complaint->id }}">
+                        <div class="pli-rank col-center">{{ $complaintListStart + $loop->iteration }}</div>
+
+                        {{-- Job Card cell --}}
+                        <div class="pli-col col-left">
+                            <div class="pli-name-cell">
+                                <div class="pli-icon pli-icon--indigo"><i class="bi bi-clipboard2-x-fill"></i></div>
+                                <div class="pli-name-stack">
+                                    <span class="pli-title" title="{{ $jobCardName }}">{{ $jobCardName }}</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="complaint-code">{{ $jobCardNum }}</span>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Staff cell --}}
+                        <div class="pli-col col-left">
+                            <div class="complaint-staff-cell">
+                                <span class="complaint-staff-name" title="{{ $staffName }}">{{ $staffName }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Service cell --}}
+                        <div class="pli-col complaint-cell-center">
+                            <div class="complaint-service-chip">
+                                <span class="complaint-service-name" title="{{ $serviceName }}">{{ $serviceName }}</span>
+                                @if($categoryName)
+                                    <span class="complaint-category-tag">{{ $categoryName }}</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Reason cell --}}
+                        <div class="pli-col complaint-cell-center">
+                            <span class="complaint-text-box" title="{{ $complaint->reason }}">
+                                {{ $complaint->reason ?: '—' }}
+                            </span>
+                        </div>
+
+                        {{-- Action taken cell --}}
+                        <div class="pli-col complaint-cell-center">
+                            @if($complaint->action_taken)
+                                <span class="complaint-action-box" title="{{ $complaint->action_taken }}">
+                                    <i class="bi bi-check-circle me-1"></i>{{ $complaint->action_taken }}
+                                </span>
+                            @else
+                                <span class="badge rounded-pill bg-light text-muted border" style="font-size:.7rem;font-weight:600;">Pending</span>
+                            @endif
+                        </div>
+
+                        {{-- Compensation cell --}}
+                        <div class="pli-col complaint-cell-center">
+                            <div class="complaint-compensation-pill">
+                                <span class="complaint-comp-amount">₹{{ number_format($compAmount, 2) }}</span>
+                                @if($compAmount > 0)
+                                    <span class="complaint-comp-badge">Paid</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Date cell --}}
+                        <div class="pli-col complaint-cell-center">
+                            <span class="complaint-date-text">{{ optional($complaint->complaint_date)->format('d/m/Y') }}</span>
+                        </div>
+
+                        {{-- Actions menu --}}
+                        <div class="pli-col pli-col-actions complaint-list-actions">
+                            <div class="pli-action-menu-wrap">
+                                <button type="button" class="pli-action-dots" aria-label="Complaint actions" aria-expanded="false" onclick="toggleComplaintActions(this)">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div class="pli-action-popover">
+                                    <button type="button" class="pli-popover-action" onclick='openComplaintDetailsModal(@json($complaint)); closeComplaintActions(this)'>
+                                        <span class="pli-popover-icon pli-popover-icon--view"><i class="bi bi-eye"></i></span>
+                                        <span>View Details</span>
+                                    </button>
+                                    <button type="button" class="pli-popover-action" onclick='openComplaint(@json($complaint)); closeComplaintActions(this)'>
+                                        <span class="pli-popover-icon pli-popover-icon--edit"><i class="bi bi-pencil"></i></span>
+                                        <span>Edit Complaint</span>
+                                    </button>
+                                    <div class="pli-popover-divider"></div>
+                                    <form method="POST" action="{{ route('complaints.destroy', $complaint) }}" onsubmit="return confirm('Delete this complaint record?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="pli-popover-action pli-popover-action--danger">
+                                            <span class="pli-popover-icon pli-popover-icon--delete"><i class="bi bi-trash3"></i></span>
+                                            <span>Delete Complaint</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            @include('partials.pagination-bar', ['paginator' => $complaints])
+        @else
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-exclamation-octagon"></i></div>
+                <h3>No complaints found</h3>
+                <p>{{ $search ? 'No complaints match your search query.' : 'Record and manage client service complaints.' }}</p>
+                <button class="btn btn-primary mt-2" onclick="openComplaint()">
+                    <i class="bi bi-plus-lg"></i> Add Complaint
+                </button>
+            </div>
+        @endif
     </div>
+</div>
 
-    {{-- ========================================================= --}}
-    {{-- ADD / EDIT COMPLAINT MODAL --}}
-    {{-- ========================================================= --}}
-
-    <div class="modal fade" id="complaintModal">
-        <div class="modal-dialog">
-            <form id="complaintForm" class="modal-content" action="{{ route('complaints.store') }}" method="POST">
+{{-- ========================================================= --}}
+{{-- ADD / EDIT COMPLAINT MODAL --}}
+{{-- ========================================================= --}}
+<div class="modal fade premium-modal job-card-builder-modal" id="complaintModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 780px;">
+        <div class="modal-content">
+            <form id="complaintForm" method="POST" action="{{ route('complaints.store') }}" class="job-card-builder-form">
                 @csrf
                 <input type="hidden" id="complaintMethod" name="_method">
+
                 <div class="modal-header">
-                    <h5 id="complaintTitle">Add Complaint</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-icon-box job-card-modal-icon" style="background:linear-gradient(135deg,#FEE2E2,#FECACA);color:#DC2626;">
+                            <i class="bi bi-exclamation-octagon"></i>
+                        </div>
+                        <div class="modal-header-content">
+                            <h5 class="modal-title" id="complaintTitle">Add Complaint</h5>
+                            <p class="modal-subtitle" id="complaintSubtitle">Record a customer feedback or service complaint.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body row g-3">
-                    <div class="col-12">
-                        <label>Staff</label>
-                        <select id="complaintStaff" class="form-select" name="staff_id" required>
-                            @foreach($staff as $member)
-                                <option value="{{ $member->id }}">{{ $member->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label>Complaint Type</label>
-                        <input id="complaintType" class="form-control" name="complaint_type_text" required>
-                    </div>
-                    <div class="col-12">
-                        <label>Reason of Complaint</label>
-                        <textarea id="complaintReason" class="form-control" name="reason" required></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label>Action Taken</label>
-                        <textarea id="complaintAction" class="form-control" name="action_taken" required></textarea>
-                    </div>
-                    <div class="col-6">
-                        {{-- Compensation is optional: no "required" attribute, no asterisk --}}
-                        <label>Compensation <small class="text-muted">(optional)</small></label>
-                        <input id="complaintCompensation" class="form-control" type="number" step="0.01" min="0" name="compensation" placeholder="0.00">
-                    </div>
-                    <div class="col-6">
-                        <label>Date</label>
-                        <input id="complaintDate" class="form-control" type="date" name="complaint_date" required>
+
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        {{-- 1st: Job Card Selection --}}
+                        <div class="col-12">
+                            <label for="complaintJobCard" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Select Job Card <span class="text-danger">*</span>
+                            </label>
+                            <div class="field-control-wrap position-relative">
+                                <select id="complaintJobCard" name="job_card_id" class="form-select no-nice-select" required onchange="onJobCardSelected(this.value)">
+                                    <option value="">Select Job Card</option>
+                                    @foreach($jobCards as $jc)
+                                        @php
+                                            $cName = $jc->customer?->name ?? ($jc->customers->first()?->name ?? 'Walk-in');
+                                            $jcNum = $jc->job_card_number ?: ('JC-' . str_pad($jc->id, 3, '0', STR_PAD_LEFT));
+                                        @endphp
+                                        <option value="{{ $jc->id }}">
+                                            {{ $jcNum }} — {{ $jc->job_card_name }} ({{ $cName }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Service Selection (Populated dynamically based on Job Card) --}}
+                        <div class="col-md-6">
+                            <label for="complaintService" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Service
+                            </label>
+                            <select id="complaintService" name="service_id" class="form-select no-nice-select" onchange="onServiceSelected(this.value)">
+                                <option value="">Select service from Job Card</option>
+                            </select>
+                        </div>
+
+                        {{-- Staff Selection (Populated dynamically based on Job Card & Service) --}}
+                        <div class="col-md-6">
+                            <label for="complaintStaff" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Staff <span class="text-danger">*</span>
+                            </label>
+                            <select id="complaintStaff" name="staff_id" class="form-select no-nice-select" required>
+                                <option value="">Select staff</option>
+                                @foreach($staff as $member)
+                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Category (Auto-filled / Read-only) --}}
+                        <div class="col-md-6">
+                            <label for="complaintCategory" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Category
+                            </label>
+                            <input type="text" id="complaintCategory" name="category" class="form-control" readonly placeholder="Auto-filled from service" style="background:#F8FAFC;color:#64748B;">
+                        </div>
+
+                        {{-- Subcategory (Auto-filled / Read-only) --}}
+                        <div class="col-md-6">
+                            <label for="complaintSubcategory" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Subcategory
+                            </label>
+                            <input type="text" id="complaintSubcategory" name="subcategory" class="form-control" readonly placeholder="Auto-filled from service" style="background:#F8FAFC;color:#64748B;">
+                        </div>
+
+                        {{-- Reason of Complaint (Mandatory) --}}
+                        <div class="col-12">
+                            <label for="complaintReason" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Reason of Complaint <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="complaintReason" name="reason" class="form-control" rows="3" placeholder="Enter the detailed reason of the complaint..." required></textarea>
+                        </div>
+
+                        {{-- Action Taken (Optional / Not Mandatory) --}}
+                        <div class="col-12">
+                            <label for="complaintAction" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Action Taken <small class="text-muted fw-normal">(optional)</small>
+                            </label>
+                            <textarea id="complaintAction" name="action_taken" class="form-control" rows="2" placeholder="Describe any corrective action or resolution taken..."></textarea>
+                        </div>
+
+                        {{-- Compensation (Optional / Not Mandatory) --}}
+                        <div class="col-md-6">
+                            <label for="complaintCompensation" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Compensation (₹) <small class="text-muted fw-normal">(optional)</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0">₹</span>
+                                <input id="complaintCompensation" name="compensation" type="number" step="0.01" min="0" class="form-control border-start-0" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        {{-- Complaint Date (Mandatory) --}}
+                        <div class="col-md-6">
+                            <label for="complaintDate" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
+                                Date <span class="text-danger">*</span>
+                            </label>
+                            <input id="complaintDate" name="complaint_date" type="date" class="form-control" required value="{{ now()->toDateString() }}">
+                        </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button class="btn btn-primary">Save Complaint</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="complaintSubmit">
+                        <i class="bi bi-check2-circle"></i> Save Complaint
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 
-    @push('scripts')
-        <script>
-            const complaintModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('complaintModal'));
+{{-- ========================================================= --}}
+{{-- COMPLAINT DETAILS MODAL — matching Job Card shell --}}
+{{-- ========================================================= --}}
+<div class="modal fade premium-modal job-card-details-modal" id="complaintDetailsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 680px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icon-box job-card-details-title-icon" style="background:linear-gradient(135deg,#FEE2E2,#FECACA);color:#DC2626;">
+                        <i class="bi bi-exclamation-octagon"></i>
+                    </div>
+                    <div class="modal-header-content">
+                        <h5 class="modal-title">Complaint Details</h5>
+                        <p class="modal-subtitle">Full complaint report and resolution breakdown</p>
+                    </div>
+                </div>
+                <div class="job-card-details-header-actions">
+                    <button type="button" class="job-card-detail-tool" onclick="window.print()" title="Print" aria-label="Print"><i class="bi bi-printer"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="jcd-details-grid" aria-label="Complaint summary">
+                    <div class="jcd-detail-item">
+                        <div class=""></div>
+                        <div class="jcd-detail-text">
+                            <span class="jcd-detail-label">Job Card</span>
+                            <strong class="jcd-detail-value" id="detailsJobCardName">—</strong>
+                        </div>
+                    </div>
+                    <div class="jcd-detail-item">
+                        <div class=""></div>
+                        <div class="jcd-detail-text">
+                            <span class="jcd-detail-label">Staff Member</span>
+                            <strong class="jcd-detail-value" id="detailsStaffName">—</strong>
+                        </div>
+                    </div>
+                    <div class="jcd-detail-item">
+                        <div class=""></div>
+                        <div class="jcd-detail-text">
+                            <span class="jcd-detail-label">Service & Category</span>
+                            <strong class="jcd-detail-value" id="detailsServiceName">—</strong>
+                        </div>
+                    </div>
+                    <div class="jcd-detail-item">
+                        <div class=""></div>
+                        <div class="jcd-detail-text">
+                            <span class="jcd-detail-label">Complaint Date</span>
+                            <strong class="jcd-detail-value" id="detailsDate">—</strong>
+                        </div>
+                    </div>
+                </div>
 
-            function openComplaint(c = null) {
-                closeAllComplaintActionMenus();
+                {{-- Reason Section --}}
+                <div class="complaint-detail-quote">
+                    <div class="complaint-detail-quote-label"><i class="bi bi-chat-square-text me-1"></i>Reason of Complaint</div>
+                    <div class="complaint-detail-quote-text" id="detailsReason">—</div>
+                </div>
 
-                complaintForm.reset();
-                complaintMethod.value = c ? 'PUT' : '';
-                complaintForm.action = c ? `/complaints/${c.id}` : `{{ route('complaints.store') }}`;
-                complaintTitle.textContent = c ? 'Edit Complaint' : 'Add Complaint';
-                complaintDate.value = c ? c.complaint_date : '{{ now()->toDateString() }}';
+                {{-- Action Taken Section --}}
+                <div class="complaint-detail-quote complaint-detail-quote--success">
+                    <div class="complaint-detail-quote-label"><i class="bi bi-check2-circle me-1"></i>Action Taken</div>
+                    <div class="complaint-detail-quote-text" id="detailsAction">—</div>
+                </div>
 
-                if (c) {
-                    complaintStaff.value = c.staff_id;
-                    complaintType.value = c.complaint_type_text;
-                    complaintReason.value = c.reason;
-                    complaintAction.value = c.action_taken;
-                    complaintCompensation.value = c.compensation || '';
-                }
+                {{-- Totals / Compensation Card --}}
+                <div class="jcd-totals-card mt-4">
+                    <div class="jcd-totals-row jcd-totals-row--final">
+                        <span class="jcd-totals-label">Compensation Paid</span>
+                        <strong id="detailsCompensation">₹ 0.00</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer job-card-details-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                complaintModal.show();
+@php
+    $jobCardsDataForJs = $jobCards->map(function ($jc) {
+        $cust = $jc->customer?->name ?? ($jc->customers->first()?->name ?? 'Walk-in');
+        $serviceList = [];
+        if ($jc->serviceItems && $jc->serviceItems->count()) {
+            foreach ($jc->serviceItems as $item) {
+                $staffList = $item->staff ? $item->staff->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray() : [];
+                $serviceList[] = [
+                    'service_id' => $item->service_id,
+                    'service_name' => $item->service?->service_name ?? '—',
+                    'category' => $item->service?->category ?? '—',
+                    'subcategory' => $item->subcategory ?: ($item->service?->subcategory ?? '—'),
+                    'staff' => $staffList,
+                ];
             }
+        } elseif ($jc->service) {
+            $staffList = $jc->staff ? $jc->staff->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray() : [];
+            $serviceList[] = [
+                'service_id' => $jc->service_id,
+                'service_name' => $jc->service->service_name,
+                'category' => $jc->service->category ?? '—',
+                'subcategory' => $jc->subcategory ?: ($jc->service->subcategory ?? '—'),
+                'staff' => $staffList,
+            ];
+        }
 
-            // ---------------------------------------------------------------
-            // Three-dot action popover (desktop) — mirrors Job Card behavior
-            // ---------------------------------------------------------------
-
-            function closeAllComplaintActionMenus() {
-                document.querySelectorAll('.complaint-action-menu-wrap.is-open').forEach(wrapper => {
-                    wrapper.classList.remove('is-open');
-
-                    const button = wrapper.querySelector('.complaint-action-dots');
-                    if (button) {
-                        button.classList.remove('is-open');
-                        button.setAttribute('aria-expanded', 'false');
-                    }
-
-                    const row = wrapper.closest('.complaint-list-item');
-                    if (row) {
-                        row.classList.remove('action-menu-row-open');
-                    }
-                });
+        $allStaff = [];
+        foreach ($serviceList as $s) {
+            foreach ($s['staff'] as $st) {
+                $allStaff[$st['id']] = $st;
             }
-
-            function toggleComplaintActions(button) {
-                const wrapper = button.closest('.complaint-action-menu-wrap');
-                const currentRow = button.closest('.complaint-list-item');
-
-                document.querySelectorAll('.complaint-action-menu-wrap.is-open').forEach(menu => {
-                    if (menu !== wrapper) {
-                        menu.classList.remove('is-open');
-
-                        const menuButton = menu.querySelector('.complaint-action-dots');
-                        if (menuButton) {
-                            menuButton.classList.remove('is-open');
-                            menuButton.setAttribute('aria-expanded', 'false');
-                        }
-
-                        const row = menu.closest('.complaint-list-item');
-                        if (row) {
-                            row.classList.remove('action-menu-row-open');
-                        }
-                    }
-                });
-
-                const isOpen = wrapper.classList.toggle('is-open');
-                button.classList.toggle('is-open', isOpen);
-                button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-
-                if (currentRow) {
-                    currentRow.classList.toggle('action-menu-row-open', isOpen);
-                }
+        }
+        if (empty($allStaff) && $jc->staff) {
+            foreach ($jc->staff as $st) {
+                $allStaff[$st->id] = ['id' => $st->id, 'name' => $st->name];
             }
+        }
 
-            function closeComplaintActions(element) {
-                const wrapper = element.closest('.complaint-action-menu-wrap');
-                if (!wrapper) return;
+        return [
+            'id' => $jc->id,
+            'job_card_number' => $jc->job_card_number ?: ('JC-' . str_pad($jc->id, 3, '0', STR_PAD_LEFT)),
+            'job_card_name' => $jc->job_card_name,
+            'customer_name' => $cust,
+            'services' => $serviceList,
+            'staff' => array_values($allStaff),
+        ];
+    });
 
-                wrapper.classList.remove('is-open');
+    $allActiveStaffForJs = $staff->map(fn($s) => ['id' => $s->id, 'name' => $s->name]);
+@endphp
 
-                const button = wrapper.querySelector('.complaint-action-dots');
-                if (button) {
-                    button.classList.remove('is-open');
-                    button.setAttribute('aria-expanded', 'false');
-                }
+@push('scripts')
+<script>
+    const complaintModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('complaintModal'));
+    const complaintDetailsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('complaintDetailsModal'));
+    const jobCardsData = @json($jobCardsDataForJs);
+    const allActiveStaff = @json($allActiveStaffForJs);
 
-                const row = wrapper.closest('.complaint-list-item');
-                if (row) {
-                    row.classList.remove('action-menu-row-open');
-                }
-            }
+    function onJobCardSelected(jobCardId, selectedServiceId = null, selectedStaffId = null) {
+        const serviceSelect = document.getElementById('complaintService');
+        const staffSelect = document.getElementById('complaintStaff');
+        const categoryInput = document.getElementById('complaintCategory');
+        const subcategoryInput = document.getElementById('complaintSubcategory');
 
-            // Close popover when clicking outside
-            document.addEventListener('click', function (event) {
-                if (!event.target.closest('.complaint-action-menu-wrap')) {
-                    closeAllComplaintActionMenus();
-                }
+        serviceSelect.innerHTML = '<option value="">Select service from Job Card</option>';
+        categoryInput.value = '';
+        subcategoryInput.value = '';
+
+        if (!jobCardId) {
+            populateStaffDropdown(allActiveStaff, selectedStaffId);
+            return;
+        }
+
+        const jobCard = jobCardsData.find(jc => String(jc.id) === String(jobCardId));
+        if (!jobCard) {
+            populateStaffDropdown(allActiveStaff, selectedStaffId);
+            return;
+        }
+
+        // Populate Services
+        if (jobCard.services && jobCard.services.length > 0) {
+            jobCard.services.forEach(srv => {
+                const opt = document.createElement('option');
+                opt.value = srv.service_id;
+                opt.textContent = `${srv.service_name} (${srv.category})`;
+                opt.dataset.category = srv.category || '';
+                opt.dataset.subcategory = srv.subcategory || '';
+                serviceSelect.appendChild(opt);
             });
 
-            // Close popover on Escape
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    closeAllComplaintActionMenus();
-                }
-            });
-        </script>
-    @endpush
+            // If only 1 service or preselected, auto-select it
+            if (selectedServiceId) {
+                serviceSelect.value = selectedServiceId;
+            } else if (jobCard.services.length === 1) {
+                serviceSelect.value = jobCard.services[0].service_id;
+            }
 
+            // Update category/subcategory for selected service
+            onServiceSelected(serviceSelect.value, jobCard);
+        } else {
+            categoryInput.value = '—';
+            subcategoryInput.value = '—';
+        }
+
+        // Populate Staff assigned to this Job Card (or fallback to all staff)
+        const staffList = (jobCard.staff && jobCard.staff.length > 0) ? jobCard.staff : allActiveStaff;
+        populateStaffDropdown(staffList, selectedStaffId);
+    }
+
+    function onServiceSelected(serviceId, preloadedJobCard = null) {
+        const jobCardId = document.getElementById('complaintJobCard').value;
+        const jobCard = preloadedJobCard || jobCardsData.find(jc => String(jc.id) === String(jobCardId));
+        const categoryInput = document.getElementById('complaintCategory');
+        const subcategoryInput = document.getElementById('complaintSubcategory');
+
+        if (!serviceId || !jobCard) {
+            categoryInput.value = '';
+            subcategoryInput.value = '';
+            return;
+        }
+
+        const foundService = jobCard.services.find(s => String(s.service_id) === String(serviceId));
+        if (foundService) {
+            categoryInput.value = foundService.category || '—';
+            subcategoryInput.value = foundService.subcategory || '—';
+
+            // If service has specific assigned staff, refine staff dropdown
+            if (foundService.staff && foundService.staff.length > 0) {
+                const currentStaffId = document.getElementById('complaintStaff').value;
+                populateStaffDropdown(foundService.staff, currentStaffId);
+            }
+        }
+    }
+
+    function populateStaffDropdown(staffList, selectedId = null) {
+        const staffSelect = document.getElementById('complaintStaff');
+        staffSelect.innerHTML = '<option value="">Select staff</option>';
+
+        staffList.forEach(st => {
+            const opt = document.createElement('option');
+            opt.value = st.id;
+            opt.textContent = st.name;
+            if (selectedId && String(st.id) === String(selectedId)) {
+                opt.selected = true;
+            }
+            staffSelect.appendChild(opt);
+        });
+
+        if (selectedId) {
+            staffSelect.value = selectedId;
+        }
+    }
+
+    function openComplaint(c = null) {
+        closeAllComplaintActionMenus();
+
+        const form = document.getElementById('complaintForm');
+        form.reset();
+
+        document.getElementById('complaintMethod').value = c ? 'PUT' : '';
+        form.action = c ? `/complaints/${c.id}` : `{{ route('complaints.store') }}`;
+        document.getElementById('complaintTitle').textContent = c ? 'Edit Complaint' : 'Add Complaint';
+        document.getElementById('complaintSubtitle').textContent = c ? 'Update complaint details and resolution.' : 'Record a customer feedback or service complaint.';
+        document.getElementById('complaintSubmit').innerHTML = c ? '<i class="bi bi-check2-circle"></i> Update Complaint' : '<i class="bi bi-check2-circle"></i> Save Complaint';
+
+        document.getElementById('complaintDate').value = c?.complaint_date ? (c.complaint_date.split('T')[0] || c.complaint_date) : '{{ now()->toDateString() }}';
+        document.getElementById('complaintReason').value = c?.reason ?? '';
+        document.getElementById('complaintAction').value = c?.action_taken ?? '';
+        document.getElementById('complaintCompensation').value = c?.compensation ? Number(c.compensation) : '';
+
+        if (c && c.job_card_id) {
+            document.getElementById('complaintJobCard').value = c.job_card_id;
+            onJobCardSelected(c.job_card_id, c.service_id, c.staff_id);
+            if (c.category) document.getElementById('complaintCategory').value = c.category;
+            if (c.subcategory) document.getElementById('complaintSubcategory').value = c.subcategory;
+        } else {
+            document.getElementById('complaintJobCard').value = '';
+            onJobCardSelected('');
+        }
+
+        complaintModal.show();
+    }
+
+    function openComplaintDetailsModal(c) {
+        if (!c) return;
+
+        const jobCard = c.job_card || c.jobCard;
+        const jcNum = jobCard?.job_card_number || (jobCard ? ('JC-' + String(jobCard.id).padStart(3, '0')) : '—');
+        const jcName = jobCard?.job_card_name || 'Job Card';
+        const custName = jobCard?.customer?.name || '—';
+
+        // document.getElementById('detailsJobCardName').textContent = `${jcNum} — ${jcName} (${custName})`;
+        document.getElementById('detailsJobCardName').textContent = `${jcNum} — ${jcName} `;
+
+        document.getElementById('detailsStaffName').textContent = c.staff?.name || '—';
+
+        const srvName = c.service?.service_name || '—';
+        const catName = c.category || c.service?.category || '';
+        document.getElementById('detailsServiceName').textContent = catName ? `${srvName} (${catName})` : srvName;
+
+        let formattedDate = '—';
+        if (c.complaint_date) {
+            const parts = c.complaint_date.split(/[-T ]/);
+            if (parts.length >= 3) {
+                formattedDate = `${parts[2].slice(0, 2)}/${parts[1]}/${parts[0]}`;
+            }
+        }
+        document.getElementById('detailsDate').textContent = formattedDate;
+
+        document.getElementById('detailsReason').textContent = c.reason || 'No reason provided.';
+        document.getElementById('detailsAction').textContent = c.action_taken || 'No corrective action recorded yet (Pending).';
+
+        const comp = Number(c.compensation || 0);
+        document.getElementById('detailsCompensation').textContent = `₹ ${comp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        complaintDetailsModal.show();
+    }
+
+    // ---------------------------------------------------------------
+    // Three-dot action popover (desktop)
+    // ---------------------------------------------------------------
+
+    function closeAllComplaintActionMenus() {
+        document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(wrapper => {
+            wrapper.classList.remove('is-open');
+            const button = wrapper.querySelector('.pli-action-dots');
+            if (button) {
+                button.classList.remove('is-open');
+                button.setAttribute('aria-expanded', 'false');
+            }
+            const row = wrapper.closest('.premium-list-item');
+            if (row) row.classList.remove('action-menu-row-open');
+        });
+    }
+
+    function toggleComplaintActions(button) {
+        const wrapper = button.closest('.pli-action-menu-wrap');
+        const currentRow = button.closest('.premium-list-item');
+        if (!wrapper) return;
+
+        document.querySelectorAll('.pli-action-menu-wrap.is-open').forEach(menu => {
+            if (menu !== wrapper) {
+                menu.classList.remove('is-open');
+                const menuButton = menu.querySelector('.pli-action-dots');
+                if (menuButton) {
+                    menuButton.classList.remove('is-open');
+                    menuButton.setAttribute('aria-expanded', 'false');
+                }
+                const row = menu.closest('.premium-list-item');
+                if (row) row.classList.remove('action-menu-row-open');
+            }
+        });
+
+        const isOpen = wrapper.classList.toggle('is-open');
+        button.classList.toggle('is-open', isOpen);
+        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+        if (currentRow) {
+            currentRow.classList.toggle('action-menu-row-open', isOpen);
+        }
+    }
+
+    function closeComplaintActions(element) {
+        const wrapper = element.closest('.pli-action-menu-wrap');
+        if (!wrapper) return;
+
+        wrapper.classList.remove('is-open');
+        const button = wrapper.querySelector('.pli-action-dots');
+        if (button) {
+            button.classList.remove('is-open');
+            button.setAttribute('aria-expanded', 'false');
+        }
+        const row = wrapper.closest('.premium-list-item');
+        if (row) row.classList.remove('action-menu-row-open');
+    }
+
+    document.addEventListener('click', event => {
+        if (!event.target.closest('.pli-action-menu-wrap')) {
+            closeAllComplaintActionMenus();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            closeAllComplaintActionMenus();
+        }
+    });
+</script>
+@endpush
 @endsection

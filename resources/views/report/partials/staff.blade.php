@@ -34,12 +34,14 @@
                 if ($assignedStaff->isNotEmpty()) {
                     return $assignedStaff->map(function ($staff) use ($card, $item) {
                         return [
+                            'staff_id'     => $staff->id,
                             'staff_name'   => $staff->name,
                             'mobile'       => $staff->mobile_number ?? '—',
                             'date'         => $card->created_at,
                             'job_card'     => $card->job_card_name,
                             'job_card_id'  => $card->id,
                             'service'      => $item->service?->service_name ?? $item->subcategory ?? '—',
+                            'service_id'   => $item->service_id,
                             'category'     => $item->service?->category ?? '—',
                             'amount'       => (float) $item->amount,
                         ];
@@ -47,16 +49,37 @@
                 }
 
                 return collect([[
+                    'staff_id'     => null,
                     'staff_name'   => '—',
                     'mobile'       => '—',
                     'date'         => $card->created_at,
                     'job_card'     => $card->job_card_name,
                     'job_card_id'  => $card->id,
                     'service'      => $item->service?->service_name ?? $item->subcategory ?? '—',
+                    'service_id'   => $item->service_id,
                     'category'     => $item->service?->category ?? '—',
                     'amount'       => (float) $item->amount,
                 ]]);
             });
+        })
+        ->filter(function (array $row) {
+            $search = trim(request('search', ''));
+            $staffId = trim(request('staff_id', ''));
+            $category = trim(request('category', ''));
+            $mobile = trim(request('mobile', ''));
+            $jobCard = trim(request('job_card', ''));
+            $serviceId = trim(request('service_id', ''));
+
+            if ($search !== '' && !str_contains(strtolower(implode(' ', [$row['staff_name'], $row['mobile'], $row['job_card'], $row['service']])), strtolower($search))) {
+                return false;
+            }
+            if ($staffId !== '' && (string) $row['staff_id'] !== $staffId) {
+                return false;
+            }
+            if ($mobile !== '' && !str_contains($row['mobile'], $mobile)) return false;
+            if ($jobCard !== '' && !str_contains(strtolower($row['job_card']), strtolower($jobCard))) return false;
+            if ($serviceId !== '' && (string) $row['service_id'] !== $serviceId) return false;
+            return $category === '' || strcasecmp($row['category'], $category) === 0;
         })
         ->sortByDesc('date')
         ->values();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\PaymentType;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,8 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $range = $request->input('range');
-        $query = Expense::with(['category', 'staff'])->latest('expense_date');
+        $search = trim($request->input('search', ''));
+        $query = Expense::with(['category', 'staff'])->latest('expense_date')->latest('id');
 
         if ($range === 'today') $query->whereDate('expense_date', today());
         if ($range === 'week') $query->whereBetween('expense_date', [now()->startOfWeek(), now()->endOfWeek()]);
@@ -26,8 +28,7 @@ class ExpenseController extends Controller
         if ($request->filled('from')) $query->whereDate('expense_date', '>=', $request->from);
         if ($request->filled('to')) $query->whereDate('expense_date', '<=', $request->to);
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
+        if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
                   ->orWhere('notes', 'like', "%{$search}%")
@@ -36,14 +37,21 @@ class ExpenseController extends Controller
             });
         }
 
+        $paymentTypes = PaymentType::where('is_active', true)->orderBy('name')->get();
+        if ($paymentTypes->isEmpty()) {
+            $paymentTypes = PaymentType::orderBy('name')->get();
+        }
+
         return view('expenses.index', [
             'expenses' => $query->paginate(12)->withQueryString(),
-            'categories' => ExpenseCategory::orderBy('name')->get(),
+            'categories' => ExpenseCategory::where('status', 'active')->orderBy('name')->get(),
             'staff' => Staff::where('status', 'active')->orderBy('name')->get(),
+            'paymentTypes' => $paymentTypes,
             'monthTotal' => Expense::whereMonth('expense_date', now()->month)->whereYear('expense_date', now()->year)->sum('amount'),
             'monthCount' => Expense::whereMonth('expense_date', now()->month)->whereYear('expense_date', now()->year)->count(),
             'categoriesCount' => ExpenseCategory::count(),
             'total' => Expense::sum('amount'),
+            'search' => $search,
         ]);
     }
 
@@ -67,10 +75,25 @@ class ExpenseController extends Controller
 
     public function storeCategory(Request $request)
     {
-        ExpenseCategory::create($request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:expense_categories,name'],
-            'status' => ['required', Rule::in(['active', 'inactive'])],
-        ]));
+            'status' => ['nullable', Rule::in(['active', 'inactive'])],
+        ]);
+
+        if (empty($data['status'])) {
+            $data['status'] = 'active';
+        }
+
+        $category = ExpenseCategory::create($data);
+
+        if ($request->wantsJson() || $request->ajax() || $request->header('Accept') === 'application/json') {
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'message' => 'Expense category added successfully.'
+            ]);
+        }
+
         return back()->with('success', 'Expense category added successfully.');
     }
 
@@ -82,7 +105,7 @@ class ExpenseController extends Controller
             'expense_date' => ['required', 'date'],
             'description' => ['nullable', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
-            'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
+            'payment_method' => ['required', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
     }

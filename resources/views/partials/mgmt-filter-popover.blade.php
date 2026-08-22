@@ -10,6 +10,10 @@
         'customers' => 'Customers',
         'services' => 'Services',
         'products' => 'Products',
+        'complaints' => 'Complaints',
+        'marketing' => 'Marketing Activities',
+        'purchases' => 'Product Purchases',
+        'expenses' => 'Expenses',
         default => 'Items',
     };
 
@@ -40,6 +44,14 @@
             'price_range' => request('price_range', ''),
             'status' => request('status', request('filter', '')),
         ];
+    } elseif ($module === 'complaints') {
+        $filteredParams = ['date_from' => request('date_from', ''), 'date_to' => request('date_to', ''), 'status' => request('status', ''), 'staff_id' => request('staff_id', ''), 'service_id' => request('service_id', '')];
+    } elseif ($module === 'marketing') {
+        $filteredParams = ['date_from' => request('date_from', ''), 'date_to' => request('date_to', ''), 'marketing_type' => request('marketing_type', ''), 'location' => request('location', ''), 'staff_id' => request('staff_id', '')];
+    } elseif ($module === 'purchases') {
+        $filteredParams = ['date_from' => request('date_from', ''), 'date_to' => request('date_to', ''), 'customer_id' => request('customer_id', ''), 'product_id' => request('product_id', ''), 'payment_type_id' => request('payment_type_id', '')];
+    } elseif ($module === 'expenses') {
+        $filteredParams = ['from' => request('from', ''), 'to' => request('to', ''), 'expense_category_id' => request('expense_category_id', ''), 'staff_id' => request('staff_id', ''), 'payment_method' => request('payment_method', '')];
     }
 
     foreach ($filteredParams as $k => $v) {
@@ -543,6 +555,47 @@
                             </label>
                         </div>
                     </div>
+                @endif
+
+                {{-- ======================================================== --}}
+                {{-- 6. OPERATIONS MODULE FILTERS --}}
+                {{-- ======================================================== --}}
+                @if(in_array($module, ['complaints', 'marketing', 'purchases', 'expenses'], true))
+                    @php
+                        $fromName = $module === 'expenses' ? 'from' : 'date_from';
+                        $toName = $module === 'expenses' ? 'to' : 'date_to';
+                    @endphp
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="bi bi-calendar3"></i> Date Range</label>
+                        <div class="row g-2">
+                            <div class="col-6"><input type="date" name="{{ $fromName }}" class="filter-input" value="{{ request($fromName, '') }}" aria-label="From date"></div>
+                            <div class="col-6"><input type="date" name="{{ $toName }}" class="filter-input" value="{{ request($toName, '') }}" aria-label="To date"></div>
+                        </div>
+                    </div>
+                @endif
+
+                @if($module === 'complaints')
+                    <div class="filter-group"><label class="filter-label" for="filter_complaint_status"><i class="bi bi-flag"></i> Status</label><div class="filter-input-wrap"><select name="status" id="filter_complaint_status" class="filter-select"><option value="">All Statuses</option>@foreach(['Pending', 'In Progress', 'Resolved'] as $status)<option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ $status }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_complaint_staff"><i class="bi bi-person"></i> Staff</label><div class="filter-input-wrap"><select name="staff_id" id="filter_complaint_staff" class="filter-select"><option value="">All Staff</option>@foreach($filterData['staff'] ?? [] as $member)<option value="{{ $member->id }}" {{ (string) request('staff_id') === (string) $member->id ? 'selected' : '' }}>{{ $member->name }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_complaint_service"><i class="bi bi-scissors"></i> Service</label><div class="filter-input-wrap"><select name="service_id" id="filter_complaint_service" class="filter-select"><option value="">All Services</option>@foreach($filterData['services'] ?? [] as $service)<option value="{{ $service->id }}" {{ (string) request('service_id') === (string) $service->id ? 'selected' : '' }}>{{ $service->service_name }}</option>@endforeach</select></div></div>
+                @endif
+
+                @if($module === 'marketing')
+                    <div class="filter-group"><label class="filter-label" for="filter_marketing_type"><i class="bi bi-megaphone"></i> Marketing Type</label><div class="filter-input-wrap"><select name="marketing_type" id="filter_marketing_type" class="filter-select"><option value="">All Types</option>@foreach($filterData['marketingTypes'] ?? [] as $type)<option value="{{ $type }}" {{ request('marketing_type') === $type ? 'selected' : '' }}>{{ $type }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_marketing_location"><i class="bi bi-geo-alt"></i> Location</label><div class="filter-input-wrap"><input type="text" name="location" id="filter_marketing_location" class="filter-input" value="{{ request('location', '') }}" placeholder="Search location..."></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_marketing_staff"><i class="bi bi-person"></i> Staff</label><div class="filter-input-wrap"><select name="staff_id" id="filter_marketing_staff" class="filter-select"><option value="">All Staff</option>@foreach($filterData['staff'] ?? [] as $member)<option value="{{ $member->id }}" {{ (string) request('staff_id') === (string) $member->id ? 'selected' : '' }}>{{ $member->name }}</option>@endforeach</select></div></div>
+                @endif
+
+                @if($module === 'purchases')
+                    <div class="filter-group"><label class="filter-label" for="filter_purchase_customer"><i class="bi bi-person"></i> Customer</label><div class="filter-input-wrap"><select name="customer_id" id="filter_purchase_customer" class="filter-select"><option value="">All Customers</option>@foreach($filterData['customers'] ?? [] as $customer)<option value="{{ $customer->id }}" {{ (string) request('customer_id') === (string) $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_purchase_product"><i class="bi bi-box-seam"></i> Product</label><div class="filter-input-wrap"><select name="product_id" id="filter_purchase_product" class="filter-select"><option value="">All Products</option>@foreach($filterData['products'] ?? [] as $product)<option value="{{ $product->id }}" {{ (string) request('product_id') === (string) $product->id ? 'selected' : '' }}>{{ $product->product_name }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_purchase_payment"><i class="bi bi-credit-card"></i> Payment Type</label><div class="filter-input-wrap"><select name="payment_type_id" id="filter_purchase_payment" class="filter-select"><option value="">All Payment Types</option>@foreach($filterData['paymentTypes'] ?? [] as $paymentType)<option value="{{ $paymentType->id }}" {{ (string) request('payment_type_id') === (string) $paymentType->id ? 'selected' : '' }}>{{ $paymentType->name }}</option>@endforeach</select></div></div>
+                @endif
+
+                @if($module === 'expenses')
+                    <div class="filter-group"><label class="filter-label" for="filter_expense_category"><i class="bi bi-tag"></i> Category</label><div class="filter-input-wrap"><select name="expense_category_id" id="filter_expense_category" class="filter-select"><option value="">All Categories</option>@foreach($filterData['categories'] ?? [] as $category)<option value="{{ $category->id }}" {{ (string) request('expense_category_id') === (string) $category->id ? 'selected' : '' }}>{{ $category->name }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_expense_staff"><i class="bi bi-person"></i> Staff</label><div class="filter-input-wrap"><select name="staff_id" id="filter_expense_staff" class="filter-select"><option value="">All Staff</option>@foreach($filterData['staff'] ?? [] as $member)<option value="{{ $member->id }}" {{ (string) request('staff_id') === (string) $member->id ? 'selected' : '' }}>{{ $member->name }}</option>@endforeach</select></div></div>
+                    <div class="filter-group"><label class="filter-label" for="filter_expense_payment"><i class="bi bi-credit-card"></i> Payment Type</label><div class="filter-input-wrap"><select name="payment_method" id="filter_expense_payment" class="filter-select"><option value="">All Payment Types</option>@foreach($filterData['paymentTypes'] ?? [] as $paymentType)<option value="{{ $paymentType->name }}" {{ request('payment_method') === $paymentType->name ? 'selected' : '' }}>{{ $paymentType->name }}</option>@endforeach</select></div></div>
                 @endif
 
             </div>

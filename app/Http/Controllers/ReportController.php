@@ -24,6 +24,12 @@ class ReportController extends Controller
         $activeTab = in_array($request->input('tab'), ['sales', 'expenses', 'staff', 'purchase'], true)
             ? $request->input('tab')
             : 'sales';
+        $reportSearch = trim($request->input('search', ''));
+        $paymentFilter = trim($request->input('payment_method', ''));
+        $staffFilter = trim($request->input('staff_id', ''));
+        $categoryFilter = trim($request->input('category', ''));
+        $productFilter = trim($request->input('product_id', ''));
+        $subCategoryFilter = trim($request->input('subcategory', ''));
 
         $salesCards = JobCard::query()
             ->where('status', '!=', 'cancelled')
@@ -57,8 +63,34 @@ class ReportController extends Controller
 
         $purchaseRows = ProductPurchase::query()->with('product')
             ->whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->when($activeTab === 'purchase' && $reportSearch !== '', function ($query) use ($reportSearch) {
+                $query->where(function ($query) use ($reportSearch) {
+                    $query->where('purchase_number', 'like', "%{$reportSearch}%")
+                        ->orWhereHas('items.product', fn ($product) => $product->where('product_name', 'like', "%{$reportSearch}%"));
+                });
+            })
+            ->when($activeTab === 'purchase' && $paymentFilter !== '', fn ($query) => $query->whereHas('paymentType', fn ($payment) => $payment->where('name', $paymentFilter)))
+            ->when($activeTab === 'purchase' && $categoryFilter !== '', fn ($query) => $query->whereHas('items.product', fn ($product) => $product->where('category', $categoryFilter)))
+            ->when($activeTab === 'purchase' && $productFilter !== '', fn ($query) => $query->whereHas('items', fn ($items) => $items->where('product_id', $productFilter)))
+            ->when($activeTab === 'purchase' && $subCategoryFilter !== '', fn ($query) => $query->whereHas('items.product', fn ($product) => $product->where('subcategory', $subCategoryFilter)))
             ->orderByDesc('purchase_date')->get();
-        $totalExpenses = Expense::whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])->sum('amount');
+
+        $expenseRows = Expense::query()
+            ->with(['category', 'staff'])
+            ->whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->when($activeTab === 'expenses' && $reportSearch !== '', function ($query) use ($reportSearch) {
+                $query->where(function ($query) use ($reportSearch) {
+                    $query->where('description', 'like', "%{$reportSearch}%")
+                        ->orWhere('notes', 'like', "%{$reportSearch}%")
+                        ->orWhereHas('category', fn ($category) => $category->where('name', 'like', "%{$reportSearch}%"))
+                        ->orWhereHas('staff', fn ($staff) => $staff->where('name', 'like', "%{$reportSearch}%"));
+                });
+            })
+            ->when($activeTab === 'expenses' && $paymentFilter !== '', fn ($query) => $query->where('payment_method', $paymentFilter))
+            ->when($activeTab === 'expenses' && $staffFilter !== '', fn ($query) => $query->where('staff_id', $staffFilter))
+            ->when($activeTab === 'expenses' && $categoryFilter !== '', fn ($query) => $query->whereHas('category', fn ($category) => $category->where('name', $categoryFilter)))
+            ->latest('expense_date')->latest('id')->get();
+        $totalExpenses = $expenseRows->sum('amount');
 
         $staffPerformance = $salesCards->flatMap(function (JobCard $card) {
             return $card->serviceItems->flatMap(function ($item) use ($card) {
@@ -92,16 +124,19 @@ class ReportController extends Controller
         // ----------------------------------------------------------------
         // Sales table: search + payment-method filter + pagination
         // ----------------------------------------------------------------
-        $salesSearch = trim($request->input('search', ''));
-        $paymentFilter = trim($request->input('payment_method', ''));
+        $salesSearch = $reportSearch;
 
         $perPage = (int) $request->input('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
         $page = max(1, (int) $request->input('page', 1));
 
-        $paymentMethods = $salesCards->flatMap(function (JobCard $card) {
-            return $card->serviceItems->map(fn ($it) => $it->paymentType?->name)->filter();
-        })->unique()->sort()->values();
+        $paymentMethods = match ($activeTab) {
+            'expenses' => Expense::whereNotNull('payment_method')->distinct()->orderBy('payment_method')->pluck('payment_method'),
+            'purchase' => \App\Models\PaymentType::where('is_active', true)->orderBy('name')->pluck('name'),
+            default => $salesCards->flatMap(function (JobCard $card) {
+                return $card->serviceItems->map(fn ($it) => $it->paymentType?->name)->filter();
+            })->unique()->sort()->values(),
+        };
 
         $filteredSalesRows = $salesCards->filter(function (JobCard $card) use ($salesSearch, $paymentFilter) {
             if ($salesSearch !== '') {
@@ -138,13 +173,20 @@ class ReportController extends Controller
 
         $filterStaff = \App\Models\Staff::where('status', 'active')->orderBy('name')->get();
         $filterCustomers = \App\Models\Customer::orderBy('name')->get();
-        $filterCategories = \App\Models\Service::whereNotNull('category')->distinct()->pluck('category')->filter()->values();
+        $filterServices = \App\Models\Service::where('status', 'active')->orderBy('service_name')->get();
+        $filterProducts = \App\Models\Product::where('status', 'active')->orderBy('product_name')->get();
+        $filterCategories = match ($activeTab) {
+            'expenses' => \App\Models\ExpenseCategory::where('status', 'active')->orderBy('name')->pluck('name'),
+            'purchase' => \App\Models\Product::whereNotNull('category')->distinct()->pluck('category')->filter()->values(),
+            default => \App\Models\Service::whereNotNull('category')->distinct()->pluck('category')->filter()->values(),
+        };
 
         return view('report.index', [
             'activeTab' => $activeTab, 'startDate' => $startDate, 'endDate' => $endDate,
             'totalSales' => $totalSales, 'totalExpenses' => $totalExpenses, 'staffDailyTarget' => 0.0,
             'staffAchieved' => $staffPerformance->sum('achieved'), 'totalPurchase' => $purchaseRows->sum->total_amount,
             'totalQuantity' => $purchaseRows->sum('quantity'), 'purchaseRows' => $purchaseRows,
+            'expenseRows' => $expenseRows,
             'salesCards' => $salesCards, 'dailySales' => $dailySales, 'topServices' => $topServices,
             'staffPerformance' => $staffPerformance,
             'salesPage' => $salesPage, 'perPage' => $perPage, 'paymentFilter' => $paymentFilter,
@@ -152,6 +194,8 @@ class ReportController extends Controller
             'salesSearch' => $salesSearch, 'paymentBreakdown' => $paymentBreakdown, 'cardTotal' => $cardTotal,
             'filterStaff' => $filterStaff,
             'filterCustomers' => $filterCustomers,
+            'filterServices' => $filterServices,
+            'filterProducts' => $filterProducts,
             'filterCategories' => $filterCategories,
         ]);
     }
@@ -257,6 +301,22 @@ class ReportController extends Controller
             })
             ->orderByDesc('purchase_date')->get();
 
+        $expenseRows = Expense::query()
+            ->with(['category', 'staff'])
+            ->whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->when($salesSearch !== '', function ($query) use ($salesSearch) {
+                $query->where(function ($query) use ($salesSearch) {
+                    $query->where('description', 'like', "%{$salesSearch}%")
+                        ->orWhere('notes', 'like', "%{$salesSearch}%")
+                        ->orWhereHas('category', fn ($category) => $category->where('name', 'like', "%{$salesSearch}%"))
+                        ->orWhereHas('staff', fn ($staff) => $staff->where('name', 'like', "%{$salesSearch}%"));
+                });
+            })
+            ->when($paymentFilter !== '', fn ($query) => $query->where('payment_method', $paymentFilter))
+            ->when($staffFilter !== '', fn ($query) => $query->where('staff_id', $staffFilter))
+            ->when($categoryFilter !== '', fn ($query) => $query->whereHas('category', fn ($category) => $category->where('name', $categoryFilter)))
+            ->latest('expense_date')->latest('id')->get();
+
         $filename = 'report-' . $activeTab . '-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.xls';
 
         $content = view('report.exports.excel', [
@@ -265,6 +325,7 @@ class ReportController extends Controller
             'salesRows'    => $salesRows,
             'staffRows'    => $staffRows,
             'purchaseRows' => $purchaseRows,
+            'expenseRows' => $expenseRows,
         ])->render();
 
         return response($content, 200, [

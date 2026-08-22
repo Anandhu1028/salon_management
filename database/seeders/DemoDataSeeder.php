@@ -11,6 +11,7 @@ use App\Models\MarketingActivity;
 use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\ProductPurchase;
+use App\Models\ProductPurchaseItem;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\StaffAttendance;
@@ -37,6 +38,7 @@ class DemoDataSeeder extends Seeder
         DB::table('job_card_customer')->truncate();
         DB::table('job_card_services')->truncate();
         JobCard::truncate();
+        ProductPurchaseItem::truncate();
         ProductPurchase::truncate();
         Product::truncate();
         Service::truncate();
@@ -209,24 +211,7 @@ class DemoDataSeeder extends Seeder
         })->values();
 
         // -----------------------------------------------------------------
-        // 5. PRODUCT PURCHASE / STOCK HISTORY
-        // -----------------------------------------------------------------
-        foreach ($productModels as $index => $product) {
-            $purchaseBatches = ($index % 4 === 0) ? 2 : 1;
-
-            for ($batch = 0; $batch < $purchaseBatches; $batch++) {
-                ProductPurchase::create([
-                    'product_id' => $product->id,
-                    'purchase_date' => $today->copy()
-                        ->subDays(7 + ($index * 2) + ($batch * 18))
-                        ->format('Y-m-d'),
-                    'quantity' => 8 + (($index * 3 + $batch * 5) % 25),
-                ]);
-            }
-        }
-
-        // -----------------------------------------------------------------
-        // 6. PAYMENT TYPES
+        // 5. PAYMENT TYPES
         // -----------------------------------------------------------------
         $paymentTypes = PaymentType::where('is_active', true)
             ->orderBy('id')
@@ -234,15 +219,43 @@ class DemoDataSeeder extends Seeder
 
         if ($paymentTypes->isEmpty()) {
             foreach (['Cash', 'UPI', 'Card', 'EC'] as $name) {
-                PaymentType::create([
-                    'name' => $name,
-                    'is_active' => true,
-                ]);
+                PaymentType::create(['name' => $name, 'is_active' => true]);
             }
 
             $paymentTypes = PaymentType::where('is_active', true)
                 ->orderBy('id')
                 ->get();
+        }
+
+        // -----------------------------------------------------------------
+        // 6. PRODUCT PURCHASE / STOCK HISTORY
+        // -----------------------------------------------------------------
+        $purchaseNumber = 1;
+        foreach ($productModels as $index => $product) {
+            $purchaseBatches = ($index % 4 === 0) ? 2 : 1;
+
+            for ($batch = 0; $batch < $purchaseBatches; $batch++) {
+                $quantity = 8 + (($index * 3 + $batch * 5) % 25);
+                $unitPrice = (float) $product->price;
+                $total = round($quantity * $unitPrice, 2);
+                $purchase = ProductPurchase::create([
+                    'purchase_number' => 'PUR-' . str_pad((string) $purchaseNumber++, 3, '0', STR_PAD_LEFT),
+                    'customer_id' => $customerModels[$index % $customerModels->count()]->id,
+                    'purchase_date' => $today->copy()
+                        ->subDays(7 + ($index * 2) + ($batch * 18))
+                        ->format('Y-m-d'),
+                    'payment_type_id' => $paymentTypes[($index + $batch) % $paymentTypes->count()]->id,
+                    'total_amount' => $total,
+                ]);
+
+                ProductPurchaseItem::create([
+                    'product_purchase_id' => $purchase->id,
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total_amount' => $total,
+                ]);
+            }
         }
 
         // -----------------------------------------------------------------

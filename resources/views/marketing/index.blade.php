@@ -12,13 +12,13 @@
 
     .premium-list--marketing {
     --marketing-grid:
-        48px
-        minmax(220px, 1.55fr)
-        minmax(145px, .9fr)
-        minmax(150px, 1fr)
-        105px
-        minmax(150px, 1fr)
-        90px;
+        36px
+        minmax(170px, 1.3fr)
+        minmax(110px, .85fr)
+        minmax(120px, 1fr)
+        80px
+        minmax(120px, 1fr)
+        70px;
     }
 
     .premium-list--marketing .premium-list-head,
@@ -26,9 +26,9 @@
         display: grid !important;
         grid-template-columns: var(--marketing-grid) !important;
         align-items: center !important;
-        column-gap: 20px !important;
+        column-gap: 14px !important;
         width: 100%;
-        min-width: 900px;
+        min-width: 0;
     }
 
     .premium-list--marketing .premium-list-head {
@@ -403,6 +403,7 @@
         'addOnclick' => 'openAddMarketingModal()',
         'filterModule' => 'marketing',
         'filterRoute' => route('marketing.index'),
+        'filterData' => ['staff' => $staff, 'marketingTypes' => $marketingTypes],
     ])
 
     {{-- STATS --}}
@@ -480,6 +481,8 @@
             <div class="content-card-header-actions">
                 <form method="GET" action="{{ route('marketing.index') }}" class="marketing-search">
                     <input type="hidden" name="activity_date" value="{{ $activityDate }}">
+                    <input type="hidden" name="date_from" value="{{ $dateFrom }}">
+                    <input type="hidden" name="date_to" value="{{ $dateTo }}">
                     <input type="hidden" name="marketing_type" value="{{ $marketingType }}">
                     <input type="hidden" name="location" value="{{ $location }}">
                     <input type="hidden" name="staff_id" value="{{ $staffId }}">

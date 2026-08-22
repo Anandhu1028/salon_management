@@ -8,8 +8,11 @@
     /* Apply search + payment-method filter, then sort newest-first */
     $salesSearch   = trim($salesSearch ?? '');
     $paymentFilter = trim($paymentFilter ?? '');
+    $jobCardFilter = trim(request('job_card', ''));
+    $customerFilter = trim(request('customer_id', ''));
+    $staffFilter = trim(request('staff_id', ''));
 
-    $allRows = $salesCards->filter(function ($card) use ($salesSearch, $paymentFilter) {
+    $allRows = $salesCards->filter(function ($card) use ($salesSearch, $paymentFilter, $jobCardFilter, $customerFilter, $staffFilter) {
         if ($salesSearch !== '') {
             $cardStaffNames = $card->serviceItems->flatMap->staff->pluck('name')->unique()->join(' ');
             $match = str_contains(strtolower($card->job_card_name), strtolower($salesSearch))
@@ -24,6 +27,19 @@
             if (! $cardPayments->contains($paymentFilter)) {
                 return false;
             }
+        }
+        if ($jobCardFilter !== '' && !str_contains(strtolower($card->job_card_name), strtolower($jobCardFilter))) {
+            return false;
+        }
+        if ($customerFilter !== '' && (string) $card->customer_id !== $customerFilter) {
+            return false;
+        }
+        if ($staffFilter !== '') {
+            $staffIds = collect([$card->staff_id])
+                ->concat($card->serviceItems->flatMap->staff->pluck('id'))
+                ->concat($card->staff->pluck('id'))
+                ->filter()->map(fn ($id) => (string) $id);
+            if (! $staffIds->contains($staffFilter)) return false;
         }
         return true;
     })->sortByDesc('created_at')->values();

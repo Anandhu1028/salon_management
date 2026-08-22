@@ -8,17 +8,20 @@
         $tabs = ['sales' => ['Total Sales', 'bi-bar-chart-line'], 'expenses' => ['Total Expenses', 'bi-wallet2'], 'staff' => ['Staff Daily Target', 'bi-people'], 'purchase' => ['Total Purchase', 'bi-cart3']];
         $range = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
 
-        $activeFiltersCount = 0;
-        if (request('search'))
-            $activeFiltersCount++;
-        if (request('payment_method'))
-            $activeFiltersCount++;
-        if (request('staff_id'))
-            $activeFiltersCount++;
-        if (request('category'))
-            $activeFiltersCount++;
-        if (request('start_date') || request('end_date'))
-            $activeFiltersCount++;
+        $tabFilters = match ($activeTab) {
+            'sales' => ['search', 'job_card', 'customer_id', 'staff_id', 'payment_method'],
+            'expenses' => ['search', 'payment_method', 'staff_id', 'category'],
+            'staff' => ['search', 'staff_id', 'mobile', 'job_card', 'service_id', 'category'],
+            'purchase' => ['search', 'product_id', 'category', 'subcategory', 'payment_method'],
+        };
+        $activeFiltersCount = collect($tabFilters)->filter(fn ($filter) => filled(request($filter)))->count();
+        $searchPlaceholders = [
+            'sales' => 'Search customer, job card, staff...',
+            'expenses' => 'Search expense, payee, notes...',
+            'staff' => 'Search staff, job card, service...',
+            'purchase' => 'Search purchase number or product...',
+        ];
+        $searchLabels = ['sales' => 'Search All Sales Fields', 'expenses' => 'Expense Name / Search', 'staff' => 'Search All Staff Fields', 'purchase' => 'Search All Purchase Fields'];
     @endphp
 
     <div class="reports-page">
@@ -65,7 +68,7 @@
                 <div>
                     <span class="report-summary-label">Total Expenses</span>
                     <strong class="report-summary-value">₹{{ number_format($totalExpenses, 2) }}</strong>
-                    <span class="report-summary-meta">No expense records available</span>
+                    <span class="report-summary-meta">{{ $expenseRows->count() }} expense {{ \Illuminate\Support\Str::plural('record', $expenseRows->count()) }}</span>
                 </div>
                 <span class="report-card-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
             </a>
@@ -98,7 +101,7 @@
             <nav class="reports-tabs" aria-label="Report categories">
                 @foreach ($tabs as $key => [$label, $icon])
                     <a class="reports-tab {{ $activeTab === $key ? 'active' : '' }}"
-                        href="{{ route('reports.index', array_merge(request()->query(), ['tab' => $key, 'start_date' => $startDate->toDateString(), 'end_date' => $endDate->toDateString()])) }}">
+                        href="{{ route('reports.index', ['tab' => $key, 'start_date' => $startDate->toDateString(), 'end_date' => $endDate->toDateString()]) }}">
                         <i class="bi {{ $icon }}"></i>
                         <span>{{ $label }}</span>
                     </a>
@@ -168,15 +171,23 @@
 
                         {{-- Search Input --}}
                         <div class="mb-3">
-                            <label class="filter-field-label" for="modal_search">Keyword Search</label>
+                            <label class="filter-field-label" for="modal_search">{{ $searchLabels[$activeTab] }}</label>
                             <div class="filter-input-pill filter-input-pill--muted">
                                 <span class="filter-input-icon filter-input-icon--muted"><i class="bi bi-search"></i></span>
                                 <input type="text" name="search" id="modal_search" class="filter-input-control"
-                                    placeholder="Search customer, job card, staff..." value="{{ request('search', '') }}">
+                                    placeholder="{{ $searchPlaceholders[$activeTab] }}" value="{{ request('search', '') }}">
                             </div>
                         </div>
 
+                        @if($activeTab === 'sales')
+                        <div class="row g-3 mb-3">
+                            <div class="col-6"><label class="filter-field-label" for="modal_job_card">Job Card</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-receipt"></i></span><input type="text" name="job_card" id="modal_job_card" class="filter-input-control" placeholder="Job card number" value="{{ request('job_card', '') }}"></div></div>
+                            <div class="col-6"><label class="filter-field-label" for="modal_customer_id">Customer</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-person"></i></span><select name="customer_id" id="modal_customer_id" class="filter-input-control filter-input-select"><option value="">All Customers</option>@foreach($filterCustomers as $customer)<option value="{{ $customer->id }}" {{ (string) request('customer_id') === (string) $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>@endforeach</select></div></div>
+                        </div>
+                        @endif
+
                         {{-- Payment Method --}}
+                        @if(in_array($activeTab, ['sales', 'expenses', 'purchase']))
                         <div class="mb-3">
                             <label class="filter-field-label" for="modal_payment_method">Payment Method</label>
                             <div class="filter-input-pill">
@@ -191,8 +202,10 @@
                                 </select>
                             </div>
                         </div>
+                        @endif
 
-                        {{-- Staff Filter (for Sales, Staff tabs) --}}
+                        {{-- Staff Filter --}}
+                        @if(in_array($activeTab, ['sales', 'expenses', 'staff']))
                         <div class="mb-3">
                             <label class="filter-field-label" for="modal_staff_id">Staff Member</label>
                             <div class="filter-input-pill">
@@ -207,8 +220,18 @@
                                 </select>
                             </div>
                         </div>
+                        @endif
+
+                        @if($activeTab === 'staff')
+                        <div class="row g-3 mb-3">
+                            <div class="col-6"><label class="filter-field-label" for="modal_mobile">Mobile Number</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-telephone"></i></span><input type="text" name="mobile" id="modal_mobile" class="filter-input-control" placeholder="Mobile number" value="{{ request('mobile', '') }}"></div></div>
+                            <div class="col-6"><label class="filter-field-label" for="modal_staff_job_card">Job Card</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-receipt"></i></span><input type="text" name="job_card" id="modal_staff_job_card" class="filter-input-control" placeholder="Job card number" value="{{ request('job_card', '') }}"></div></div>
+                        </div>
+                        <div class="mb-3"><label class="filter-field-label" for="modal_service_id">Service</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-scissors"></i></span><select name="service_id" id="modal_service_id" class="filter-input-control filter-input-select"><option value="">All Services</option>@foreach($filterServices as $service)<option value="{{ $service->id }}" {{ (string) request('service_id') === (string) $service->id ? 'selected' : '' }}>{{ $service->service_name }}</option>@endforeach</select></div></div>
+                        @endif
 
                         {{-- Category Filter --}}
+                        @if(in_array($activeTab, ['expenses', 'staff', 'purchase']))
                         <div class="mb-1">
                             <label class="filter-field-label" for="modal_category">Category</label>
                             <div class="filter-input-pill">
@@ -223,6 +246,12 @@
                                 </select>
                             </div>
                         </div>
+                        @endif
+
+                        @if($activeTab === 'purchase')
+                        <div class="mb-3"><label class="filter-field-label" for="modal_product_id">Product Name</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-box-seam"></i></span><select name="product_id" id="modal_product_id" class="filter-input-control filter-input-select"><option value="">All Products</option>@foreach($filterProducts as $product)<option value="{{ $product->id }}" {{ (string) request('product_id') === (string) $product->id ? 'selected' : '' }}>{{ $product->product_name }}</option>@endforeach</select></div></div>
+                        <div class="mb-1"><label class="filter-field-label" for="modal_subcategory">Sub Category</label><div class="filter-input-pill"><span class="filter-input-icon"><i class="bi bi-grid"></i></span><select name="subcategory" id="modal_subcategory" class="filter-input-control filter-input-select"><option value="">All Sub Categories</option>@foreach($filterProducts->pluck('subcategory')->filter()->unique()->sort() as $subcategory)<option value="{{ $subcategory }}" {{ request('subcategory') === $subcategory ? 'selected' : '' }}>{{ $subcategory }}</option>@endforeach</select></div></div>
+                        @endif
                     </div>
 
                     <div class="modal-footer filter-modal-footer">

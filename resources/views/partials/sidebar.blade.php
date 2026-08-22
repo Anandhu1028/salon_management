@@ -116,12 +116,12 @@
                     <span class="sidebar-nav-text">Product Purchases</span>
                 </a>
             </li>
-            <li class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+            <!-- <li class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
                 <a href="{{ route('expenses.index') }}">
                     <span class="sidebar-nav-icon"><i class="bi bi-wallet2"></i></span>
                     <span class="sidebar-nav-text">Expenses</span>
                 </a>
-            </li>
+            </li> -->
             @endif
 
         </ul>
@@ -225,6 +225,15 @@
                             <span class="sidebar-nav-text">
                                 Products
                             </span>
+                        </a>
+                    </li>
+
+                      <!-- Expense -->
+                     
+                    <li class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+                        <a href="{{ route('expenses.index') }}">
+                            <span class="sidebar-nav-icon"><i class="bi bi-wallet2"></i></span>
+                            <span class="sidebar-nav-text">Expenses</span>
                         </a>
                     </li>
                     @endif
