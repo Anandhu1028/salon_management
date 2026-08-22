@@ -275,6 +275,118 @@
         .complaint-detail-quote--success .complaint-detail-quote-text {
             color: #14532D;
         }
+
+        .complaint-job-card-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .complaint-native-select {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .complaint-select-trigger {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 14px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #334155;
+            font-size: .88rem;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .complaint-select-value {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .complaint-select-trigger:focus-visible,
+        .complaint-job-card-select.is-open .complaint-select-trigger {
+            outline: 2px solid rgba(124, 58, 237, .28);
+            outline-offset: -2px;
+        }
+
+        .complaint-select-trigger.is-placeholder { color: #94A3B8; }
+        .complaint-select-trigger i { color: #94A3B8; transition: transform .18s ease; }
+        .complaint-job-card-select.is-open .complaint-select-trigger i {
+            transform: rotate(180deg);
+            color: #7C3AED;
+        }
+
+        .complaint-select-menu {
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, .16);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+        }
+
+        .complaint-job-card-select.is-open .complaint-select-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .complaint-select-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            min-height: 38px;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #334155;
+            font-size: .84rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .complaint-select-option:hover,
+        .complaint-select-option:focus-visible {
+            background: #F5F3FF;
+            color: #6D28D9;
+            outline: none;
+        }
+
+        .complaint-select-option.is-selected {
+            background: #EDE9FE;
+            color: #5B21B6;
+        }
+
+        .complaint-select-option i { margin-left: auto; color: #7C3AED; }
+        .complaint-page .field-control-wrap:has(.complaint-job-card-select) {
+            overflow: visible !important;
+            z-index: 20;
+        }
+
+        @media (max-width: 576px) {
+            .complaint-select-menu { max-height: 210px; }
+        }
     </style>
 @endpush
 
@@ -562,7 +674,7 @@
                                 Select Job Card <span class="text-danger">*</span>
                             </label>
                             <div class="field-control-wrap position-relative">
-                                <select id="complaintJobCard" name="job_card_id" class="form-select no-nice-select" required onchange="onJobCardSelected(this.value)">
+                                <select id="complaintJobCard" name="job_card_id" class="form-select no-nice-select complaint-native-select" required onchange="onJobCardSelected(this.value)">
                                     <option value="">Select Job Card</option>
                                     @foreach($jobCards as $jc)
                                         @php
@@ -574,6 +686,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <div class="complaint-job-card-select" data-select-id="complaintJobCard"></div>
                             </div>
                         </div>
 
@@ -582,9 +695,12 @@
                             <label for="complaintService" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
                                 Service
                             </label>
-                            <select id="complaintService" name="service_id" class="form-select no-nice-select" onchange="onServiceSelected(this.value)">
-                                <option value="">Select service from Job Card</option>
-                            </select>
+                            <div class="field-control-wrap position-relative">
+                                <select id="complaintService" name="service_id" class="form-select no-nice-select complaint-native-select" onchange="onServiceSelected(this.value)">
+                                    <option value="">Select service from Job Card</option>
+                                </select>
+                                <div class="complaint-job-card-select" data-select-id="complaintService"></div>
+                            </div>
                         </div>
 
                         {{-- Staff Selection (Populated dynamically based on Job Card & Service) --}}
@@ -592,12 +708,15 @@
                             <label for="complaintStaff" class="form-label fw-bold text-uppercase" style="font-size:0.75rem;color:#475569;letter-spacing:0.04em;">
                                 Staff <span class="text-danger">*</span>
                             </label>
-                            <select id="complaintStaff" name="staff_id" class="form-select no-nice-select" required>
-                                <option value="">Select staff</option>
-                                @foreach($staff as $member)
-                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="field-control-wrap position-relative">
+                                <select id="complaintStaff" name="staff_id" class="form-select no-nice-select complaint-native-select" required>
+                                    <option value="">Select staff</option>
+                                    @foreach($staff as $member)
+                                        <option value="{{ $member->id }}">{{ $member->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="complaint-job-card-select" data-select-id="complaintStaff"></div>
+                            </div>
                         </div>
 
                         {{-- Category (Auto-filled / Read-only) --}}
@@ -807,6 +926,175 @@
     const jobCardsData = @json($jobCardsDataForJs);
     const allActiveStaff = @json($allActiveStaffForJs);
 
+    function closeComplaintJobCardDropdown() {
+        const dropdown = document.querySelector('.complaint-job-card-select.is-open');
+        if (dropdown) {
+            dropdown.classList.remove('is-open');
+            dropdown.querySelector('.complaint-select-trigger')?.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    function positionComplaintJobCardDropdown(customSelect) {
+        const trigger = customSelect.querySelector('.complaint-select-trigger');
+        const menu = customSelect.querySelector('.complaint-select-menu');
+        if (!trigger || !menu) return;
+
+        const triggerRect = trigger.getBoundingClientRect();
+        const menuHeight = Math.min(menu.scrollHeight, window.innerWidth <= 576 ? 210 : 250);
+        const gap = 7;
+        const opensAbove = triggerRect.bottom + gap + menuHeight > window.innerHeight
+            && triggerRect.top - gap - menuHeight > 8;
+
+        menu.style.left = `${Math.max(8, triggerRect.left)}px`;
+        menu.style.width = `${Math.min(Math.max(triggerRect.width, 320), window.innerWidth - 16)}px`;
+        menu.style.top = opensAbove
+            ? `${Math.max(8, triggerRect.top - menuHeight - gap)}px`
+            : `${triggerRect.bottom + gap}px`;
+    }
+
+    function initializeComplaintJobCardDropdown() {
+        const select = document.getElementById('complaintJobCard');
+        const customSelect = document.querySelector('.complaint-job-card-select');
+        if (!select || !customSelect) return;
+
+        customSelect.innerHTML = `
+            <button type="button" class="complaint-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="complaint-select-value"></span>
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="complaint-select-menu" role="listbox"></div>
+        `;
+
+        const trigger = customSelect.querySelector('.complaint-select-trigger');
+        const value = customSelect.querySelector('.complaint-select-value');
+        const menu = customSelect.querySelector('.complaint-select-menu');
+
+        function syncDropdown() {
+            const selectedOption = select.options[select.selectedIndex];
+            const selected = selectedOption && selectedOption.value !== '';
+            value.textContent = selected ? selectedOption.textContent.trim() : 'Select Job Card';
+            trigger.classList.toggle('is-placeholder', !selected);
+            menu.querySelectorAll('.complaint-select-option').forEach(option => {
+                const isSelected = option.dataset.value === select.value;
+                option.classList.toggle('is-selected', isSelected);
+                option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                option.querySelector('i')?.classList.toggle('d-none', !isSelected);
+            });
+        }
+
+        Array.from(select.options).forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'complaint-select-option';
+            optionButton.dataset.value = option.value;
+            optionButton.setAttribute('role', 'option');
+            optionButton.innerHTML = `<span>${option.textContent.trim()}</span><i class="bi bi-check-lg d-none"></i>`;
+            optionButton.addEventListener('click', () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                closeComplaintJobCardDropdown();
+            });
+            menu.appendChild(optionButton);
+        });
+
+        trigger.addEventListener('click', () => {
+            const isOpen = !customSelect.classList.contains('is-open');
+            closeComplaintJobCardDropdown();
+            customSelect.classList.toggle('is-open', isOpen);
+            trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (isOpen) positionComplaintJobCardDropdown(customSelect);
+        });
+
+        select.addEventListener('change', syncDropdown);
+        select._syncComplaintDropdown = syncDropdown;
+        syncDropdown();
+    }
+
+    function initializeComplaintDynamicDropdown(select, customSelect, placeholder) {
+        if (!select || !customSelect || customSelect.dataset.initialized === 'true') return;
+
+        customSelect.dataset.initialized = 'true';
+        customSelect.innerHTML = `
+            <button type="button" class="complaint-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="complaint-select-value"></span>
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="complaint-select-menu" role="listbox"></div>
+        `;
+
+        const trigger = customSelect.querySelector('.complaint-select-trigger');
+        const value = customSelect.querySelector('.complaint-select-value');
+        const menu = customSelect.querySelector('.complaint-select-menu');
+
+        function syncDropdown() {
+            const selectedOption = select.options[select.selectedIndex];
+            const selected = selectedOption && selectedOption.value !== '';
+            value.textContent = selected ? selectedOption.textContent.trim() : placeholder;
+            trigger.classList.toggle('is-placeholder', !selected);
+            menu.querySelectorAll('.complaint-select-option').forEach(option => {
+                const isSelected = option.dataset.value === select.value;
+                option.classList.toggle('is-selected', isSelected);
+                option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                option.querySelector('i')?.classList.toggle('d-none', !isSelected);
+            });
+        }
+
+        function renderOptions() {
+            menu.innerHTML = '';
+            Array.from(select.options).forEach(option => {
+                const optionButton = document.createElement('button');
+                optionButton.type = 'button';
+                optionButton.className = 'complaint-select-option';
+                optionButton.dataset.value = option.value;
+                optionButton.setAttribute('role', 'option');
+                optionButton.innerHTML = `<span>${option.textContent.trim()}</span><i class="bi bi-check-lg d-none"></i>`;
+                optionButton.addEventListener('click', () => {
+                    select.value = option.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    customSelect.classList.remove('is-open');
+                    trigger.setAttribute('aria-expanded', 'false');
+                });
+                menu.appendChild(optionButton);
+            });
+            syncDropdown();
+        }
+
+        trigger.addEventListener('click', () => {
+            const isOpen = !customSelect.classList.contains('is-open');
+            document.querySelectorAll('.complaint-job-card-select.is-open').forEach(dropdown => {
+                dropdown.classList.remove('is-open');
+                dropdown.querySelector('.complaint-select-trigger')?.setAttribute('aria-expanded', 'false');
+            });
+            customSelect.classList.toggle('is-open', isOpen);
+            trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (isOpen) positionComplaintJobCardDropdown(customSelect);
+        });
+
+        select.addEventListener('change', syncDropdown);
+        select._renderComplaintDropdown = renderOptions;
+        select._syncComplaintDropdown = syncDropdown;
+        renderOptions();
+    }
+
+    initializeComplaintJobCardDropdown();
+    initializeComplaintDynamicDropdown(
+        document.getElementById('complaintService'),
+        document.querySelector('[data-select-id="complaintService"]'),
+        'Select service from Job Card'
+    );
+    initializeComplaintDynamicDropdown(
+        document.getElementById('complaintStaff'),
+        document.querySelector('[data-select-id="complaintStaff"]'),
+        'Select staff'
+    );
+    document.addEventListener('click', event => {
+        if (!event.target.closest('.complaint-job-card-select')) closeComplaintJobCardDropdown();
+    });
+    window.addEventListener('resize', () => {
+        const dropdown = document.querySelector('.complaint-job-card-select.is-open');
+        if (dropdown) positionComplaintJobCardDropdown(dropdown);
+    });
+
     function onJobCardSelected(jobCardId, selectedServiceId = null, selectedStaffId = null) {
         const serviceSelect = document.getElementById('complaintService');
         const staffSelect = document.getElementById('complaintStaff');
@@ -814,6 +1102,7 @@
         const subcategoryInput = document.getElementById('complaintSubcategory');
 
         serviceSelect.innerHTML = '<option value="">Select service from Job Card</option>';
+        serviceSelect._renderComplaintDropdown?.();
         categoryInput.value = '';
         subcategoryInput.value = '';
 
@@ -845,6 +1134,8 @@
             } else if (jobCard.services.length === 1) {
                 serviceSelect.value = jobCard.services[0].service_id;
             }
+
+            serviceSelect._renderComplaintDropdown?.();
 
             // Update category/subcategory for selected service
             onServiceSelected(serviceSelect.value, jobCard);
@@ -900,6 +1191,8 @@
         if (selectedId) {
             staffSelect.value = selectedId;
         }
+
+        staffSelect._renderComplaintDropdown?.();
     }
 
     function openComplaint(c = null) {
@@ -920,12 +1213,16 @@
         document.getElementById('complaintCompensation').value = c?.compensation ? Number(c.compensation) : '';
 
         if (c && c.job_card_id) {
-            document.getElementById('complaintJobCard').value = c.job_card_id;
+            const jobCardSelect = document.getElementById('complaintJobCard');
+            jobCardSelect.value = c.job_card_id;
+            jobCardSelect._syncComplaintDropdown?.();
             onJobCardSelected(c.job_card_id, c.service_id, c.staff_id);
             if (c.category) document.getElementById('complaintCategory').value = c.category;
             if (c.subcategory) document.getElementById('complaintSubcategory').value = c.subcategory;
         } else {
-            document.getElementById('complaintJobCard').value = '';
+            const jobCardSelect = document.getElementById('complaintJobCard');
+            jobCardSelect.value = '';
+            jobCardSelect._syncComplaintDropdown?.();
             onJobCardSelected('');
         }
 
