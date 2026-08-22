@@ -191,6 +191,16 @@
                 max-width: 100%;
             }
         }
+        /* Payment cards retain a single selected method, matching the job-card transaction model. */
+        .job-card-payment-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+        .job-card-payment-card { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1.5px solid #E2E8F0; border-radius: 12px; background: #fff; color: #475569; font-size: .78rem; font-weight: 700; cursor: pointer; transition: .16s ease; }
+        .job-card-payment-card:hover { border-color: #C4B5FD; background: #FAF8FF; }
+        .job-card-payment-card input { position: absolute; opacity: 0; pointer-events: none; }
+        .job-card-payment-card .payment-card-check { width: 17px; height: 17px; border: 1.5px solid #CBD5E1; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; color: transparent; transition: .16s ease; }
+        .job-card-payment-card .payment-card-icon { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; background: #F1F5F9; color: #64748B; }
+        .job-card-payment-card.is-selected { border-color: #8B5CF6; background: #F5F3FF; color: #5B21B6; box-shadow: 0 0 0 3px rgba(139, 92, 246, .10); }
+        .job-card-payment-card.is-selected .payment-card-check { border-color: #7C3AED; background: #7C3AED; color: #fff; }
+        .job-card-payment-card.is-selected .payment-card-icon { background: #EDE9FE; color: #6D28D9; }
     </style>
 @endpush
 
@@ -349,6 +359,7 @@
                                     </div>
                                     <div class="pli-name-stack">
                                         <span class="pli-title job-card-name">{{ $jobCard->job_card_name }}</span>
+                                        <small class="text-muted d-block">{{ $jobCard->job_card_number ?? ('JC-' . str_pad($jobCard->id, 3, '0', STR_PAD_LEFT)) }}</small>
                                         <!-- <span class="pli-subtext job-card-number">#JC-{{ str_pad($jobCard->id, 5, '0', STR_PAD_LEFT) }}</span> -->
                                     </div>
                                 </div>
@@ -675,19 +686,24 @@
                             {{-- Payment Method — ONE selection that applies to the whole job card
                                  (every service item shares this single payment method). --}}
                             <div class="job-card-builder-section">
-                                <div class="form-field job-card-payment-field">
+                                <div class="form-field">
                                     <label for="payment_type_id" class="form-label">
                                         PAYMENT METHOD <span>*</span>
                                     </label>
-                                    <div class="job-card-payment-select-wrap">
-                                        <span class="form-field-icon"><i class="bi bi-wallet2"></i></span>
-                                        <select name="payment_type_id" id="payment_type_id" class="no-nice-select" required>
-                                            <option value="">Select payment method</option>
-                                            @foreach($paymentTypes as $paymentType)
-                                                <option value="{{ $paymentType->id }}">{{ $paymentType->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <i class="bi bi-chevron-down job-card-payment-select-arrow"></i>
+                                    <input type="hidden" name="payment_type_id" id="payment_type_id" value="">
+                                    <div class="job-card-payment-cards" id="jobCardPaymentCards">
+                                        @foreach($paymentTypes as $paymentType)
+                                            @php
+                                                $paymentName = strtolower($paymentType->name);
+                                                $paymentCardIcon = str_contains($paymentName, 'upi') ? 'bi-phone' : (str_contains($paymentName, 'cash') ? 'bi-cash' : (str_contains($paymentName, 'card') ? 'bi-credit-card' : (str_contains($paymentName, 'bank') ? 'bi-bank' : 'bi-wallet2')));
+                                            @endphp
+                                            <label class="job-card-payment-card" data-payment-id="{{ $paymentType->id }}">
+                                                <input type="radio" name="payment_type_choice" value="{{ $paymentType->id }}" aria-label="{{ $paymentType->name }}">
+                                                <span class="payment-card-check"><i class="bi bi-check"></i></span>
+                                                <span class="payment-card-icon"><i class="bi {{ $paymentCardIcon }}"></i></span>
+                                                <span>{{ $paymentType->name }}</span>
+                                            </label>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -911,9 +927,7 @@
 
                 document.getElementById('customer_ids').value = '';
 
-                // Reset the single job-card-level payment method
-                const paymentSelect = document.getElementById('payment_type_id');
-                if (paymentSelect) paymentSelect.value = '';
+                setJobCardPaymentMethod('');
 
                 // Reset discount
                 setDiscountValue(0);
@@ -947,8 +961,7 @@
                 const existingPaymentTypeId = (existingServiceItems.length && existingServiceItems[0].payment_type_id)
                     ? String(existingServiceItems[0].payment_type_id)
                     : '';
-                const paymentSelect = document.getElementById('payment_type_id');
-                if (paymentSelect) paymentSelect.value = existingPaymentTypeId;
+                setJobCardPaymentMethod(existingPaymentTypeId);
 
                 // Populate discount
                 setDiscountValue(parseFloat(jobCard.discount_amount) || 0);
@@ -1033,7 +1046,6 @@
                                         @foreach($staff as $member)
                                             <label class="job-card-staff-option">
                                                 <input type="checkbox" name="service_items[${itemIndex}][staff_ids][]" value="{{ $member->id }}" data-name="{{ $member->name }}" class="staff-checkbox" data-item-id="${itemId}">
-                                                <span class="staff-option-avatar">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
                                                 <span class="staff-option-name">{{ $member->name }}</span>
                                             </label>
                                         @endforeach
@@ -1233,6 +1245,7 @@
             function attachServiceItemHandlers() {
                 setupServiceItemEvents();
                 setupDiscountEditorEvents();
+                setupPaymentMethodEvents();
             }
 
             function updateStaffDisplay(itemId) {
@@ -1760,6 +1773,102 @@ document.addEventListener('keydown', function (event) {
             }
         });
 });
+
+
+
+// ============================================================
+// JOB CARD PAYMENT METHOD
+// Single payment method for the whole job card
+// ============================================================
+function setupPaymentMethodEvents() {
+    const paymentContainer = document.getElementById('jobCardPaymentCards');
+    const paymentHidden = document.getElementById('payment_type_id');
+
+    if (!paymentContainer || !paymentHidden) {
+        return;
+    }
+
+    // Prevent duplicate event binding
+    if (paymentContainer._paymentEventsInitialized) {
+        return;
+    }
+
+    paymentContainer._paymentEventsInitialized = true;
+
+    // Handle payment method selection
+    paymentContainer.addEventListener('change', function (e) {
+        if (!e.target.matches('input[name="payment_type_choice"]')) {
+            return;
+        }
+
+        const selectedId = String(e.target.value);
+
+        // Store selected payment type in hidden field
+        paymentHidden.value = selectedId;
+
+        // Update selected UI
+        paymentContainer
+            .querySelectorAll('.job-card-payment-card')
+            .forEach(card => {
+                card.classList.remove('is-selected');
+            });
+
+        const selectedCard = e.target.closest('.job-card-payment-card');
+
+        if (selectedCard) {
+            selectedCard.classList.add('is-selected');
+        }
+    });
+}
+
+
+// ============================================================
+// SET PAYMENT METHOD PROGRAMMATICALLY
+// Used for Add / Edit modal
+// ============================================================
+function setJobCardPaymentMethod(paymentTypeId) {
+    const paymentContainer = document.getElementById('jobCardPaymentCards');
+    const paymentHidden = document.getElementById('payment_type_id');
+
+    if (!paymentContainer || !paymentHidden) {
+        return;
+    }
+
+    const value = paymentTypeId ? String(paymentTypeId) : '';
+
+    // Update hidden field
+    paymentHidden.value = value;
+
+    // Reset all cards
+    paymentContainer
+        .querySelectorAll('.job-card-payment-card')
+        .forEach(card => {
+            card.classList.remove('is-selected');
+
+            const radio = card.querySelector('input[name="payment_type_choice"]');
+
+            if (radio) {
+                radio.checked = false;
+            }
+        });
+
+    // Select matching card
+    if (value) {
+        const selectedRadio = paymentContainer.querySelector(
+            `input[name="payment_type_choice"][value="${value}"]`
+        );
+
+        if (selectedRadio) {
+            selectedRadio.checked = true;
+
+            const selectedCard = selectedRadio.closest('.job-card-payment-card');
+
+            if (selectedCard) {
+                selectedCard.classList.add('is-selected');
+            }
+        }
+    }
+}
         </script>
     @endpush
 

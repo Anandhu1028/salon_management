@@ -127,8 +127,6 @@
                         <span class="pli-head-cell col-left">Name</span>
                         <span class="pli-head-cell col-left pli-head-category">Category</span>
                         <span class="pli-head-cell col-left pli-head-subcategory">Sub Category</span>
-                        <span class="pli-head-cell col-center pli-head-price">Price</span>
-                        <span class="pli-head-cell col-center pli-head-purchases">Purchases</span>
                         <span class="pli-head-cell col-center pli-head-status">Status</span>
                         <span class="pli-head-cell col-center product-actions-col">Actions</span>
                     </div>
@@ -154,18 +152,6 @@
 
                             <div class="pli-col col-left pli-col-subcategory">
                                 <span class="pli-col-text">{{ $product->subcategory ?: '—' }}</span>
-                            </div>
-
-                            <div class="pli-col col-center price-cell pli-col-amount">
-                                <span class="pli-col-text pli-col-price">₹{{ number_format($product->price, 2) }}</span>
-                            </div>
-
-                            <div class="pli-col col-center pli-col-purchases">
-                                <div class="product-purchase-count">
-                                    <span class="product-purchase-count__number">
-                                        {{ $product->purchases_count }}
-                                    </span>
-                                </div>
                             </div>
 
                             <div class="pli-col col-center status-cell">
@@ -419,18 +405,6 @@
                                     <span class="form-field-icon"><i class="bi bi-collection"></i></span>
                                     <input type="text" name="subcategory" id="product_subcategory" class="form-control"
                                         placeholder="e.g. Shampoo">
-                                </div>
-                            </div>
-
-                            {{-- Price --}}
-                            <div class="form-field">
-                                <label for="product_price" class="form-label">
-                                    Price (₹) <span>*</span>
-                                </label>
-                                <div class="field-control-wrap">
-                                    <span class="form-field-icon"><i class="bi bi-currency-rupee"></i></span>
-                                    <input type="number" name="price" id="product_price" class="form-control"
-                                        placeholder="0.00" min="0" step="0.01" required>
                                 </div>
                             </div>
 
@@ -1263,7 +1237,6 @@
             document.getElementById('product_name').value = product.product_name ?? '';
             document.getElementById('product_category').value = product.category ?? '';
             document.getElementById('product_subcategory').value = product.subcategory ?? '';
-            document.getElementById('product_price').value = product.price ?? '';
             document.getElementById('product_status').value = product.status ?? 'active';
         }
 

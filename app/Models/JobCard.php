@@ -10,6 +10,7 @@ class JobCard extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'job_card_number',
         'job_card_name',
         'customer_id',
         'service_id',
@@ -17,10 +18,17 @@ class JobCard extends Model
         'subcategory',
         'status',
         'discount_amount',
+        'subtotal',
+        'total',
+        'payment_method',
+        'job_card_date',
     ];
 
     protected $casts = [
         'discount_amount' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'total' => 'decimal:2',
+        'job_card_date' => 'date',
     ];
 
     public function customer()
@@ -66,6 +74,7 @@ class JobCard extends Model
      */
     public function getSubtotalAmount(): float
     {
+        if ($this->subtotal !== null && (float) $this->subtotal > 0) return (float) $this->subtotal;
         return (float) ($this->relationLoaded('serviceItems')
             ? $this->serviceItems->sum('amount')
             : $this->serviceItems()->sum('amount'));
@@ -78,6 +87,7 @@ class JobCard extends Model
 
     public function getTotalAmount(): float
     {
+        if ($this->total !== null && (float) $this->total > 0) return (float) $this->total;
         $subtotal = $this->getSubtotalAmount();
         $discount = $this->getDiscountAmount();
 

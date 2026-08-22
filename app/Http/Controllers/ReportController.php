@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JobCard;
 use App\Models\ProductPurchase;
+use App\Models\Expense;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -57,6 +58,7 @@ class ReportController extends Controller
         $purchaseRows = ProductPurchase::query()->with('product')
             ->whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->orderByDesc('purchase_date')->get();
+        $totalExpenses = Expense::whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])->sum('amount');
 
         $staffPerformance = $salesCards->flatMap(function (JobCard $card) {
             return $card->serviceItems->flatMap(function ($item) use ($card) {
@@ -140,7 +142,7 @@ class ReportController extends Controller
 
         return view('report.index', [
             'activeTab' => $activeTab, 'startDate' => $startDate, 'endDate' => $endDate,
-            'totalSales' => $totalSales, 'totalExpenses' => 0.0, 'staffDailyTarget' => 0.0,
+            'totalSales' => $totalSales, 'totalExpenses' => $totalExpenses, 'staffDailyTarget' => 0.0,
             'staffAchieved' => $staffPerformance->sum('achieved'), 'totalPurchase' => $purchaseRows->sum->total_amount,
             'totalQuantity' => $purchaseRows->sum('quantity'), 'purchaseRows' => $purchaseRows,
             'salesCards' => $salesCards, 'dailySales' => $dailySales, 'topServices' => $topServices,

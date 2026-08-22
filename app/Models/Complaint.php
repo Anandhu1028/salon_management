@@ -16,12 +16,20 @@ class Complaint extends Model
         'date_of_complaint',
         'status',
         'evidence_path',
+        'staff_id',
+        'complaint_type_text',
+        'reason',
+        'action_taken',
+        'compensation',
+        'complaint_date',
     ];
 
     protected $casts = [
         'date_of_complaint' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'complaint_date' => 'date',
+        'compensation' => 'decimal:2',
     ];
 
     public function complainantStaff()
@@ -38,5 +46,10 @@ class Complaint extends Model
             ComplaintType::class,
             'complaint_type_id'
         );
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
     }
 }

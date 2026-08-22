@@ -3,6 +3,14 @@
 @section('title', 'Services')
 @section('page-title', 'Services')
 
+@push('styles')
+<style>
+    #serviceNameIcon { transition: color .18s ease, transform .18s ease; }
+    #serviceNameIcon.is-changing { transform: scale(1.14); color: #7C3AED; }
+    #serviceModalHeaderIcon .bi { color: #7C3AED; font-size: 1.35rem; }
+</style>
+@endpush
+
 @section('content')
 
     <div class="service-page management-page">
@@ -297,12 +305,10 @@
                     {{-- Header --}}
                     <div class="modal-header">
                         <div class="d-flex align-items-center gap-3">
-                            <div id="serviceModalHeaderIcon">
-                                @include('partials.service-icons.icon', ['key' => 'default', 'size' => 'md'])
-                            </div>
+                            <div id="serviceModalHeaderIcon"><i class="bi bi-stars"></i></div>
                             <div class="modal-header-content">
                                 <h5 class="modal-title" id="serviceModalTitle">Add Service</h5>
-                                <p class="modal-subtitle" id="serviceModalSubtitle">Add a new salon service and pricing.</p>
+                                <p class="modal-subtitle" id="serviceModalSubtitle">Add a new salon service.</p>
                             </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -317,13 +323,11 @@
                                 Service Name <span>*</span>
                             </label>
                             <div class="field-control-wrap">
-                                <span class="form-field-icon"><i class="bi bi-scissors"></i></span>
+                                <span class="form-field-icon"><i id="serviceNameIcon" class="bi bi-stars"></i></span>
                                 <input type="text" name="service_name" id="service_name" class="form-control"
                                     placeholder="e.g. Classic Haircut, Bridal Makeup" required autocomplete="off">
                             </div>
                         </div>
-
-                        @include('partials.service-icon-picker')
 
                         <div class="row g-3 service-form-grid">
                             {{-- Category --}}
@@ -335,7 +339,7 @@
                                     <div class="field-control-wrap">
                                         <span class="form-field-icon"><i class="bi bi-grid"></i></span>
                                         <input type="text" name="category" id="service_category" class="form-control"
-                                            placeholder="e.g. Hair Care" required>
+                                            placeholder="e.g. Hair, Treatment, Grooming" required>
                                     </div>
                                 </div>
                             </div>
@@ -435,7 +439,6 @@
 
 
     @push('scripts')
-        <script src="{{ asset('js/service-icon-picker.js') }}"></script>
         <script src="{{ asset('js/pli-action-popover.js') }}"></script>
         <script>
             let currentServiceId = null;
@@ -452,9 +455,7 @@
                 document.getElementById('serviceSubmitButton').innerHTML = '<i class="bi bi-scissors"></i> Create Service';
                 document.getElementById('service_status').value = 'active';
 
-                if (window.ServiceIconPicker) {
-                    window.ServiceIconPicker.initAdd();
-                }
+                updateServiceNameIcon();
             }
 
             function openEditServiceModal(service) {
@@ -485,10 +486,29 @@
                 document.getElementById('service_status').value =
                     service.status ?? 'active';
 
-                if (window.ServiceIconPicker) {
-                    window.ServiceIconPicker.initEdit(service);
-                }
+                updateServiceNameIcon();
             }
+
+            function detectedServiceIcon(name) {
+                const value = (name || '').toLowerCase();
+                if (/hair|haircut|hairstyle|hair spa|colour|color|smoothing|smoothening|keratin/.test(value)) return 'bi-scissors';
+                if (/nail|manicure|pedicure|nail art/.test(value)) return 'bi-hand-index-thumb';
+                if (/skin|facial|cleanup|clean up|skin care|treatment/.test(value)) return 'bi-person-hearts';
+                if (/makeup|make up|bridal makeup|party makeup/.test(value)) return 'bi-palette';
+                return 'bi-stars';
+            }
+
+            function updateServiceNameIcon() {
+                const icon = detectedServiceIcon(document.getElementById('service_name').value);
+                const inputIcon = document.getElementById('serviceNameIcon');
+                const headerIcon = document.getElementById('serviceModalHeaderIcon');
+                inputIcon.classList.add('is-changing');
+                inputIcon.className = `bi ${icon} is-changing`;
+                headerIcon.innerHTML = `<i class="bi ${icon}"></i>`;
+                setTimeout(() => inputIcon.classList.remove('is-changing'), 180);
+            }
+
+            document.getElementById('service_name').addEventListener('input', updateServiceNameIcon);
 
             function triggerServiceStatusToggle(serviceId, serviceName) {
                 const mobBtn = document.getElementById(`mob-status-btn-${serviceId}`);

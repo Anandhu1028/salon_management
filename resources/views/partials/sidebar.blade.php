@@ -49,7 +49,7 @@
 
 
         {{-- =====================================================
-        MANAGEMENT
+        OPERATIONS
         ====================================================== --}}
         <div class="sidebar-section-label">
             Management
@@ -105,6 +105,21 @@
                     <span class="sidebar-nav-text">
                         Complaints
                     </span>
+                </a>
+            </li>
+            @endif
+
+            @if(auth()->user()?->hasAnyRole(['administrator', 'manager']))
+            <li class="{{ request()->routeIs('product-purchases.*') ? 'active' : '' }}">
+                <a href="{{ route('product-purchases.index') }}">
+                    <span class="sidebar-nav-icon"><i class="bi bi-cart-check"></i></span>
+                    <span class="sidebar-nav-text">Product Purchases</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+                <a href="{{ route('expenses.index') }}">
+                    <span class="sidebar-nav-icon"><i class="bi bi-wallet2"></i></span>
+                    <span class="sidebar-nav-text">Expenses</span>
                 </a>
             </li>
             @endif

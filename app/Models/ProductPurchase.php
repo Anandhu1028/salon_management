@@ -8,14 +8,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductPurchase extends Model
 {
     protected $fillable = [
+        'purchase_number',
         'product_id',
         'purchase_date',
         'quantity',
+        'unit_price',
+        'total_amount',
+        'payment_method',
+        'notes',
     ];
 
     protected $casts = [
         'purchase_date' => 'date',
         'quantity'      => 'integer',
+        'unit_price' => 'decimal:2',
+        'total_amount' => 'decimal:2',
     ];
 
     public function product(): BelongsTo
@@ -23,12 +30,4 @@ class ProductPurchase extends Model
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Total amount for this purchase row = product price × quantity.
-     * Requires the product relation to be loaded.
-     */
-    public function getTotalAmountAttribute(): float
-    {
-        return (float) ($this->product?->price ?? 0) * (float) $this->quantity;
-    }
 }

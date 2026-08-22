@@ -11,6 +11,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ComplaintsController;
 use App\Http\Controllers\MarketingActivityController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ProductPurchaseController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -77,9 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:administrator,manager')->group(function () {
         Route::get('/complaints', [ComplaintsController::class, 'index'])->name('complaints.index');
         Route::post('/complaints', [ComplaintsController::class, 'store'])->name('complaints.store');
-        Route::get('/complaints/{complaint}', [ComplaintsController::class, 'show'])->name('complaints.show');
+        Route::put('/complaints/{complaint}', [ComplaintsController::class, 'update'])->name('complaints.update');
         Route::delete('/complaints/{complaint}', [ComplaintsController::class, 'destroy'])->name('complaints.destroy');
-        Route::patch('/complaints/{complaint}/close', [ComplaintsController::class, 'close'])->name('complaints.close');
     });
 
 
@@ -138,8 +139,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [ProductController::class, 'toggleStatus']) ->name('products.toggle-status');
         Route::delete('/products/{product}', [ProductController::class, 'destroy']) ->name('products.destroy');
-        Route::post('/products/{product}/purchases', [ProductController::class, 'storePurchase']) ->name('products.purchases.store');
-        Route::get('/products/{product}/purchases', [ProductController::class, 'purchaseHistory'])->name('products.purchases.history');
+        Route::get('/product-purchases', [ProductPurchaseController::class, 'index'])->name('product-purchases.index');
+        Route::post('/product-purchases', [ProductPurchaseController::class, 'store'])->name('product-purchases.store');
+        Route::put('/product-purchases/{productPurchase}', [ProductPurchaseController::class, 'update'])->name('product-purchases.update');
+        Route::delete('/product-purchases/{productPurchase}', [ProductPurchaseController::class, 'destroy'])->name('product-purchases.destroy');
+
+        Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+        Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+        Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+        Route::post('/expense-categories', [ExpenseController::class, 'storeCategory'])->name('expense-categories.store');
     });
 
 

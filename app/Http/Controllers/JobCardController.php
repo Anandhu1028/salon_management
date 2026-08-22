@@ -198,13 +198,20 @@ class JobCardController extends Controller
                 ->withInput();
         }
 
-        return DB::transaction(function () use ($validated, $discount) {
+        return DB::transaction(function () use ($validated, $discount, $subtotal) {
+            $number = 'JC-' . str_pad((string) ((int) JobCard::lockForUpdate()->max('id') + 1), 3, '0', STR_PAD_LEFT);
+            $paymentMethod = PaymentType::find($validated['payment_type_id'])?->name;
             // Create the job card
             $jobCard = JobCard::create([
+                'job_card_number' => $number,
                 'job_card_name' => $validated['job_card_name'],
                 'customer_id' => $validated['customer_ids'][0],
                 'status' => $validated['status'] ?? 'pending',
                 'discount_amount' => $discount,
+                'subtotal' => $subtotal,
+                'total' => max(0, $subtotal - $discount),
+                'payment_method' => $paymentMethod,
+                'job_card_date' => now()->toDateString(),
             ]);
 
             // Sync customers
@@ -312,13 +319,17 @@ class JobCardController extends Controller
                 ->withInput();
         }
 
-        return DB::transaction(function () use ($jobCard, $validated, $discount) {
+        return DB::transaction(function () use ($jobCard, $validated, $discount, $subtotal) {
+            $paymentMethod = PaymentType::find($validated['payment_type_id'])?->name;
             // Update job card
             $jobCard->update([
                 'job_card_name' => $validated['job_card_name'],
                 'customer_id' => $validated['customer_ids'][0],
                 'status' => $validated['status'] ?? $jobCard->status ?? 'pending',
                 'discount_amount' => $discount,
+                'subtotal' => $subtotal,
+                'total' => max(0, $subtotal - $discount),
+                'payment_method' => $paymentMethod,
             ]);
 
             // Sync customers

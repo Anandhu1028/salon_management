@@ -20,7 +20,6 @@ class ProductController extends Controller
         $filter = trim($request->input('filter', ''));
 
         $products = $this->filteredQuery($request)
-            ->withCount('purchases')
             ->paginate(9)
             ->withQueryString();
 
@@ -47,14 +46,13 @@ class ProductController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $headers = ['Product', 'Category', 'Sub Category', 'Price', 'Status'];
+        $headers = ['Product', 'Category', 'Sub Category', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(Product $product) => [
                 $product->product_name,
                 $product->category,
                 $product->subcategory ?: '—',
-                number_format((float) $product->price, 2),
                 ucfirst($product->status),
             ]
         );
@@ -64,14 +62,13 @@ class ProductController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $headers = ['Product', 'Category', 'Sub Category', 'Price', 'Status'];
+        $headers = ['Product', 'Category', 'Sub Category', 'Status'];
         $rows = $this->mapRowsFromQuery(
             $this->filteredQuery($request),
             fn(Product $product) => [
                 $product->product_name,
                 $product->category,
                 $product->subcategory ?: '—',
-                '₹' . number_format((float) $product->price, 2),
                 ucfirst($product->status),
             ]
         );
@@ -107,13 +104,6 @@ class ProductController extends Controller
                 'nullable',
                 'string',
                 'max:100',
-            ],
-
-            'price' => [
-                'required',
-                'numeric',
-                'min:0',
-                'max:99999999.99',
             ],
 
             'status' => [
@@ -157,13 +147,6 @@ class ProductController extends Controller
                 'nullable',
                 'string',
                 'max:100',
-            ],
-
-            'price' => [
-                'required',
-                'numeric',
-                'min:0',
-                'max:99999999.99',
             ],
 
             'status' => [
@@ -227,7 +210,6 @@ class ProductController extends Controller
         $name = trim($request->input('name', ''));
         $category = trim($request->input('category', ''));
         $subcategory = trim($request->input('subcategory', ''));
-        $priceRange = $request->input('price_range');
         $status = trim($request->input('status', $filter));
 
         return Product::query()
@@ -253,16 +235,6 @@ class ProductController extends Controller
             ->when($name !== '', fn($q) => $q->where('product_name', 'like', "%{$name}%"))
             ->when($category !== '', fn($q) => $q->where('category', $category))
             ->when($subcategory !== '', fn($q) => $q->where('subcategory', $subcategory))
-            ->when(!empty($priceRange) && $priceRange !== 'all', function ($query) use ($priceRange) {
-                match ($priceRange) {
-                    'under_500' => $query->where('price', '<', 500),
-                    '500_1000' => $query->whereBetween('price', [500, 1000]),
-                    '1001_2500' => $query->whereBetween('price', [1001, 2500]),
-                    '2501_5000' => $query->whereBetween('price', [2501, 5000]),
-                    'above_5000' => $query->where('price', '>', 5000),
-                    default => null,
-                };
-            })
             ->when(in_array($status, ['active', 'inactive'], true), function ($query) use ($status) {
                 $query->where('status', $status);
             })

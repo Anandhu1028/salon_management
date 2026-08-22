@@ -156,19 +156,7 @@ class ServiceController extends Controller
             $this->serviceRules()
         );
 
-        if (empty($validated['icon'])) {
-            $resolved = ServiceIconResolver::resolve(
-                $validated['service_name'],
-                $validated['category'],
-                $validated['subcategory'] ?? null
-            );
-
-            $validated['icon'] = $resolved['primary'];
-        } else {
-            $validated['icon'] = ServiceIconResolver::normalize(
-                $validated['icon']
-            );
-        }
+        $validated['icon'] = $this->serviceNameIcon($validated['service_name']);
 
         Service::create($validated);
 
@@ -191,9 +179,7 @@ class ServiceController extends Controller
             $this->serviceRules()
         );
 
-        $validated['icon'] = ServiceIconResolver::normalize(
-            $validated['icon'] ?? $service->icon
-        );
+        $validated['icon'] = $this->serviceNameIcon($validated['service_name']);
 
         $service->update($validated);
 
@@ -254,14 +240,6 @@ class ServiceController extends Controller
                 'max:150',
             ],
 
-            'icon' => [
-                'nullable',
-                'string',
-                Rule::in(
-                    ServiceIconResolver::validKeys()
-                ),
-            ],
-
             'category' => [
                 'required',
                 'string',
@@ -282,6 +260,18 @@ class ServiceController extends Controller
                 ]),
             ],
         ];
+    }
+
+    private function serviceNameIcon(string $name): string
+    {
+        $name = strtolower($name);
+
+        if (preg_match('/hair|haircut|hairstyle|hair spa|colour|color|smoothing|smoothening|keratin/', $name)) return 'haircut';
+        if (preg_match('/nail|manicure|pedicure|nail art/', $name)) return 'nails';
+        if (preg_match('/skin|facial|cleanup|clean up|skin care|treatment/', $name)) return 'facial';
+        if (preg_match('/makeup|make up|bridal makeup|party makeup/', $name)) return 'makeup';
+
+        return 'default';
     }
 
     /**
